@@ -1,0 +1,9 @@
+# Pinned CPU-only stack. Torch is intentionally absent (TDD §4.3 option C).
+# Exact versions (NFR-14). Bump only with a measured ablation.
+
+numpy==2.2.6
+scipy==1.15.3
+bm25s==0.3.11
+model2vec==0.6.0
+lightgbm==4.6.0
+pytest==8.3.5

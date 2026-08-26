@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Index / embedding cache — runtime-built, never committed (TDD §4.2)
+cache/
+*.npz
+
+# Organiser catalog and evaluation artefacts
+data/
+*.jsonl.gz
+results.json
+eval_output/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+!.env.example
+credentials.json
+*.pem
