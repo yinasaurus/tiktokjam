@@ -5,19 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-# Placeholder until M0 reads the official evaluator (PRD A1).
-# Replace this tuple with the ten permitted values verbatim; question.py
-# will refuse to emit anything outside it (C-3).
+# Official enum from docs/agent_api_contract.json. Anything else is a spec miss.
 ALLOWED_ASK_ATTRIBUTES: tuple[str, ...] = (
+    "category",
+    "material",
     "color",
     "size",
-    "brand",
-    "material",
     "style",
-    "price",
-    "pattern",
-    "occasion",
-    "fit",
+    "brand",
+    "budget",
+    "feature",
+    "use_case",
     "other",
 )
 

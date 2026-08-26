@@ -1,122 +1,125 @@
 # Conversational Shopping Agent
 
-Offline multi-turn shopping copilot for **TikTok TechJam 2026, Track 4**. The agent identifies a hidden target product from a frozen 50k Amazon clothing catalog within 10 turns.
+TikTok TechJam 2026, Track 4. Offline multi-turn **search agent** that finds a hidden catalog product within 10 turns.
 
-There is **no `.env` file** and **no API key**. Scoring is fully offline. Thread pins and Hugging Face offline flags are set in `agent/determinism.py`. Tunables live in `agent/config.py`.
+This is **not** a general chatbot. The customer says what they want; we return 10 product IDs and maybe ask one attribute. Judges score those IDs, not the webpage.
 
-Companion docs: [PRD](PRD-v2.0-conversational-shopping-agent.md) · [TDD](TDD-v2.0-conversational-shopping-agent.md)
+Layout matches the official participant kit. The evaluator imports **`from starter.agent import Agent`**. Do not edit `evaluator/`.
+
+There is **no `.env` file** and **no API key**. Tunables are in `agent/config.py`.
+
+Official docs: [competition spec](docs/competition_specification.md) · [API contract](docs/agent_api_contract.json) · [submission rules](docs/submission_rules.md) · [PRD](PRD-v2.0-conversational-shopping-agent.md) · [TDD](TDD-v2.0-conversational-shopping-agent.md)
 
 ---
 
 ## How to start
 
-You need **Python 3.11+**. Confirm with `python --version`.
-
-From the repo root (`tiktok jam`):
+Python 3.10+ (3.11+ recommended). From the repo root:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pytest tests -q
-python scripts/smoke_session.py
 ```
 
-If PowerShell blocks the venv script, run this once, then activate again:
+If PowerShell blocks the venv:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-`pytest` should print `29 passed`. The smoke script runs three turns against a 12-product fixture catalog — no official kit required.
-
-Minimal install (tests + smoke only, skips bm25s / Model2Vec / LightGBM):
+Unpack the 50k catalog if `data/catalog.jsonl` is missing:
 
 ```powershell
-python -m pip install numpy==2.2.6 pytest==8.3.5
+python -c "import gzip,shutil; shutil.copyfileobj(gzip.open('catalog.jsonl.gz','rb'), open('data/catalog.jsonl','wb'))"
 ```
 
-There is no dev server and no UI. The official harness calls `Agent` headless.
+Also copy `data/public_set.jsonl` out of `techjam-participant-kit.zip` if needed. Verify downloads with `SHA256SUMS`.
 
----
-
-## Use the agent
-
-```python
-from agent import Agent
-
-agent = Agent(catalog="tests/fixtures/catalog.jsonl")
-agent.reset("session-1", user_profile={})
-out = agent.respond("session-1", "navy cotton t-shirts", turn=1, top_k=10)
-
-print(out["recommendations"])  # ASINs, best first
-print(out["ask_attribute"])    # one of the ten allowed values, or None
-print(out["message"])
-print(out["usage"])            # always zeros; no tokens billed
-```
-
-When you have the organiser catalog:
+### Run
 
 ```powershell
-$env:SHOPPING_AGENT_CATALOG = "C:\path\to\catalog.jsonl"
-python scripts/measure_catalog.py --catalog $env:SHOPPING_AGENT_CATALOG
-python scripts/build_index.py --catalog $env:SHOPPING_AGENT_CATALOG
+python -m pytest tests -q
+python -m ui
+python -m evaluator.local_evaluator
 ```
-
-Or pass the path in code: `Agent(catalog=r"C:\path\to\catalog.jsonl")`.
-
-Other scripts:
 
 | Command | What it does |
 |---|---|
-| `python scripts/smoke_session.py` | 3-turn demo on the fixture catalog |
-| `python scripts/check_determinism.py` | Two runs must return identical ASINs |
-| `python -m pytest tests -q` | Unit tests (no kit needed) |
+| `python -m pytest tests -q` | Unit tests (tiny fixture catalog) |
+| `python -m ui` | Demo in the browser at **http://127.0.0.1:8765/** — **not scored** |
+| `python -m evaluator.local_evaluator` | Official scorer on 200 public sessions → `results.json` |
+| `python scripts/chat.py` | Same agent, terminal only |
+
+After pulling code changes, stop the old UI (`Ctrl+C`) and run `python -m ui` again, then click **Reset**.
+
+The kit BM25 starter is `starter/bm25_baseline.py` (Hit@10 0.125). Our system is what `starter/agent.py` exports.
+
+---
+
+## Demo UI
+
+`python -m ui` opens a chat on the left and a **Top 10** product list on the right.
+
+- Chat is only for questions / short status. Ranked products live in the right panel (not repeated as “Top pick: …” in every bubble).
+- Type like a search, not like WhatsApp.
+
+Works:
+
+- `navy cotton t-shirts`
+- `black leather boots`
+- `I'm looking for running shorts. A key requirement is: cotton.`
+
+Does not (and is not supposed to) work well:
+
+- `mmm idk`
+- random slang with no product type
+
+Exam-style edge cases are buy / browse / “actually I want X instead” / “no preference” — not open chit-chat.
+
+---
+
+## Agent contract
+
+```python
+from starter.agent import Agent
+
+agent = Agent("data/catalog.jsonl")
+agent.reset(session_id, user_profile)
+out = agent.respond(session_id, user_message, turn, top_k=10)
+```
+
+```python
+{
+  "message": "Could you share a preferred material?",
+  "ask_attribute": "material",   # or null
+  "recommendations": [{"parent_asin": "B000..."}],
+  "usage": {"prompt_tokens": 0, "completion_tokens": 0}
+}
+```
+
+`ask_attribute` must be one of: `category`, `material`, `color`, `size`, `style`, `brand`, `budget`, `feature`, `use_case`, `other`, or `null`.
+
+**How they score:** each session has one hidden `parent_asin`. We output 10 IDs. They check if the hidden one is in that list, how high, and on which turn. No UI/UX score.
 
 ---
 
 ## Layout
 
 ```
-agent/          Agent + all seven pipeline stages (no evaluator imports)
-tests/          Unit tests + fixture catalog
-scripts/        Smoke, index build, catalog stats, determinism check
-models/         Vendored encoder later (keep under 100 MiB; no Git LFS)
-report/         Technical report draft
-```
-
-Pipeline: deadline guard -> extract constraints -> dialog state -> exact-phrase / bm25s / dense -> RRF fusion -> rerank -> question policy -> response.
-
----
-
-## Config (not an env file)
-
-| What | Where |
-|---|---|
-| Route weights, budgets, ablation switch | `agent/config.py` |
-| Ten `ask_attribute` values (placeholder until M0) | `ALLOWED_ASK_ATTRIBUTES` in `agent/config.py` |
-| Catalog path | `SHOPPING_AGENT_CATALOG` or `Agent(catalog=...)` |
-| BLAS threads, `HF_HUB_OFFLINE` | `agent/determinism.py` (set automatically) |
-
-G-2 ablation (exact-phrase off) is a flag, not a code edit:
-
-```python
-from dataclasses import replace
-from agent import Agent, Config
-
-agent = Agent(catalog="...", config=replace(Config(), exact_phrase_enabled=False))
+starter/agent.py           official entry (re-exports Agent)
+starter/bm25_baseline.py   kit BM25 starter, kept for comparison
+agent/                     retrieval pipeline — does not import evaluator
+evaluator/                 official scorer — do not edit
+docs/                      official contract and rules
+data/                      catalog.jsonl + public_set.jsonl (gitignored)
+ui/                        demo webpage only
+tests/
+scripts/
 ```
 
 ---
 
-## Current status (M1)
+## Current status
 
-Shipped: official `reset` / `respond` contract, defensive catalog parsing (`price="None"`), exact-phrase retrieval, fusion, deadline guard, popularity backfill.
-
-Not shipped yet: official 50k catalog, vendored Model2Vec in `models/encoder/`, trained LightGBM, evaluator-accurate `ask_attribute` list.
-
-Replace `ALLOWED_ASK_ATTRIBUTES` with the ten values from the shipped evaluator before submitting.
-
-## Team contributions
-
-*(fill in)*
+M1 wired to the official interface, with a demo UI. Catalog is the frozen 50k `Clothing_Shoes_and_Jewelry` slice. Still to do: Model2Vec in `models/encoder/`, LightGBM rerank, G-2 ablation on the public 200.

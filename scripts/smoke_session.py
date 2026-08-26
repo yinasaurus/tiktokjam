@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agent import Agent, Config
+from agent.types import asins_of
 
 FIXTURE = ROOT / "tests" / "fixtures" / "catalog.jsonl"
 
@@ -31,7 +32,7 @@ def main() -> None:
         print("ask_attribute:", out["ask_attribute"])
         print("message:", out["message"])
         print("recommendations:")
-        for asin in out["recommendations"]:
+        for asin in asins_of(out):
             product = agent.catalog.get(asin)
             title = product.title if product else "?"
             print(f"  {asin}  {title}")

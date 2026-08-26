@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from agent.determinism import pin_runtime
+from agent.lexicon import COLORS, MATERIALS, _ATTR_DETAIL_KEYS, is_slot_token
 from agent.normalise import HEADER_STOPLIST, is_indexable_phrase, ngrams, normalise, strip_html
 
 pin_runtime()
@@ -137,6 +138,7 @@ def _attr_phrases(
     details: Mapping[str, str],
     category_path: tuple[str, ...],
     is_sparse: bool,
+    store: str = "",
 ) -> frozenset[str]:
     phrases: set[str] = set()
     for feat in features:
@@ -146,11 +148,18 @@ def _attr_phrases(
     for key in sorted(details.keys()):
         val = details[key]
         n = normalise(val)
-        if is_indexable_phrase(n):
+        if is_indexable_phrase(n) or is_slot_token(n):
             phrases.add(n)
+        compact = n.replace(" ", "")
+        if compact and compact != n and is_slot_token(compact):
+            phrases.add(compact)
         kv = normalise(f"{key} {val}")
         if is_indexable_phrase(kv):
             phrases.add(kv)
+        if key in _ATTR_DETAIL_KEYS:
+            for tok in n.split():
+                if is_slot_token(tok):
+                    phrases.add(tok)
     for cat in category_path:
         n = normalise(cat)
         if n and 1 <= len(n.split()) <= 8:
@@ -160,6 +169,16 @@ def _attr_phrases(
         for gram in ngrams(title_n, 2, 4):
             if is_indexable_phrase(gram):
                 phrases.add(gram)
+    title_n = normalise(title)
+    for tok in title_n.split():
+        if tok in COLORS or tok in MATERIALS:
+            phrases.add(tok)
+    store_n = normalise(store)
+    if store_n:
+        phrases.add(store_n)
+        for tok in store_n.split():
+            if len(tok) >= 3:
+                phrases.add(tok)
     return frozenset(phrases)
 
 
@@ -198,10 +217,10 @@ def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) ->
     feat_desc_len = len(features) + (1 if description else 0)
     is_sparse = feat_desc_len < sparse_threshold
 
-    blob_parts = [title, " ".join(features), description, " ".join(categories)]
+    blob_parts = [title, " ".join(features), description, " ".join(categories), store]
     text_blob = normalise(" ".join(p for p in blob_parts if p))
 
-    phrases = _attr_phrases(title, features, details, category_path, is_sparse)
+    phrases = _attr_phrases(title, features, details, category_path, is_sparse, store=store)
 
     return Product(
         parent_asin=asin,

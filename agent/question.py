@@ -9,17 +9,15 @@ from agent.catalog import CatalogStore, Product
 from agent.config import Config
 from agent.state import SessionState
 
-# Maps a permitted ask_attribute to possible `details` keys (lowercased).
+# Maps official ask_attribute values to product.details keys (lowercased).
 _ATTR_KEYS: dict[str, tuple[str, ...]] = {
     "color": ("color", "colour", "color name"),
     "size": ("size", "sizes"),
-    "brand": ("brand", "manufacturer", "publisher"),
+    "brand": ("brand", "manufacturer", "publisher", "store"),
     "material": ("material", "fabric", "fabric type"),
-    "style": ("style", "department"),
-    "price": ("price",),
-    "pattern": ("pattern", "print"),
-    "occasion": ("occasion",),
-    "fit": ("fit", "fit type"),
+    "style": ("style", "department", "fit", "fit type"),
+    "feature": ("feature", "pattern", "print"),
+    "use_case": ("occasion", "sport", "use"),
 }
 
 
@@ -78,15 +76,16 @@ def _pool_entropy(ranked: list[tuple[str, float]]) -> float:
 
 
 def _values_for(product: Product, attr: str) -> list[str]:
-    if attr == "price":
+    if attr == "budget":
         if product.price is None:
             return []
-        # Coarse buckets so price actually partitions the pool.
         if product.price < 20:
             return ["low"]
         if product.price < 50:
             return ["mid"]
         return ["high"]
+    if attr == "category":
+        return [product.leaf_category.lower()] if product.leaf_category else []
     keys = _ATTR_KEYS.get(attr, (attr,))
     out: list[str] = []
     for key in keys:

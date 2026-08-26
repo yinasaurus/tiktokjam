@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from agent.catalog import CatalogStore
 from agent.config import Config
+from agent.lexicon import guess_attribute
 from agent.normalise import ngrams, normalise, token_count
 from agent.state import SessionState
 from agent.types import Constraint
@@ -21,6 +22,9 @@ _DECLINE_CUES = frozenset(
         "skip",
         "i don't know",
         "i dont know",
+        "idk",
+        "dunno",
+        "no idea",
         "not sure",
         "whatever",
     }
@@ -46,11 +50,14 @@ class ConstraintExtractor:
     ) -> list[Constraint]:
         lexical_ok = self.config.exact_phrase_enabled
         normalised = normalise(utterance)
+        if normalised == "shoe":
+            normalised = "shoes"
         constraints: list[Constraint] = []
 
         if lexical_ok and normalised:
             constraints.extend(self._lexical(normalised, turn))
             constraints.extend(self._category(normalised, turn))
+            constraints.extend(self._followup_slot(normalised, state, turn))
 
         oov_ratio = self._oov_ratio(normalised)
         need_semantic = (
@@ -76,7 +83,7 @@ class ConstraintExtractor:
     def _lexical(self, normalised: str, turn: int) -> list[Constraint]:
         hits: list[Constraint] = []
         seen: set[str] = set()
-        windows = ngrams(normalised, self.config.ngram_min, self.config.ngram_max)
+        windows = ngrams(normalised, 1, self.config.ngram_max)
         # Also try the full utterance if it is a short phrase.
         if 1 <= token_count(normalised) <= self.config.ngram_max:
             windows.append(normalised)
@@ -88,7 +95,7 @@ class ConstraintExtractor:
                 hits.append(
                     Constraint(
                         text=window,
-                        attribute=_guess_attribute(window),
+                        attribute=guess_attribute(window),
                         confidence=1.0,
                         source="exact",
                         turn=turn,
@@ -162,7 +169,7 @@ class ConstraintExtractor:
                 out.append(
                     Constraint(
                         text=phrase,
-                        attribute=_guess_attribute(phrase),
+                        attribute=guess_attribute(phrase),
                         confidence=max(0.0, min(1.0, score)),
                         source="semantic",
                         turn=turn,
@@ -173,30 +180,29 @@ class ConstraintExtractor:
             return []
 
 
-def _guess_attribute(phrase: str) -> str | None:
-    """Cheap attribute tag. None is fine — those become free_constraints."""
-    tokens = phrase.split()
-    colorish = {
-        "black",
-        "white",
-        "red",
-        "blue",
-        "green",
-        "navy",
-        "pink",
-        "grey",
-        "gray",
-        "brown",
-        "beige",
-        "purple",
-        "yellow",
-        "orange",
-        "gold",
-        "silver",
-    }
-    if any(t in colorish for t in tokens):
-        return "color"
-    return None
+    def _followup_slot(self, normalised: str, state: SessionState, turn: int) -> list[Constraint]:
+        """Short answers after we asked something ('brown', 'eu40') become a slot."""
+        n_tok = token_count(normalised)
+        if not normalised or n_tok == 0:
+            return []
+        guessed = guess_attribute(normalised)
+        if n_tok <= 2 and guessed:
+            attr = guessed
+        elif state.asked and n_tok <= 4:
+            attr = guessed or state.asked[-1]
+        else:
+            return []
+        if attr in {"other", "category"}:
+            return []
+        return [
+            Constraint(
+                text=normalised,
+                attribute=attr,
+                confidence=0.95 if guessed else 0.8,
+                source="exact",
+                turn=turn,
+            )
+        ]
 
 
 def _dedupe_constraints(constraints: list[Constraint]) -> list[Constraint]:

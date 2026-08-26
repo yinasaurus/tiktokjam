@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from agent.agent import Agent
 from agent.config import Config
+from agent.types import asins_of
 
 
 def test_overconstrained_still_returns_top_k(catalog, records):
@@ -22,19 +23,21 @@ def test_overconstrained_still_returns_top_k(catalog, records):
         turn=1,
         top_k=10,
     )
-    recs = out["recommendations"]
+    recs = asins_of(out)
     assert len(recs) == min(10, len(catalog))
     assert len(recs) == len(set(recs))
     assert all(a in catalog.asin_to_idx for a in recs)
+    assert all(isinstance(item, dict) and "parent_asin" in item for item in out["recommendations"])
 
 
 def test_recommendations_on_every_turn_including_question(records, catalog):
     agent = Agent(catalog=records, config=Config(lexical_enabled=False, dense_enabled=False))
     agent.reset("s1", {})
     out = agent.respond("s1", "looking for cotton t-shirts", turn=1, top_k=10)
-    assert len(out["recommendations"]) == min(10, len(catalog))
+    recs = asins_of(out)
+    assert len(recs) == min(10, len(catalog))
     assert out["usage"]["prompt_tokens"] >= 0
     assert out["usage"]["completion_tokens"] >= 0
-    assert out["usage"]["total_tokens"] >= 0
+    assert "total_tokens" not in out["usage"]
     if out["ask_attribute"] is not None:
         assert out["ask_attribute"] in agent.config.ask_attributes

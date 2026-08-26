@@ -9,13 +9,15 @@ __pycache__/
 venv/
 env/
 
-# Index / embedding cache — runtime-built, never committed (TDD §4.2)
+# Index / embedding cache (TDD §4.2)
 cache/
 *.npz
 
-# Organiser catalog and evaluation artefacts
-data/
+# Official catalog and eval output — download via SHA256SUMS, do not commit
+data/*
+!data/README.md
 *.jsonl.gz
+techjam-participant-kit.zip
 results.json
 eval_output/
 

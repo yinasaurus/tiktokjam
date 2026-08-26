@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shopping copilot</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --ink: #1c1916;
+      --muted: #6b6258;
+      --paper: #fffaf3;
+      --line: #e4d9c8;
+      --accent: #c45c26;
+      --chip: #efe4d4;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      padding: 20px;
+      gap: 16px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.15rem; margin: 0; font-weight: 650; }
+    header p { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; }
+    #status { color: var(--muted); font-size: 0.85rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      min-height: 0;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel h2 {
+      margin: 0;
+      padding: 14px 16px 0;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    #log {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bubble {
+      max-width: 85%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .you { align-self: flex-end; background: var(--ink); color: #fff; }
+    .bot { align-self: flex-start; background: var(--chip); }
+    .ask { font-size: 0.8rem; color: var(--accent); margin-top: 6px; }
+    form {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--line);
+    }
+    input[type="text"] {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      background: #fff;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+      background: var(--ink);
+      color: #fff;
+    }
+    button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    #cards {
+      overflow: auto;
+      padding: 12px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .card b { display: block; margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.82rem; }
+    .rank { color: var(--accent); font-size: 0.75rem; font-weight: 650; }
+    .empty { color: var(--muted); padding: 16px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>Shopping copilot</h1>
+        <p>Demo only. Judges score the code, not this page.</p>
+      </div>
+      <div id="status">Loading catalog…</div>
+    </header>
+    <div class="layout">
+      <section class="panel">
+        <h2>Chat</h2>
+        <div id="log"></div>
+        <form id="form">
+          <button class="ghost" type="button" id="reset">Reset</button>
+          <input id="box" type="text" placeholder="e.g. navy cotton t-shirts" autocomplete="off" />
+          <button type="submit">Send</button>
+        </form>
+      </section>
+      <section class="panel">
+        <h2>Top 10</h2>
+        <div id="cards"><div class="empty">Ask for something. Matches show up here.</div></div>
+      </section>
+    </div>
+  </div>
+  <script>
+    const sessionId = "ui-" + Math.random().toString(16).slice(2);
+    const log = document.getElementById("log");
+    const cards = document.getElementById("cards");
+    const status = document.getElementById("status");
+    const box = document.getElementById("box");
+    const form = document.getElementById("form");
+    let ready = false;
+
+    function bubble(text, who, extra) {
+      const el = document.createElement("div");
+      el.className = "bubble " + who;
+      el.textContent = text;
+      if (extra) {
+        const ask = document.createElement("div");
+        ask.className = "ask";
+        ask.textContent = extra;
+        el.appendChild(ask);
+      }
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function renderCards(items) {
+      if (!items || !items.length) {
+        cards.innerHTML = '<div class="empty">No matches this turn.</div>';
+        return;
+      }
+      cards.innerHTML = items.map((p, i) => {
+        const price = p.price == null ? "price n/a" : "$" + p.price;
+        const cat = p.category || "";
+        const store = p.store || "";
+        return `<article class="card">
+          <div class="rank">#${i + 1}</div>
+          <b>${escapeHtml(p.title || p.parent_asin)}</b>
+          <div class="meta">${escapeHtml(cat)} · ${price} · ${escapeHtml(store)}</div>
+        </article>`;
+      }).join("");
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    async function health() {
+      const res = await fetch("/api/health");
+      const data = await res.json();
+      if (data.error) {
+        status.textContent = data.error;
+        return true;
+      }
+      if (data.ready) {
+        ready = true;
+        status.textContent = data.catalog_size.toLocaleString() + " products ready";
+        return true;
+      }
+      status.textContent = "Indexing catalog…";
+      return false;
+    }
+
+    async function waitReady() {
+      while (!(await health())) {
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    async function reset() {
+      await fetch("/api/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      log.innerHTML = "";
+      cards.innerHTML = '<div class="empty">Ask for something. Matches show up here.</div>';
+      bubble("New session. What are you looking for?", "bot");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!ready) return;
+      const text = box.value.trim();
+      if (!text) return;
+      box.value = "";
+      bubble(text, "you");
+      const res = await fetch("/api/turn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, message: text })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        bubble(data.error || "error", "bot");
+        return;
+      }
+      const extra = data.ask_attribute ? "" : "";
+      bubble(data.message || "Here are some options.", "bot");
+      renderCards(data.recommendations);
+    });
+
+    document.getElementById("reset").addEventListener("click", reset);
+
+    waitReady().then(reset);
+  </script>
+</body>
+</html>

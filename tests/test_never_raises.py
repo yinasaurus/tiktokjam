@@ -6,16 +6,18 @@ from agent.agent import Agent
 from agent.config import Config
 from agent.extract import ConstraintExtractor
 from agent.routes.exact_phrase import ExactPhraseIndex
+from agent.types import asins_of
 
 
 def _valid(out, catalog, top_k=10):
     assert isinstance(out, dict)
-    recs = out["recommendations"]
+    recs = asins_of(out)
     assert len(recs) == min(top_k, len(catalog))
     assert len(recs) == len(set(recs))
     assert all(a in catalog.asin_to_idx for a in recs)
     assert out["ask_attribute"] is None or out["ask_attribute"] in Config().ask_attributes
-    assert out["usage"]["total_tokens"] >= 0
+    assert out["usage"]["prompt_tokens"] >= 0
+    assert isinstance(out["message"], str)
 
 
 def test_extract_raises(monkeypatch, records, catalog):

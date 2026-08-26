@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from agent.agent import Agent
 from agent.config import Config
+from agent.types import asins_of
 
 
 def test_navy_cotton_tee_ranks_near_top(records, catalog):
@@ -13,5 +14,5 @@ def test_navy_cotton_tee_ranks_near_top(records, catalog):
     )
     agent.reset("s1", {})
     out = agent.respond("s1", "navy cotton crew neck t-shirt", turn=1, top_k=10)
-    recs = out["recommendations"]
+    recs = asins_of(out)
     assert "B000000001" in recs[:5]

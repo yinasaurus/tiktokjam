@@ -19,7 +19,7 @@ from agent.routes.dense import DenseIndex, HashEncoder, load_encoder
 from agent.routes.exact_phrase import ExactPhraseIndex
 from agent.routes.lexical import LexicalIndex
 from agent.state import DialogStateManager, SessionState
-from agent.types import ZERO_USAGE, Constraint
+from agent.types import Constraint, payload
 
 pin_runtime()
 
@@ -73,10 +73,9 @@ class Agent:
         self.lexical = LexicalIndex(self.catalog, self.config)
         if encoder is None:
             encoder = load_encoder(self.config)
-        if encoder is None and self.config.dense_enabled:
-            # Tests / kit-not-yet-present: deterministic stand-in so the
-            # dense route is wired, not decorative. Swap for Model2Vec
-            # once models/encoder is vendored (TDD §4.3).
+        if encoder is None and self.config.dense_enabled and len(self.catalog) <= 256:
+            # Tiny catalogs (unit tests): keep the dense route wired.
+            # Do not HashEncoder the 50k official catalog — wait for models/encoder.
             encoder = HashEncoder(dim=64)
         self.encoder = encoder
         self.dense = DenseIndex(self.catalog, self.config, encoder=encoder)
@@ -215,12 +214,7 @@ class Agent:
             self.metrics["budget_degradations"]["skip_question"] += 1
 
         message = _compose_message(state, recs, ask, self.catalog)
-        return {
-            "recommendations": recs,
-            "ask_attribute": ask,
-            "message": message,
-            "usage": dict(ZERO_USAGE),
-        }
+        return payload(message, ask, recs)
 
     def _run_routes(
         self,
@@ -297,12 +291,7 @@ class Agent:
         recs = [a for a, _ in filled[:top_k]]
         if state is not None:
             state.last_candidates = list(recs)
-        return {
-            "recommendations": recs,
-            "ask_attribute": None,
-            "message": reason,
-            "usage": dict(ZERO_USAGE),
-        }
+        return payload(reason, None, recs)
 
 
 def _compose_message(
@@ -311,16 +300,9 @@ def _compose_message(
     ask: str | None,
     catalog: CatalogStore,
 ) -> str:
-    bits: list[str] = []
-    if state.leaf_category:
-        bits.append(f"Looking in {state.leaf_category}.")
-    n_slots = len(state.slots)
-    if n_slots:
-        bits.append(f"Matching {n_slots} preference(s).")
-    if recs:
-        top = catalog.get(recs[0])
-        if top and top.title:
-            bits.append(f"Top pick: {top.title}.")
+    # Product titles belong in recommendations, not repeated in every chat line.
     if ask:
-        bits.append(f"Could you share a preferred {ask}?")
-    return " ".join(bits) if bits else "Here are some options."
+        return f"Could you share a preferred {ask}?"
+    if state.slots or state.leaf_category:
+        return "Here are the closest matches so far."
+    return "Tell me a product type, color, or material."
