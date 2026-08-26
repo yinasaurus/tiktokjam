@@ -92,6 +92,45 @@ def guess_attribute(phrase: str) -> str | None:
     return None
 
 
+TYPE_ALIASES: dict[str, tuple[str, ...]] = {
+    "shirt": ("shirt", "shirts", "t-shirt", "t-shirts", "tee"),
+    "shirts": ("shirt", "shirts", "t-shirt", "t-shirts"),
+    "tee": ("tee", "t-shirt", "t-shirts", "shirt"),
+    "tshirt": ("t-shirt", "t-shirts", "shirt", "shirts"),
+    "t-shirt": ("t-shirt", "t-shirts", "shirt"),
+    "t-shirts": ("t-shirt", "t-shirts", "shirt", "shirts"),
+    "shoe": ("shoe", "shoes"),
+    "shoes": ("shoe", "shoes"),
+    "boot": ("boot", "boots"),
+    "boots": ("boot", "boots"),
+    "jean": ("jean", "jeans"),
+    "jeans": ("jean", "jeans"),
+    "dress": ("dress", "dresses"),
+    "hoodie": ("hoodie", "hoodies"),
+    "short": ("short", "shorts"),
+    "shorts": ("short", "shorts"),
+    "clog": ("clog", "clogs"),
+    "sandal": ("sandal", "sandals"),
+}
+
+
+def expand_terms(normalised: str) -> list[str]:
+    """Query tokens plus shirt/shirts style aliases, first-seen order."""
+    seen: set[str] = set()
+    out: list[str] = []
+    if not normalised:
+        return out
+    for tok in normalised.lower().split():
+        variants = TYPE_ALIASES.get(tok, (tok,))
+        for v in variants:
+            if v not in seen:
+                seen.add(v)
+                out.append(v)
+    if normalised not in seen:
+        out.append(normalised)
+    return out
+
+
 def is_slot_token(normalised: str) -> bool:
     """True for a short value we should index even as a 1-gram."""
     if not normalised:

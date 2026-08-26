@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from agent.determinism import pin_runtime
-from agent.lexicon import COLORS, MATERIALS, _ATTR_DETAIL_KEYS, is_slot_token
+from agent.lexicon import COLORS, MATERIALS, TYPE_ALIASES, _ATTR_DETAIL_KEYS, is_slot_token
 from agent.normalise import HEADER_STOPLIST, is_indexable_phrase, ngrams, normalise, strip_html
 
 pin_runtime()
@@ -164,6 +164,9 @@ def _attr_phrases(
         n = normalise(cat)
         if n and 1 <= len(n.split()) <= 8:
             phrases.add(n)
+            for tok in n.split():
+                for alias in TYPE_ALIASES.get(tok, ()):
+                    phrases.add(alias)
     if is_sparse:
         title_n = normalise(title)
         for gram in ngrams(title_n, 2, 4):

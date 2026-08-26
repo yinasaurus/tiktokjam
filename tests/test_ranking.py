@@ -16,3 +16,14 @@ def test_navy_cotton_tee_ranks_near_top(records, catalog):
     out = agent.respond("s1", "navy cotton crew neck t-shirt", turn=1, top_k=10)
     recs = asins_of(out)
     assert "B000000001" in recs[:5]
+
+
+def test_cotton_shirt_finds_tees_not_belt(records):
+    agent = Agent(
+        catalog=records,
+        config=Config(lexical_enabled=False, dense_enabled=False, exact_phrase_enabled=True),
+    )
+    agent.reset("s1", {})
+    recs = asins_of(agent.respond("s1", "cotton shirt", turn=1, top_k=10))
+    assert recs[0] in {"B000000001", "B000000002", "B000000012"}
+    assert recs[0] != "B000000011"

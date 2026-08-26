@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 
-from agent.catalog import CatalogStore
+from agent.lexicon import expand_terms
 from agent.config import Config
 from agent.determinism import stable_order
 from agent.state import SessionState
@@ -42,9 +42,11 @@ def heuristic_rerank(
     """Cheap linear combination of the TDD §9.2 features. No trained model."""
     phrases = [c.text for c in constraints if c.text]
     leaf = (state.leaf_category or "").lower()
-    utterance_tokens = set((state.last_utterance or "").lower().split())
+    utterance_tokens = set(expand_terms(state.last_utterance or ""))
     scored: list[tuple[float, str]] = []
     rrf_by_asin = {asin: rrf for asin, rrf in ranked}
+    has_constraints = bool(phrases or leaf)
+    pop_weight = 0.005 if has_constraints else 0.04
     for asin, rrf in ranked:
         product = catalog.get(asin)
         if product is None:
@@ -72,10 +74,11 @@ def heuristic_rerank(
             )
         title_overlap = 0.0
         if utterance_tokens:
-            title_toks = set(product.title.lower().split())
+            title_toks = set(expand_terms(product.title.lower()))
             title_overlap = len(utterance_tokens & title_toks) / max(len(utterance_tokens), 1)
         pop = math.log1p(product.rating_count)
         sparse_pen = 0.15 if product.is_sparse else 0.0
+        unmatched_pen = 1.5 if has_constraints and coverage_ratio == 0.0 and cat_exact == 0.0 else 0.0
         score = (
             rrf_by_asin[asin]
             + 2.0 * coverage_ratio
@@ -83,8 +86,9 @@ def heuristic_rerank(
             + 0.8 * cat_exact
             + 0.15 * path_overlap
             + 0.4 * title_overlap
-            + 0.04 * pop
+            + pop_weight * pop
             - sparse_pen
+            - unmatched_pen
         )
         scored.append((score, asin))
     order = stable_order(scored)

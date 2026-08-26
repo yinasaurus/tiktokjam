@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from agent.catalog import CatalogStore
 from agent.config import Config
-from agent.lexicon import guess_attribute
+from agent.lexicon import guess_attribute, expand_terms
 from agent.normalise import ngrams, normalise, token_count
 from agent.state import SessionState
 from agent.types import Constraint
@@ -84,9 +84,9 @@ class ConstraintExtractor:
         hits: list[Constraint] = []
         seen: set[str] = set()
         windows = ngrams(normalised, 1, self.config.ngram_max)
-        # Also try the full utterance if it is a short phrase.
         if 1 <= token_count(normalised) <= self.config.ngram_max:
             windows.append(normalised)
+        windows.extend(expand_terms(normalised))
         for window in windows:
             if window in seen:
                 continue
@@ -105,6 +105,7 @@ class ConstraintExtractor:
 
     def _category(self, normalised: str, turn: int) -> list[Constraint]:
         padded = f" {normalised} "
+        expanded = expand_terms(normalised)
         for phrase in self._category_phrases:
             if len(phrase) < 3:
                 continue
@@ -118,6 +119,19 @@ class ConstraintExtractor:
                         turn=turn,
                     )
                 ]
+            for term in expanded:
+                if len(term) < 4:
+                    continue
+                if term == phrase or term in phrase.split() or phrase in term:
+                    return [
+                        Constraint(
+                            text=phrase,
+                            attribute="category",
+                            confidence=0.9,
+                            source="category",
+                            turn=turn,
+                        )
+                    ]
         return []
 
     def _oov_ratio(self, normalised: str) -> float:
