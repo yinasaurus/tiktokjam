@@ -27,12 +27,23 @@ def choose_ask_attribute(
     ranked: list[tuple[str, float]],
     config: Config,
 ) -> str | None:
+    filled = set(state.slots.keys())
+    if state.leaf_category:
+        filled.add("category")
+
     available = [
         a
         for a in config.ask_attributes
-        if a not in state.asked_set() and a not in state.declined_set()
+        if a not in state.asked_set()
+        and a not in state.declined_set()
+        and a not in filled
+        and a != "other"
     ]
     if not available:
+        return None
+
+    # Already know the product type and at least one preference — don't grill.
+    if state.leaf_category and state.slots:
         return None
 
     candidates = [catalog.get(asin) for asin, _ in ranked[: max(config.N_fuse, 10)]]
@@ -47,8 +58,6 @@ def choose_ask_attribute(
     best_attr: str | None = None
     best_gain = 0.0
     for attr in available:
-        if attr == "other":
-            continue
         gain = _expected_gain(products, attr, entropy)
         if gain > best_gain:
             best_gain = gain

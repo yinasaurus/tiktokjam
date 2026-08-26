@@ -9,6 +9,10 @@ from agent.normalise import ngrams, normalise, token_count
 from agent.state import SessionState
 from agent.types import Constraint
 
+# Whole-utterance only — "?" is stripped by normalise, and "what" must not
+# match "what size" / "what's a good shirt".
+_DECLINE_EXACT = frozenset({"?", "??", "???", "huh", "huh?", "what", "what?", "what??"})
+
 _DECLINE_CUES = frozenset(
     {
         "no preference",
@@ -75,10 +79,17 @@ class ConstraintExtractor:
         return _dedupe_constraints(constraints)
 
     def utterance_is_decline(self, utterance: str) -> bool:
-        n = normalise(utterance)
-        if n in _DECLINE_CUES:
+        raw = (utterance or "").strip().lower()
+        if raw in _DECLINE_EXACT:
             return True
-        return any(cue in n for cue in _DECLINE_CUES)
+        n = normalise(utterance)
+        if not n:
+            return False
+        cues = [normalise(c) for c in _DECLINE_CUES if c]
+        if n in cues:
+            return True
+        padded = f" {n} "
+        return any(f" {cue} " in padded for cue in cues)
 
     def _lexical(self, normalised: str, turn: int) -> list[Constraint]:
         hits: list[Constraint] = []
