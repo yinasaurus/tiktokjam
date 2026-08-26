@@ -55,6 +55,29 @@ After pulling code changes, stop the old UI (`Ctrl+C`) and run `python -m ui` ag
 
 The kit BM25 starter is `starter/bm25_baseline.py` (Hit@10 0.125). Our system is what `starter/agent.py` exports.
 
+### Do not deploy this to Vercel
+
+Vercel is for serverless functions. It looks for a Flask/FastAPI `app`. Our demo is `python -m ui` — a long-running local server that loads **50,000 products into RAM** and keeps chat state in memory.
+
+Do **not** add this (it will not work):
+
+```toml
+[tool.vercel]
+entrypoint = "ui.server:Handler"
+```
+
+`Handler` is a stdlib HTTP handler, not a Vercel entrypoint. Even if you wrap it, Vercel will not ship `data/catalog.jsonl` (gitignored), will time out on index build, and will forget sessions between requests.
+
+**Demo for teammates / video:** leave it on your machine at http://127.0.0.1:8765/  
+**Share a temporary public link:** keep `python -m ui` running, then in another terminal:
+
+```powershell
+ngrok http 8765
+```
+
+The competition score is still `python -m evaluator.local_evaluator`, not any website.
+
+
 ---
 
 ## Demo UI
