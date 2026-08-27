@@ -12,7 +12,15 @@ from pathlib import Path
 from typing import Any
 
 from agent.determinism import pin_runtime
-from agent.lexicon import COLORS, MATERIALS, TYPE_ALIASES, _ATTR_DETAIL_KEYS, is_slot_token
+from agent.lexicon import (
+    COLORS,
+    GENDER_INDEX_TERMS,
+    MATERIALS,
+    TYPE_ALIASES,
+    _ATTR_DETAIL_KEYS,
+    infer_department,
+    is_slot_token,
+)
 from agent.normalise import HEADER_STOPLIST, is_indexable_phrase, ngrams, normalise, strip_html
 
 pin_runtime()
@@ -139,6 +147,7 @@ def _attr_phrases(
     category_path: tuple[str, ...],
     is_sparse: bool,
     store: str = "",
+    department: str = "",
 ) -> frozenset[str]:
     phrases: set[str] = set()
     for feat in features:
@@ -182,6 +191,10 @@ def _attr_phrases(
         for tok in store_n.split():
             if len(tok) >= 3:
                 phrases.add(tok)
+    if department:
+        phrases.add(department)
+        for alias in GENDER_INDEX_TERMS.get(department, ()):
+            phrases.add(alias)
     return frozenset(phrases)
 
 
@@ -199,6 +212,7 @@ class Product:
     rating_count: int
     store: str
     is_sparse: bool
+    department: str
 
 
 def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) -> Product | None:
@@ -219,11 +233,14 @@ def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) ->
     leaf_category = categories[-1] if categories else ""
     feat_desc_len = len(features) + (1 if description else 0)
     is_sparse = feat_desc_len < sparse_threshold
+    department = infer_department(category_path, details, title)
 
     blob_parts = [title, " ".join(features), description, " ".join(categories), store]
     text_blob = normalise(" ".join(p for p in blob_parts if p))
 
-    phrases = _attr_phrases(title, features, details, category_path, is_sparse, store=store)
+    phrases = _attr_phrases(
+        title, features, details, category_path, is_sparse, store=store, department=department
+    )
 
     return Product(
         parent_asin=asin,
@@ -238,6 +255,7 @@ def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) ->
         rating_count=rating_count,
         store=store,
         is_sparse=is_sparse,
+        department=department,
     )
 
 

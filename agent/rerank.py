@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 
-from agent.lexicon import expand_terms
+from agent.lexicon import canonical_gender, expand_terms
 from agent.config import Config
 from agent.determinism import stable_order
 from agent.state import SessionState
@@ -42,7 +42,17 @@ def heuristic_rerank(
     """Cheap linear combination of the TDD §9.2 features. No trained model."""
     phrases = [c.text for c in constraints if c.text]
     leaf = (state.leaf_category or "").lower()
-    utterance_tokens = set(expand_terms(state.last_utterance or ""))
+    session_tokens: set[str] = set()
+    for phrase in phrases:
+        session_tokens.update(expand_terms(phrase))
+    if leaf:
+        session_tokens.update(expand_terms(leaf))
+    session_tokens.update(expand_terms(state.last_utterance or ""))
+    want_gender = None
+    for key in ("department", "style"):
+        slot = state.slots.get(key)
+        if slot:
+            want_gender = canonical_gender(slot.value) or want_gender
     scored: list[tuple[float, str]] = []
     rrf_by_asin = {asin: rrf for asin, rrf in ranked}
     has_constraints = bool(phrases or leaf)
@@ -73,12 +83,19 @@ def heuristic_rerank(
                 1.0 for c in product.category_path if leaf in c.lower() or c.lower() in leaf
             )
         title_overlap = 0.0
-        if utterance_tokens:
+        if session_tokens:
             title_toks = set(expand_terms(product.title.lower()))
-            title_overlap = len(utterance_tokens & title_toks) / max(len(utterance_tokens), 1)
+            title_overlap = len(session_tokens & title_toks) / max(len(session_tokens), 1)
         pop = math.log1p(product.rating_count)
         sparse_pen = 0.15 if product.is_sparse else 0.0
         unmatched_pen = 1.5 if has_constraints and coverage_ratio == 0.0 and cat_exact == 0.0 else 0.0
+        gender_boost = 0.0
+        gender_pen = 0.0
+        if want_gender:
+            if product.department == want_gender:
+                gender_boost = 1.8
+            elif product.department:
+                gender_pen = 4.0
         score = (
             rrf_by_asin[asin]
             + 2.0 * coverage_ratio
@@ -87,8 +104,10 @@ def heuristic_rerank(
             + 0.15 * path_overlap
             + 0.4 * title_overlap
             + pop_weight * pop
+            + gender_boost
             - sparse_pen
             - unmatched_pen
+            - gender_pen
         )
         scored.append((score, asin))
     order = stable_order(scored)

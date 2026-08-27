@@ -34,3 +34,47 @@ def test_color_followup_changes_ranking(records):
     second = asins_of(agent.respond("s1", "navy", turn=2, top_k=10))
     assert "B000000001" in second[:5]
     assert second != first or second[0] == "B000000001"
+
+
+def test_male_extracts_as_style(catalog):
+    ext = ConstraintExtractor(catalog, Config())
+    hits = ext.extract("male", SessionState("s", {}), turn=2)
+    assert any(c.text == "men" and c.attribute == "department" for c in hits)
+    assert not any(c.source == "category" for c in hits)
+
+
+def test_for_him_and_her_extract_gender(catalog):
+    ext = ConstraintExtractor(catalog, Config())
+    him = ext.extract("for him", SessionState("s", {}), turn=2)
+    her = ext.extract("for her", SessionState("s", {}), turn=2)
+    assert any(c.text == "men" and c.attribute == "department" for c in him)
+    assert any(c.text == "women" and c.attribute == "department" for c in her)
+
+
+def test_blouse_maps_to_catalog_leaf(catalog):
+    ext = ConstraintExtractor(catalog, Config())
+    blouse = [c.text for c in ext.extract("blouse", SessionState("s", {}), 1) if c.source == "category"]
+    assert blouse
+    assert "blouse" in blouse[0]
+
+
+def test_shirt_does_not_bind_blouse_category(catalog):
+    ext = ConstraintExtractor(catalog, Config())
+    hits = ext.extract("blue shirt", SessionState("s", {}), turn=1)
+    cats = [c.text for c in hits if c.source == "category"]
+    assert cats
+    assert "blouse" not in cats[0]
+    assert cats[0] in {"t-shirts", "shirts", "t-shirt", "shirt"}
+
+
+def test_male_followup_ranks_mens_above_womens_blouse(records):
+    agent = Agent(
+        catalog=records,
+        config=Config(lexical_enabled=False, dense_enabled=False, exact_phrase_enabled=True),
+    )
+    agent.reset("s1", {})
+    agent.respond("s1", "blue shirt", turn=1, top_k=10)
+    recs = asins_of(agent.respond("s1", "male", turn=2, top_k=10))
+    assert recs[0] != "B000000013"
+    assert "B000000013" not in recs[:5]
+    assert recs[0] in {"B000000001", "B000000002", "B000000003", "B000000007", "B000000009"}

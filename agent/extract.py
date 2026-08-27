@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from agent.catalog import CatalogStore
 from agent.config import Config
-from agent.lexicon import guess_attribute, expand_terms
+from agent.lexicon import canonical_gender, expand_terms, guess_attribute
 from agent.normalise import ngrams, normalise, token_count
 from agent.state import SessionState
 from agent.types import Constraint
@@ -62,6 +62,7 @@ class ConstraintExtractor:
             constraints.extend(self._lexical(normalised, turn))
             constraints.extend(self._category(normalised, turn))
             constraints.extend(self._followup_slot(normalised, state, turn))
+            constraints.extend(self._gender(normalised, turn))
 
         oov_ratio = self._oov_ratio(normalised)
         need_semantic = (
@@ -116,9 +117,8 @@ class ConstraintExtractor:
 
     def _category(self, normalised: str, turn: int) -> list[Constraint]:
         padded = f" {normalised} "
-        expanded = expand_terms(normalised)
         for phrase in self._category_phrases:
-            if len(phrase) < 3:
+            if len(phrase) < 3 or canonical_gender(phrase):
                 continue
             if f" {phrase} " in padded:
                 return [
@@ -130,20 +130,36 @@ class ConstraintExtractor:
                         turn=turn,
                     )
                 ]
-            for term in expanded:
-                if len(term) < 4:
-                    continue
-                if term == phrase or term in phrase.split() or phrase in term:
-                    return [
-                        Constraint(
-                            text=phrase,
-                            attribute="category",
-                            confidence=0.9,
-                            source="category",
-                            turn=turn,
-                        )
-                    ]
+        # Whole-phrase only. "shirt" must not latch onto "blouses button-down shirts".
+        expanded = set(expand_terms(normalised))
+        for phrase in self._category_phrases:
+            if canonical_gender(phrase):
+                continue
+            if phrase in expanded:
+                return [
+                    Constraint(
+                        text=phrase,
+                        attribute="category",
+                        confidence=0.9,
+                        source="category",
+                        turn=turn,
+                    )
+                ]
         return []
+
+    def _gender(self, normalised: str, turn: int) -> list[Constraint]:
+        gender = canonical_gender(normalised)
+        if not gender:
+            return []
+        return [
+            Constraint(
+                text=gender,
+                attribute="department",
+                confidence=1.0,
+                source="exact",
+                turn=turn,
+            )
+        ]
 
     def _oov_ratio(self, normalised: str) -> float:
         tokens = normalised.split()
@@ -219,9 +235,10 @@ class ConstraintExtractor:
             return []
         if attr in {"other", "category"}:
             return []
+        text = canonical_gender(normalised) if attr in {"style", "department"} else normalised
         return [
             Constraint(
-                text=normalised,
+                text=text or normalised,
                 attribute=attr,
                 confidence=0.95 if guessed else 0.8,
                 source="exact",
