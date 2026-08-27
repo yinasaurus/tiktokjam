@@ -213,6 +213,8 @@ class Product:
     store: str
     is_sparse: bool
     department: str
+    features: tuple[str, ...]
+    description: str
 
 
 def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) -> Product | None:
@@ -256,6 +258,8 @@ def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) ->
         store=store,
         is_sparse=is_sparse,
         department=department,
+        features=tuple(features),
+        description=description,
     )
 
 

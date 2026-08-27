@@ -59,14 +59,21 @@ def _product_card(agent, asin: str) -> dict:
     if product is None:
         return {"parent_asin": asin, "title": asin}
     price = None if product.price is None else round(product.price, 2)
+    rating = None if not product.avg_rating else round(product.avg_rating, 2)
     return {
         "parent_asin": asin,
         "title": product.title or asin,
         "price": price,
         "category": product.leaf_category,
-        "store": product.store,
-        "rating": product.avg_rating,
+        "categories": list(product.category_path),
+        "store": product.store or None,
+        "department": product.department or None,
+        "rating": rating,
         "rating_count": product.rating_count,
+        "features": list(product.features),
+        "description": product.description or "",
+        "details": dict(product.details),
+        "sparse": product.is_sparse,
     }
 
 

@@ -121,6 +121,43 @@
     .card b { display: block; margin-bottom: 4px; }
     .meta { color: var(--muted); font-size: 0.82rem; }
     .rank { color: var(--accent); font-size: 0.75rem; font-weight: 650; }
+    .asin {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .path { font-size: 0.78rem; color: var(--muted); margin: 4px 0 8px; }
+    .facts {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2px 10px;
+      font-size: 0.8rem;
+      margin: 8px 0;
+    }
+    .facts dt { color: var(--muted); }
+    .facts dd { margin: 0; overflow-wrap: anywhere; }
+    .card h3 {
+      margin: 10px 0 4px;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .card ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+    .desc {
+      font-size: 0.82rem;
+      line-height: 1.4;
+      max-height: 9em;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
     .empty { color: var(--muted); padding: 16px; }
   </style>
 </head>
@@ -129,7 +166,7 @@
     <header>
       <div>
         <h1>Shopping copilot</h1>
-        <p>Demo only. Judges score the code, not this page. · build 5</p>
+        <p>Demo only. Judges score the code, not this page. · build 6</p>
       </div>
       <div id="status">Loading catalog…</div>
     </header>
@@ -178,13 +215,38 @@
         return;
       }
       cards.innerHTML = items.map((p, i) => {
-        const price = p.price == null ? "price n/a" : "$" + p.price;
-        const cat = p.category || "";
-        const store = p.store || "";
+        const price = p.price == null ? "n/a" : "$" + p.price;
+        const rating = p.rating_count
+          ? (p.rating ?? "n/a") + " (" + p.rating_count + " reviews)"
+          : "n/a";
+        const cats = (p.categories && p.categories.length)
+          ? p.categories.join(" › ")
+          : (p.category || "n/a");
+        const features = (p.features || []).filter(Boolean);
+        const details = p.details && typeof p.details === "object" ? p.details : {};
+        const detailRows = Object.keys(details).map(k =>
+          `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(details[k])}</dd>`
+        ).join("");
+        const featureList = features.length
+          ? `<h3>Features</h3><ul>${features.map(f => `<li>${escapeHtml(f)}</li>`).join("")}</ul>`
+          : "";
+        const desc = p.description
+          ? `<h3>Description</h3><div class="desc">${escapeHtml(p.description)}</div>`
+          : "";
         return `<article class="card">
           <div class="rank">#${i + 1}</div>
+          <div class="asin">${escapeHtml(p.parent_asin || "")}</div>
           <b>${escapeHtml(p.title || p.parent_asin)}</b>
-          <div class="meta">${escapeHtml(cat)} · ${price} · ${escapeHtml(store)}</div>
+          <div class="path">${escapeHtml(cats)}</div>
+          <dl class="facts">
+            <dt>price</dt><dd>${escapeHtml(price)}</dd>
+            <dt>store</dt><dd>${escapeHtml(p.store || "n/a")}</dd>
+            <dt>department</dt><dd>${escapeHtml(p.department || "n/a")}</dd>
+            <dt>rating</dt><dd>${escapeHtml(String(rating))}</dd>
+          </dl>
+          ${detailRows ? `<h3>Details</h3><dl class="facts">${detailRows}</dl>` : ""}
+          ${featureList}
+          ${desc}
         </article>`;
       }).join("");
     }

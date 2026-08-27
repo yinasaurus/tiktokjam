@@ -77,6 +77,8 @@ def test_product_from_record_survives_bad_fields():
     assert product.rating_count == 0
     assert product.details == {}
     assert "description" not in product.text_blob
+    assert product.features == ("12",)
+    assert "Nice" in product.description
 
 
 def test_missing_asin_dropped():
