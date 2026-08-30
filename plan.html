@@ -379,7 +379,7 @@ submit best offline method only</code></pre>
           <ul>
             <li><strong>Current public-set score is known:</strong> <code>TechnicalScore 0.852704</code> on all 200 public sessions; the <code>0.80</code> gate passes.</li>
             <li><strong>Ablation and benchmark scripts exist:</strong> <code>scripts/run_ablations.py</code>, <code>scripts/bench_reranker.py</code>, and <code>tools/eval.py</code> are available for further experiments.</li>
-            <li><strong>Hosted CI exists:</strong> GitHub Actions runs unit tests, compile, fixture smoke, and a synthetic fixture-customer gate.</li>
+            <li><strong>Hosted CI exists:</strong> GitHub Actions runs unit tests, compile, repository hygiene, fixture smoke, and a synthetic fixture-customer gate.</li>
             <li><strong>Demo remains local by design:</strong> use <code>python -m ui --fixture</code> for instant video setup or <code>python -m ui</code> for official-catalog mode.</li>
           </ul>
         </div>
@@ -674,7 +674,7 @@ python scripts/check_determinism.py</code></pre>
           </tr>
           <tr>
             <td>Clear visual proof</td>
-            <td>UI shows chat, turn behavior through the API, selected ask attribute, and a Top 10 product panel with metadata.</td>
+            <td>UI shows chat, preset demo buttons, turn behavior through the API, selected ask attribute, and a Top 10 product panel with metadata.</td>
             <td>Judges and teammates can see agent behavior rather than just chat text.</td>
           </tr>
           <tr>
@@ -719,8 +719,13 @@ python scripts/check_determinism.py</code></pre>
           </tr>
           <tr>
             <td>Final verification</td>
-            <td><code>scripts/verify_submission.ps1</code> and <code>scripts/verify_submission.sh</code> run tests, compile, fixture smoke, synthetic customer gate, and optional full data evaluation.</td>
+            <td><code>scripts/verify_submission.ps1</code> and <code>scripts/verify_submission.sh</code> run tests, compile, repository hygiene, fixture smoke, synthetic customer gate, and optional full data evaluation.</td>
             <td>Run <code>.\scripts\verify_submission.ps1 -WithData</code> on a data-bearing machine before submission.</td>
+          </tr>
+          <tr>
+            <td>Submission package</td>
+            <td><code>scripts/package_submission.ps1</code> and <code>scripts/package_submission.sh</code> build a tracked-file-only zip from clean <code>HEAD</code>.</td>
+            <td>Use the filename printed by the package script after the final pull.</td>
           </tr>
         </tbody>
       </table>
@@ -731,9 +736,9 @@ python scripts/check_determinism.py</code></pre>
       <ul>
         <li><span class="ok">Done now:</span> official <code>Agent</code> interface, local UI, fixture unit tests, defensive degradation path, ignored local data paths.</li>
         <li><span class="ok">Measured:</span> full public-set acceptance score is 0.852704 with zero paid API calls.</li>
-        <li><span class="ok">Done now:</span> GitHub Actions fixture CI, synthetic customer gate, PowerShell helpers, and macOS/Linux shell companions.</li>
+        <li><span class="ok">Done now:</span> GitHub Actions fixture CI, repository hygiene, synthetic customer gate, package scripts, PowerShell helpers, and macOS/Linux shell companions.</li>
         <li><span class="p0">Must finish:</span> final Devpost paste, public YouTube demo link, and last clean <code>-WithData</code> verification before submission.</li>
-        <li><span class="p1">Should finish:</span> concise latency note and final report polish using the measured 0.852704 score.</li>
+        <li><span class="p1">Should finish:</span> concise live demo recording using the preset UI buttons and measured 0.852704 score.</li>
         <li><span class="p2">Could finish:</span> optional dense/LTR comparison appendix only if it beats the current default.</li>
       </ul>
     </section>
@@ -742,9 +747,9 @@ python scripts/check_determinism.py</code></pre>
       <h2>Immediate Next Actions</h2>
       <ol>
         <li>Run <code>.\scripts\verify_submission.ps1 -WithData</code> once more on the data-bearing machine before submission.</li>
-        <li>Record the demo using <code>.\scripts\demo.ps1 -Fixture</code> for instant UI flow plus <code>.\scripts\evaluate.ps1</code> for real metrics.</li>
+        <li>Record the demo using <code>.\scripts\demo.ps1 -Fixture</code> and the preset buttons for instant UI flow plus <code>.\scripts\evaluate.ps1</code> for real metrics.</li>
         <li>Paste <code>docs/devpost_draft.md</code> into Devpost, add team names/contributions, and link the public YouTube video.</li>
-        <li>Confirm GitHub Actions remains green on <code>main</code> and <code>git status --short</code> shows no staged data or secrets.</li>
+        <li>Confirm GitHub Actions remains green on <code>main</code>, run <code>python scripts/check_repo_hygiene.py</code>, and check <code>git status --short</code> shows no staged data or secrets.</li>
         <li>Only spend extra time on Model2Vec/LightGBM if it can be measured quickly and beats the current 0.852704 default.</li>
       </ol>
     </section>
