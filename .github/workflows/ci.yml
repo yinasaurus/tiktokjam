@@ -28,6 +28,9 @@ jobs:
       - name: Compile modules
         run: python -m compileall agent scripts tools starter tests ui -q
 
+      - name: Repository hygiene
+        run: python scripts/check_repo_hygiene.py
+
       - name: Fixture smoke session
         run: python scripts/smoke_session.py
 

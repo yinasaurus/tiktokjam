@@ -20,6 +20,9 @@ Write-Host "Running unit tests"
 Write-Host "Compiling Python modules"
 & $Python -m compileall agent scripts tools starter tests evaluator ui -q
 
+Write-Host "Checking repository hygiene"
+& $Python scripts/check_repo_hygiene.py
+
 Write-Host "Running fixture smoke session"
 & $Python scripts/smoke_session.py
 

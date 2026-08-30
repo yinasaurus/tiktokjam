@@ -19,6 +19,7 @@ PYTHON="python3"
 
 "$PYTHON" -m pytest tests -q
 "$PYTHON" -m compileall agent scripts tools starter tests evaluator ui -q
+"$PYTHON" scripts/check_repo_hygiene.py
 "$PYTHON" scripts/smoke_session.py
 "$PYTHON" scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
 
