@@ -5,7 +5,14 @@ this file stays a thin adapter for `docs/agent_api_contract.json`.
 The BM25 starter shipped in the kit is preserved as `starter/bm25_baseline.py`.
 """
 
-from agent.agent import Agent as HybridAgent
 from agent.fast_agent import Agent
 
 __all__ = ["Agent", "HybridAgent"]
+
+
+def __getattr__(name: str):
+    if name == "HybridAgent":
+        from agent.agent import Agent as HybridAgent
+
+        return HybridAgent
+    raise AttributeError(name)

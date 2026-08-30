@@ -4,6 +4,10 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 cd "$ROOT"
 PORT="${PORT:-8765}"
+EXTRA_ARGS=""
+if [ "${FIXTURE:-0}" = "1" ]; then
+  EXTRA_ARGS="--fixture"
+fi
 
 if [ ! -x ".venv/bin/python" ]; then
   python3 -m venv .venv
@@ -16,4 +20,4 @@ fi
 
 "$PYTHON" -m pytest tests -q
 echo "Starting demo UI at http://127.0.0.1:$PORT/"
-"$PYTHON" -m ui --port "$PORT"
+"$PYTHON" -m ui --port "$PORT" $EXTRA_ARGS

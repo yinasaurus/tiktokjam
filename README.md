@@ -101,17 +101,19 @@ Also copy `data/public_set.jsonl` out of `techjam-participant-kit.zip` if needed
 ```powershell
 python -m pytest tests -q
 python -m ui
+python -m ui --fixture
 python -m evaluator.local_evaluator
 ```
 
 | Command | What it does |
 |---|---|
 | `python -m pytest tests -q` | Unit tests (tiny fixture catalog) |
-| `python -m ui` | Demo in the browser at **http://127.0.0.1:8765/** — **not scored** |
+| `python -m ui` | Demo in the browser at **http://127.0.0.1:8765/** using the official catalog when present — **not scored** |
+| `python -m ui --fixture` | Instant UI smoke/demo mode using the tiny fixture catalog — **not scored** |
 | `python -m evaluator.local_evaluator` | Official scorer on 200 public sessions → `results.json` |
 | `python scripts/chat.py` | Same agent, terminal only |
 
-After pulling code changes, stop the old UI (`Ctrl+C`) and run `python -m ui` again, then click **Reset**.
+After pulling code changes, stop the old UI (`Ctrl+C`) and run `python -m ui` again, then click **Reset**. Use `python -m ui --fixture` when you only need to verify or record the UI flow quickly.
 
 The kit BM25 starter is `starter/bm25_baseline.py` (Hit@10 0.125). Our system is what `starter/agent.py` exports.
 
@@ -122,6 +124,7 @@ Use the PowerShell helpers when onboarding a teammate or preparing a demo machin
 ```powershell
 .\scripts\setup_local_data.ps1 -DownloadOfficial
 .\scripts\demo.ps1 -Install
+.\scripts\demo.ps1 -Fixture
 .\scripts\evaluate.ps1
 ```
 
@@ -130,6 +133,7 @@ macOS/Linux companions:
 ```bash
 sh scripts/setup_local_data.sh --download-official
 INSTALL=1 sh scripts/demo.sh
+FIXTURE=1 sh scripts/demo.sh
 sh scripts/evaluate.sh
 ```
 
@@ -254,7 +258,7 @@ The competition score is still `python -m evaluator.local_evaluator`, not any we
 
 ## Demo UI
 
-`python -m ui` opens a chat on the left and a **Top 10** product list on the right.
+`python -m ui` opens a chat on the left and a **Top 10** product list on the right. For fast recording setup, use `python -m ui --fixture` or the matching `-Fixture` / `FIXTURE=1` script options; this proves the interface flow without waiting for the 50k-product catalog index.
 
 - Chat is only for questions / short status. Ranked products live in the right panel (not repeated as “Top pick: …” in every bubble).
 - Type like a search, not like WhatsApp.

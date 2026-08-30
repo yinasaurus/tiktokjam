@@ -1,5 +1,6 @@
 param(
     [switch]$Install,
+    [switch]$Fixture,
     [int]$Port = 8765
 )
 
@@ -27,5 +28,11 @@ if (Test-Path "data\catalog.jsonl") {
 Write-Host "Running unit tests"
 & $Python -m pytest tests -q
 
+$Args = @("--port", "$Port")
+if ($Fixture) {
+    Write-Host "Using fixture catalog for instant demo startup"
+    $Args += "--fixture"
+}
+
 Write-Host "Starting demo UI at http://127.0.0.1:$Port/"
-& $Python -m ui --port $Port
+& $Python -m ui @Args

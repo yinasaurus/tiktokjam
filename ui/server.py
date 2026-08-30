@@ -15,7 +15,6 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent.config import Config
 from agent.types import asins_of
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -27,26 +26,29 @@ _agent = None
 _error: str | None = None
 _ready = False
 _catalog_size = 0
+_selected_catalog = OFFICIAL_CATALOG
 _turns: dict[str, int] = {}
 
 
 def _catalog_path() -> Path:
-    if OFFICIAL_CATALOG.exists():
-        return OFFICIAL_CATALOG
+    if _selected_catalog == FIXTURE_CATALOG:
+        return FIXTURE_CATALOG
+    if _selected_catalog.exists():
+        return _selected_catalog
     return FIXTURE_CATALOG
 
 
 def _load_agent() -> None:
     global _agent, _error, _ready, _catalog_size
-    from agent.agent import Agent
+    from starter.agent import Agent
 
     path = _catalog_path()
     try:
-        config = Config(dense_enabled=False)
-        agent = Agent(catalog=path, config=config)
+        agent = Agent(path)
         with _lock:
             _agent = agent
-            _catalog_size = len(agent.catalog)
+            catalog = getattr(agent, "products", None) or getattr(agent, "catalog", [])
+            _catalog_size = len(catalog)
             _ready = True
     except Exception as exc:
         with _lock:
@@ -55,9 +57,41 @@ def _load_agent() -> None:
 
 
 def _product_card(agent, asin: str) -> dict:
-    product = agent.catalog.get(asin)
+    product = None
+    if hasattr(agent, "products"):
+        product = agent.products.get(asin)
+    elif hasattr(agent, "catalog"):
+        product = agent.catalog.get(asin)
     if product is None:
         return {"parent_asin": asin, "title": asin}
+    if isinstance(product, dict):
+        price = product.get("price")
+        try:
+            price = None if price is None else round(float(price), 2)
+        except (TypeError, ValueError):
+            price = None
+        try:
+            rating = product.get("average_rating")
+            rating = None if rating is None else round(float(rating), 2)
+        except (TypeError, ValueError):
+            rating = None
+        categories = [str(item) for item in product.get("categories") or []]
+        details = product.get("details") if isinstance(product.get("details"), dict) else {}
+        return {
+            "parent_asin": asin,
+            "title": product.get("title") or asin,
+            "price": price,
+            "category": categories[-1] if categories else None,
+            "categories": categories,
+            "store": product.get("store") or None,
+            "department": details.get("Department"),
+            "rating": rating,
+            "rating_count": product.get("rating_number") or 0,
+            "features": list(product.get("features") or []),
+            "description": " ".join(str(item) for item in product.get("description") or []),
+            "details": dict(details),
+            "sparse": False,
+        }
     price = None if product.price is None else round(product.price, 2)
     rating = None if not product.avg_rating else round(product.avg_rating, 2)
     return {
@@ -150,7 +184,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         with _lock:
             turn = _turns.get(session_id, 1)
-            if session_id not in _agent._sessions:
+            sessions = getattr(_agent, "sessions", getattr(_agent, "_sessions", {}))
+            if session_id not in sessions:
                 _agent.reset(session_id, {})
                 turn = 1
             out = _agent.respond(session_id, message, turn=turn, top_k=10)
@@ -171,11 +206,19 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    global _selected_catalog
     parser = argparse.ArgumentParser(description="Demo UI for the shopping agent")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument(
+        "--fixture",
+        action="store_true",
+        help="Use the tiny test catalog for instant UI demos. Not for scoring.",
+    )
     args = parser.parse_args()
+    if args.fixture:
+        _selected_catalog = FIXTURE_CATALOG
     threading.Thread(target=_load_agent, daemon=True).start()
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     url = f"http://{args.host}:{args.port}/"

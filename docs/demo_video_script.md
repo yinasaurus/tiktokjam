@@ -63,6 +63,15 @@ Run:
 .\scripts\demo.ps1
 ```
 
+For a quick UI-only recording pass, use:
+
+```powershell
+.\scripts\demo.ps1 -Fixture
+```
+
+The fixture mode is not scored; it exists so the visual walkthrough starts
+instantly. Use `.\scripts\evaluate.ps1` for the real 50k-catalog score.
+
 Use short prompts:
 
 - `navy cotton t-shirts`
