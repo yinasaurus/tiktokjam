@@ -11,6 +11,10 @@ The system is optimized for the official backend evaluator, not for a consumer
 checkout UI. Each session has a hard 10-turn limit. The objective is to recover
 the hidden purchased product as early and as highly ranked as possible.
 
+Repository: https://github.com/yinasaurus/tiktokjam
+
+Planning artifact: https://mj4gkxs69b24.postplan.dev
+
 ## How It Addresses the Problem
 
 Traditional keyword search is brittle when a shopper starts vague, changes

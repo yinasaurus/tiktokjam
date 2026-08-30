@@ -12,6 +12,24 @@ git status --short
 git log -1 --oneline
 ```
 
+Current latest checked commit:
+
+```text
+95de9ed test(ui): cover demo preset prompts
+```
+
+Public GitHub repository:
+
+```text
+https://github.com/yinasaurus/tiktokjam
+```
+
+Shared PostPlan:
+
+```text
+https://mj4gkxs69b24.postplan.dev
+```
+
 ## Required Final Commands
 
 On the data-bearing Windows machine:
@@ -39,6 +57,12 @@ HitRate@10: 0.960000
 MRR: 0.681347
 MTTC: 2.585000
 TechnicalScore: 0.852704
+```
+
+Latest local package after the last rebuild:
+
+```text
+dist\techjam-track4-submission-95de9ed.zip
 ```
 
 ## Demo Recording
