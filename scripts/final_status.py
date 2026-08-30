@@ -91,7 +91,7 @@ def main() -> None:
     print()
     print("## External Items")
     print()
-    print("- Fill team names and contribution split in Devpost.")
+    print("- Team name is `kpopy demon hunter`; fill individual names and contribution split in Devpost.")
     print("- Record/upload the public YouTube demo.")
     print("- Paste `docs/devpost_draft.md` into Devpost and submit before 2026-09-01 12:00 Singapore time.")
 

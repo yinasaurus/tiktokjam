@@ -8,6 +8,8 @@ Use `docs/youtube_description.md` for the upload title and description.
 
 Show the repo and explain the task:
 
+> We are team kpopy demon hunter.
+>
 > This is a backend conversational shopping copilot for TikTok TechJam 2026
 > Track 4. The goal is to find a hidden purchased Amazon product from a frozen
 > 50,000-item clothing catalog within 10 turns.

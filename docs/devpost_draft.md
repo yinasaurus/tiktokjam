@@ -1,5 +1,7 @@
 # Devpost Draft: Shopping Copilot
 
+Team: **kpopy demon hunter**
+
 ## Project Description
 
 This project is an offline conversational shopping agent for TikTok TechJam 2026
@@ -173,7 +175,9 @@ python scripts/bench_reranker.py --mode ltr
 
 ## Team Contributions
 
-Fill before submission:
+Team name: **kpopy demon hunter**
+
+Fill individual names and contribution split before submission:
 
 - Team member 1:
 - Team member 2:

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok TechJam Shopping Agent: Execution Plan</title>
+  <title>kpopy demon hunter: TikTok TechJam Shopping Agent Execution Plan</title>
   <style>
     :root {
       color-scheme: dark;
@@ -195,8 +195,8 @@
 <body>
   <header>
     <div class="hero">
-      <h1>TikTok TechJam Shopping Agent: Execution Plan</h1>
-      <p>Repo: <code>X:\01 REPOSITORIES\tiktokjam</code>. This plan converts the current M1-style agent into a reproducible, teammate-friendly, demo-ready production submission path for the Shopping Copilot challenge.</p>
+      <h1>kpopy demon hunter: TikTok TechJam Shopping Agent Execution Plan</h1>
+      <p>Repo: <code>X:\01 REPOSITORIES\tiktokjam</code>. This plan keeps the team aligned on the reproducible, teammate-friendly, demo-ready production submission path for the Shopping Copilot challenge.</p>
       <div class="summary">
         <div class="metric">
           <span class="label">Current state</span>
@@ -211,7 +211,7 @@
         <div class="metric">
           <span class="label">Target model path</span>
           <span class="value">Offline CPU</span>
-          <span class="note">Model2Vec dense route + LightGBM LambdaRank.</span>
+          <span class="note">Submitted path uses no paid API; Model2Vec/LTR stay research-only unless they beat the gate.</span>
         </div>
         <div class="metric">
           <span class="label">Validation target</span>
@@ -263,7 +263,30 @@
       <h2>Architecture Diagrams</h2>
       <div class="grid">
         <div>
-          <h3>Runtime Flow</h3>
+          <h3>Submitted Offline Runtime</h3>
+          <pre><code>official evaluator / demo UI
+  |
+  v
+starter.agent.Agent
+  |
+  v
+FastAgent
+  |
+  +-- template parser
+  +-- SessionState
+  +-- question policy
+  |
+  v
+category + exact + lexical + popularity routes
+  |
+  v
+score candidates
+  |
+  v
+10 valid parent_asin + ask_attribute</code></pre>
+        </div>
+        <div>
+          <h3>Research Pipeline</h3>
           <pre><code>customer turn
   |
   v
@@ -281,6 +304,8 @@ exact + lexical + dense retrieval
   v
 fusion -> rerank/fallback -> Top 10 parent_asin</code></pre>
         </div>
+      </div>
+      <div class="grid">
         <div>
           <h3>Evaluation Loop</h3>
           <pre><code>official catalog + public_set
@@ -296,6 +321,22 @@ compare variants
   |
   v
 submit best offline method only</code></pre>
+        </div>
+        <div>
+          <h3>Team Machine Setup</h3>
+          <pre><code>git pull origin main
+  |
+  v
+setup_local_data.ps1 / setup_local_data.sh
+  |
+  v
+verify_submission.ps1 / verify_submission.sh
+  |
+  v
+demo.ps1 / demo.sh for recording
+  |
+  v
+package_submission.ps1 / package_submission.sh</code></pre>
         </div>
       </div>
     </section>
@@ -368,7 +409,7 @@ submit best offline method only</code></pre>
         <div>
           <h3><span class="p0">P0</span> Final Submission Inputs</h3>
           <ul>
-            <li><strong>Submission text needs final human fields:</strong> team names, contribution split, YouTube URL, and any final latency note still need to be pasted into Devpost.</li>
+            <li><strong>Submission text needs final human fields:</strong> individual names, contribution split, YouTube URL, and any final latency note still need to be pasted into Devpost. Team name is <strong>kpopy demon hunter</strong>.</li>
             <li><strong>Final data gate is local-only:</strong> the official 50k catalog and public sessions are downloaded locally, verified, and gitignored. Any teammate running the final gate must run setup first.</li>
             <li><strong>Demo video still needs recording:</strong> the UI and script exist; the final YouTube link is the remaining deliverable artifact.</li>
             <li><strong>Optional model paths are not submission blockers:</strong> Model2Vec and LightGBM stay research-only unless they beat the current offline default.</li>
@@ -705,7 +746,7 @@ python scripts/check_determinism.py</code></pre>
           <tr>
             <td>Devpost written description</td>
             <td><code>docs/devpost_draft.md</code> with project description, tools, APIs, libraries, datasets, limitations, and contribution placeholders.</td>
-            <td>Paste measured scores, latency, team names, and final YouTube link.</td>
+            <td>Paste measured scores, latency, individual contributions, and final YouTube link.</td>
           </tr>
           <tr>
             <td>Public GitHub repository</td>
@@ -748,7 +789,7 @@ python scripts/check_determinism.py</code></pre>
       <ol>
         <li>Run <code>.\scripts\verify_submission.ps1 -WithData</code> once more on the data-bearing machine before submission.</li>
         <li>Record the demo using <code>.\scripts\demo.ps1 -Fixture</code> and the preset buttons for instant UI flow plus <code>.\scripts\evaluate.ps1</code> for real metrics.</li>
-        <li>Paste <code>docs/devpost_draft.md</code> into Devpost, add team names/contributions, and link the public YouTube video.</li>
+        <li>Paste <code>docs/devpost_draft.md</code> into Devpost, add individual names/contributions, and link the public YouTube video. Team name: <strong>kpopy demon hunter</strong>.</li>
         <li>Confirm GitHub Actions remains green on <code>main</code>, run <code>python scripts/check_repo_hygiene.py</code>, and check <code>git status --short</code> shows no staged data or secrets.</li>
         <li>Only spend extra time on Model2Vec/LightGBM if it can be measured quickly and beats the current 0.852704 default.</li>
       </ol>

@@ -1,5 +1,7 @@
 # Conversational Shopping Agent
 
+Team: **kpopy demon hunter**
+
 [![CI](https://github.com/yinasaurus/tiktokjam/actions/workflows/ci.yml/badge.svg)](https://github.com/yinasaurus/tiktokjam/actions/workflows/ci.yml)
 
 TikTok TechJam 2026, Track 4. Offline multi-turn **search agent** that finds a hidden catalog product within 10 turns.
@@ -36,6 +38,26 @@ template parser -> session state -> question policy
     |          active constraints   ask_attribute
     v
 multi-route retrieval -> fusion -> rerank/fallback -> Top 10 parent_asin
+```
+
+Submitted offline architecture:
+
+```text
+official evaluator
+    |
+    v
+starter.agent.Agent
+    |
+    v
+FastAgent: parser + SessionState + question policy
+    |
+    +--> category route
+    +--> exact constraint route
+    +--> lexical overlap route
+    +--> popularity fallback
+    |
+    v
+score/rank candidates -> 10 valid parent_asin + ask_attribute
 ```
 
 Evaluation loop:

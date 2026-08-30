@@ -1,5 +1,7 @@
 # Technical report
 
+Team: **kpopy demon hunter**
+
 ## Who this is for
 
 A shopper who knows roughly what they want, cannot phrase it as a keyword query, and abandons after two failed searches. Ten turns is not a hackathon artefact; it is roughly the patience budget of that person. Every turn spent asking is a turn not spent recommending.

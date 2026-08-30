@@ -2,6 +2,8 @@
 
 Date: 2026-08-31 Singapore time.
 
+Team: **kpopy demon hunter**
+
 ## Current Submit Commit
 
 Use the latest pushed `main`. Verify before packaging:
@@ -93,7 +95,7 @@ Use `docs/youtube_description.md` as the upload title/description template.
 ## Devpost Paste Order
 
 1. Paste `docs/devpost_draft.md`.
-2. Fill team names and contribution split.
+2. Fill individual names and contribution split.
 3. Add the public GitHub URL.
 4. Add the public YouTube demo URL.
 5. Include the measured score block above.

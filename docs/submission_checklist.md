@@ -55,6 +55,7 @@ python scripts/run_ablations.py --variant ltr --variant cascade
 
 ## Devpost
 
+- [ ] Team name is set to `kpopy demon hunter`.
 - [ ] Problem statement and solution approach are clear.
 - [ ] Tools, APIs, libraries, datasets, and assets are listed.
 - [ ] State that no hosted model/API is required for the default scoring path.
@@ -62,7 +63,7 @@ python scripts/run_ablations.py --variant ltr --variant cascade
 - [ ] Include measured HitRate@10, MRR, MTTC, Efficiency, TechnicalScore,
   latency, and token usage.
 - [ ] Include limitations and future improvements.
-- [ ] Include team member contributions.
+- [ ] Include individual team member contributions.
 
 ## Demo Video
 

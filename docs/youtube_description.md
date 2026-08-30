@@ -11,6 +11,8 @@ Description:
 ```text
 Demo for TikTok TechJam 2026 Track 4: Shopping Copilot.
 
+Team: kpopy demon hunter
+
 This project is an offline conversational search agent for a frozen 50,000-item Amazon Reviews 2023 clothing catalog. The official evaluator imports starter.agent.Agent and scores ranked parent_asin recommendations, not the UI.
 
 Default submission path:
