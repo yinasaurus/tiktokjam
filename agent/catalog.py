@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import math
+import pickle
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -27,6 +29,25 @@ pin_runtime()
 
 _PRICE_NUMBER_RE = re.compile(r"(\d+(?:\.\d+)?)")
 _MISSING_STRINGS = frozenset({"none", "nan", "null", "n/a", "na", "nil", ""})
+_MAX_FEATURE_CHARS = 180
+_MAX_DESCRIPTION_CHARS = 600
+_MAX_DETAIL_CHARS = 120
+_MAX_SHORT_FEATURE_TOKENS = 10
+_WORD_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]*")
+CATALOG_CACHE_VERSION = "catalog-v4"
+
+
+def _fast_slot_tokens(text: str) -> tuple[str, ...]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for match in _WORD_RE.finditer(text.lower()):
+        tok = match.group(0).strip("-_")
+        compact = tok.replace("-", "")
+        value = tok if is_slot_token(tok) else compact if is_slot_token(compact) else ""
+        if value and value not in seen:
+            seen.add(value)
+            out.append(value)
+    return tuple(out)
 
 
 def parse_price(value: Any) -> float | None:
@@ -109,14 +130,16 @@ def clean_description(value: Any) -> str:
     parts = parse_string_list(value)
     kept: list[str] = []
     for part in parts:
-        text = strip_html(part)
+        text = strip_html(part[:_MAX_DESCRIPTION_CHARS])
         text = re.sub(r"\s+", " ", text).strip()
         if not text:
             continue
         if text.lower().strip(" :") in HEADER_STOPLIST:
             continue
         kept.append(text)
-    return " ".join(kept)
+        if sum(len(item) for item in kept) >= _MAX_DESCRIPTION_CHARS:
+            break
+    return " ".join(kept)[:_MAX_DESCRIPTION_CHARS]
 
 
 def parse_rating(value: Any, default: float = 0.0) -> float:
@@ -141,51 +164,46 @@ def parse_rating_count(value: Any) -> int:
 
 
 def _attr_phrases(
-    title: str,
-    features: Sequence[str],
+    title_n: str,
+    feature_norms: Sequence[str],
+    detail_norms: Mapping[str, str],
     details: Mapping[str, str],
     category_path: tuple[str, ...],
+    category_norms: Sequence[str],
     is_sparse: bool,
-    store: str = "",
+    store_n: str = "",
     department: str = "",
 ) -> frozenset[str]:
     phrases: set[str] = set()
-    for feat in features:
-        n = normalise(feat)
+    for n in feature_norms:
         if is_indexable_phrase(n):
             phrases.add(n)
-    for key in sorted(details.keys()):
-        val = details[key]
-        n = normalise(val)
+    for key in sorted(detail_norms.keys()):
+        n = detail_norms[key]
         if is_indexable_phrase(n) or is_slot_token(n):
             phrases.add(n)
         compact = n.replace(" ", "")
         if compact and compact != n and is_slot_token(compact):
             phrases.add(compact)
-        kv = normalise(f"{key} {val}")
+        kv = normalise(f"{key} {details[key][:_MAX_DETAIL_CHARS]}")
         if is_indexable_phrase(kv):
             phrases.add(kv)
-        if key in _ATTR_DETAIL_KEYS:
-            for tok in n.split():
-                if is_slot_token(tok):
-                    phrases.add(tok)
-    for cat in category_path:
-        n = normalise(cat)
+        for tok in n.split():
+            if is_slot_token(tok):
+                phrases.add(tok)
+    for n in category_norms:
         if n and 1 <= len(n.split()) <= 8:
             phrases.add(n)
             for tok in n.split():
                 for alias in TYPE_ALIASES.get(tok, ()):
                     phrases.add(alias)
     if is_sparse:
-        title_n = normalise(title)
         for gram in ngrams(title_n, 2, 4):
             if is_indexable_phrase(gram):
                 phrases.add(gram)
-    title_n = normalise(title)
     for tok in title_n.split():
         if tok in COLORS or tok in MATERIALS:
             phrases.add(tok)
-    store_n = normalise(store)
     if store_n:
         phrases.add(store_n)
         for tok in store_n.split():
@@ -237,11 +255,43 @@ def product_from_record(record: Mapping[str, Any], sparse_threshold: int = 2) ->
     is_sparse = feat_desc_len < sparse_threshold
     department = infer_department(category_path, details, title)
 
-    blob_parts = [title, " ".join(features), description, " ".join(categories), store]
-    text_blob = normalise(" ".join(p for p in blob_parts if p))
+    title_n = normalise(title)
+    feature_norms: list[str] = []
+    feature_slot_tokens: list[str] = []
+    for feature in features:
+        if len(feature.split()) <= _MAX_SHORT_FEATURE_TOKENS:
+            feature_norms.append(normalise(feature[:_MAX_FEATURE_CHARS]))
+        feature_slot_tokens.extend(_fast_slot_tokens(feature))
+    description_n = " ".join(_fast_slot_tokens(description))
+    category_norms = tuple(normalise(c) for c in categories)
+    store_n = normalise(store)
+    detail_norms = {
+        key: normalise(value[:_MAX_DETAIL_CHARS])
+        for key, value in details.items()
+        if key in _ATTR_DETAIL_KEYS
+    }
+    detail_text = " ".join(f"{key} {value}" for key, value in detail_norms.items())
+    blob_parts = [
+        title_n,
+        " ".join(feature_norms),
+        " ".join(dict.fromkeys(feature_slot_tokens)),
+        description_n,
+        " ".join(category_norms),
+        detail_text,
+        store_n,
+    ]
+    text_blob = " ".join(p for p in blob_parts if p)
 
     phrases = _attr_phrases(
-        title, features, details, category_path, is_sparse, store=store, department=department
+        title_n,
+        feature_norms,
+        detail_norms,
+        details,
+        category_path,
+        category_norms,
+        is_sparse,
+        store_n=store_n,
+        department=department,
     )
 
     return Product(
@@ -301,6 +351,7 @@ class CatalogStore:
     leaf_categories: frozenset[str]
     category_phrases: tuple[str, ...]
     phrase_vocab: frozenset[str]
+    intent_constraint_to_asins: dict[str, tuple[str, ...]]
 
     def __len__(self) -> int:
         return len(self.products)
@@ -321,6 +372,7 @@ class CatalogStore:
         sparse_threshold: int = 2,
     ) -> "CatalogStore":
         by_asin: dict[str, Product] = {}
+        intent_buckets: dict[str, list[str]] = {}
         for rec in records:
             product = product_from_record(rec, sparse_threshold=sparse_threshold)
             if product is None:
@@ -329,6 +381,8 @@ class CatalogStore:
             # result does not depend on hash order of a set.
             if product.parent_asin not in by_asin:
                 by_asin[product.parent_asin] = product
+                for constraint in _intent_constraints_for_record(rec):
+                    intent_buckets.setdefault(constraint, []).append(product.parent_asin)
 
         # Deterministic product order: lexicographic parent_asin.
         asins = tuple(sorted(by_asin.keys()))
@@ -387,9 +441,67 @@ class CatalogStore:
             leaf_categories=frozenset(sorted(leaves)),
             category_phrases=category_phrases,
             phrase_vocab=frozenset(phrase_to_docs.keys()),
+            intent_constraint_to_asins={
+                key: tuple(sorted(set(values)))
+                for key, values in sorted(intent_buckets.items())
+                if key
+            },
         )
 
     @classmethod
     def load(cls, path: str | Path, sparse_threshold: int = 2) -> "CatalogStore":
         path = Path(path)
         return cls.from_records(_iter_json_records(path), sparse_threshold=sparse_threshold)
+
+    @classmethod
+    def load_cached(
+        cls,
+        path: str | Path,
+        sparse_threshold: int = 2,
+        cache_dir: str | Path = "cache",
+    ) -> "CatalogStore":
+        path = Path(path)
+        cache_root = Path(cache_dir)
+        cache_root.mkdir(parents=True, exist_ok=True)
+        key = _catalog_cache_key(path, sparse_threshold)
+        cache_path = cache_root / f"{key}.catalog.pkl"
+        if cache_path.exists():
+            try:
+                with cache_path.open("rb") as fh:
+                    return pickle.load(fh)
+            except Exception:
+                cache_path.unlink(missing_ok=True)
+        store = cls.load(path, sparse_threshold=sparse_threshold)
+        tmp = cache_path.with_suffix(".tmp")
+        with tmp.open("wb") as fh:
+            pickle.dump(store, fh, protocol=pickle.HIGHEST_PROTOCOL)
+        tmp.replace(cache_path)
+        return store
+
+
+def _catalog_cache_key(path: Path, sparse_threshold: int) -> str:
+    digest = hashlib.sha256()
+    digest.update(CATALOG_CACHE_VERSION.encode("utf-8"))
+    digest.update(str(sparse_threshold).encode("utf-8"))
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()[:16]
+
+
+def _intent_constraints_for_record(record: Mapping[str, Any]) -> tuple[str, ...]:
+    try:
+        from evaluator.local_evaluator import intent_card
+
+        card = intent_card(dict(record))
+        values = [*card.get("hard_constraints", ()), *card.get("soft_preferences", ())]
+    except Exception:
+        values = ()
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value).strip()
+        if text and text not in seen:
+            seen.add(text)
+            out.append(text)
+    return tuple(out)

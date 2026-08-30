@@ -37,11 +37,17 @@ def main() -> None:
 
     config = Config(cache_dir=str(args.cache_dir))
     t0 = time.perf_counter()
-    store = CatalogStore.load(args.catalog, sparse_threshold=config.sparse_threshold)
+    print(f"loading catalog: {args.catalog}", flush=True)
+    store = CatalogStore.load_cached(
+        args.catalog,
+        sparse_threshold=config.sparse_threshold,
+        cache_dir=args.cache_dir,
+    )
     print(f"catalog: {len(store)} products in {time.perf_counter() - t0:.2f}s")
     print(f"phrase vocab: {len(store.phrase_vocab)}")
     print(f"sparse listings: {sum(1 for p in store.products if p.is_sparse)}")
 
+    print(f"loading encoder from {config.encoder_dir}", flush=True)
     encoder = load_encoder(config)
     if encoder is None:
         print("no vendored encoder at", config.encoder_dir, "— skipping dense cache")
@@ -51,6 +57,7 @@ def main() -> None:
     key = _catalog_key(args.catalog, config)
     npz_path = args.cache_dir / f"{key}.npz"
     t1 = time.perf_counter()
+    print("building dense index", flush=True)
     index = DenseIndex(store, config, encoder=encoder)
     print(f"dense index: available={index.available} in {time.perf_counter() - t1:.2f}s")
     if index.available:

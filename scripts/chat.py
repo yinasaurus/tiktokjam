@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent import Agent, Config
+from agent.agent import Agent
+from agent.config import Config
 from agent.types import asins_of
 
 FIXTURE = ROOT / "tests" / "fixtures" / "catalog.jsonl"

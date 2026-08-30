@@ -20,6 +20,7 @@ class SessionState:
     intent: Intent = "unknown"
     slots: dict[str, SlotValue] = field(default_factory=dict)
     free_constraints: list[Constraint] = field(default_factory=list)
+    disclosed_texts: list[str] = field(default_factory=list)
     asked: list[str] = field(default_factory=list)  # list, not set — ranking-safe
     declined: list[str] = field(default_factory=list)
     last_candidates: list[str] = field(default_factory=list)
@@ -39,6 +40,12 @@ class SessionState:
     def mark_declined(self, attribute: str) -> None:
         if attribute not in self.declined:
             self.declined.append(attribute)
+
+    def remember_disclosures(self, values: tuple[str, ...]) -> None:
+        for value in values:
+            text = str(value).strip()
+            if text and text not in self.disclosed_texts:
+                self.disclosed_texts.append(text)
 
 
 class DialogStateManager:

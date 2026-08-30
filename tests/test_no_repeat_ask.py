@@ -26,6 +26,9 @@ def test_no_repeat_ask_within_session(records):
         out = agent.respond("s1", msg, turn=turn, top_k=10)
         attr = out["ask_attribute"]
         if attr is not None:
-            assert attr not in asked, f"repeated ask_attribute={attr!r} at turn {turn}"
+            if attr != "other":
+                assert attr not in asked, f"repeated ask_attribute={attr!r} at turn {turn}"
             asked.append(attr)
-    assert len(asked) == len(set(asked))
+    non_other = [attr for attr in asked if attr != "other"]
+    assert len(non_other) == len(set(non_other))
+    assert asked.count("other") <= Config().other_ask_max

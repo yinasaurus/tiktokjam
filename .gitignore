@@ -20,6 +20,7 @@ data/*
 techjam-participant-kit.zip
 results.json
 eval_output/
+runs/
 
 # IDE / OS
 .idea/

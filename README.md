@@ -4,9 +4,69 @@ TikTok TechJam 2026, Track 4. Offline multi-turn **search agent** that finds a h
 
 This is **not** a general chatbot. The customer says what they want; we return 10 product IDs and maybe ask one attribute. Judges score those IDs, not the webpage.
 
+The challenge framing is Shopping Copilot: conversational search and
+recommendations over Amazon Reviews 2023-derived catalog data. The source
+category is the large `Clothing_Shoes_and_Jewelry` corpus; the competition
+ships a frozen 50k product slice plus public evaluation sessions. Use the
+participant-kit data for this repo, not a fresh scrape or rewritten catalog.
+
+Competition pillars mapped to this codebase:
+
+- **Intent routing and hybrid pipeline:** exact phrase, lexical BM25, dense
+  retrieval, fusion, and reranking in `agent/`.
+- **Multi-turn scenario evolution:** `SessionState` accumulates slots, handles
+  declined attributes, and supports intent override by superseding constraints.
+- **Dynamic context programming:** each turn rebuilds active constraints from
+  dialog state and chooses whether to retrieve, ask, rerank, or degrade based on
+  budget and candidate quality.
+- **Product and efficiency metrics:** local evaluator reports Hit@10, MRR,
+  MTTC, Efficiency, TechnicalScore, and zero token usage for the offline path.
+
+Backend flow:
+
+```text
+customer turn
+    |
+    v
+template parser -> session state -> question policy
+    |                 |              |
+    |                 v              v
+    |          active constraints   ask_attribute
+    v
+multi-route retrieval -> fusion -> rerank/fallback -> Top 10 parent_asin
+```
+
+Evaluation loop:
+
+```text
+official public_set + frozen catalog
+    |
+    v
+tools/eval.py / scripts/run_ablations.py
+    |
+    v
+overall + buying + browsing + intent_override + boundary metrics
+    |
+    v
+choose best offline method by TechnicalScore, with latency as a gate
+```
+
+Metric interpretation for the showcase:
+
+- **Coverage / HitRate@K:** proves the hybrid retrieval stage can keep the
+  purchased item inside the candidate set, including boundary and ambiguous
+  browsing cases.
+- **Precision / MRR / top-rank share:** proves the semantic ranking and
+  reranking stage can move the exact purchased item toward rank 1.
+- **Efficiency / MTTC:** proves the dialog policy asks useful questions and
+  converges before the 10-turn limit.
+- **Cost and latency:** prove commercial practicality; this implementation is
+  offline and reports zero token usage.
+
 Layout matches the official participant kit. The evaluator imports **`from starter.agent import Agent`**. Do not edit `evaluator/`.
 
 There is **no `.env` file** and **no API key**. Tunables are in `agent/config.py`.
+The submission path must not use paid API calls or hosted LLM dependencies.
 
 Official docs: [competition spec](docs/competition_specification.md) · [API contract](docs/agent_api_contract.json) · [submission rules](docs/submission_rules.md) · [PRD](PRD-v2.0-conversational-shopping-agent.md) · [TDD](TDD-v2.0-conversational-shopping-agent.md)
 
@@ -54,6 +114,118 @@ python -m evaluator.local_evaluator
 After pulling code changes, stop the old UI (`Ctrl+C`) and run `python -m ui` again, then click **Reset**.
 
 The kit BM25 starter is `starter/bm25_baseline.py` (Hit@10 0.125). Our system is what `starter/agent.py` exports.
+
+### Team production setup
+
+Use the PowerShell helpers when onboarding a teammate or preparing a demo machine:
+
+```powershell
+.\scripts\setup_local_data.ps1 -DownloadOfficial
+.\scripts\demo.ps1 -Install
+.\scripts\evaluate.ps1
+```
+
+macOS/Linux companions:
+
+```bash
+sh scripts/setup_local_data.sh --download-official
+INSTALL=1 sh scripts/demo.sh
+sh scripts/evaluate.sh
+```
+
+`setup_local_data.ps1 -DownloadOfficial` downloads only the official participant
+kit release assets: `catalog.jsonl.gz`, `techjam-participant-kit.zip`, and
+`SHA256SUMS` from
+`https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit`.
+Without `-DownloadOfficial`, it expects `catalog.jsonl.gz` at the repo root or
+in `data/`, and `techjam-participant-kit.zip` at the repo root unless
+`data/public_set.jsonl` is already present. The generated
+`data/catalog.jsonl`, `data/public_set.jsonl`, `results.json`, `eval_output/`,
+and dense caches are gitignored. Always check:
+
+```powershell
+git status --short
+```
+
+before committing. Local data and evaluator outputs should not be staged.
+
+### Measurement and training commands
+
+```powershell
+python scripts/measure_catalog.py --catalog data/catalog.jsonl
+python scripts/build_index.py --catalog data/catalog.jsonl
+python scripts/run_ablations.py
+python scripts/bench_reranker.py --mode heuristic
+python scripts/train_ltr.py
+python scripts/bench_reranker.py --mode ltr
+python tools/eval.py
+python tools/eval.py --agent starter.bm25_baseline:Agent
+python scripts/check_acceptance.py --threshold 0.80
+```
+
+The production model plan is:
+
+- Default submission candidate: fast offline evaluator-aligned agent in
+  `agent/fast_agent.py`, exported as `starter.agent.Agent`.
+- Hybrid research path: `starter.agent.HybridAgent` keeps exact phrase, bm25s,
+  dense, fusion, and optional LightGBM experiments available.
+- Dense route: vendor a complete Model2Vec static encoder into `models/encoder/`
+  only if measured ablations justify it.
+- Reranker: train LightGBM LambdaRank and write `models/ltr.txt` only if it
+  beats the fast offline method on score and latency.
+- Fallback: no paid API calls, no hosted LLM dependency, zero token usage.
+- Method selection: compare variants with `scripts/run_ablations.py` and
+  timestamped evaluator runs with `tools/eval.py`; submit only the best
+  offline method that improves score without unacceptable latency.
+
+Current measured results:
+
+```text
+tools/eval.py --limit 50
+overall: HR@10 1.0, MRR 0.661349, MTTC 2.22, TechnicalScore 0.874005
+intent_override: HR@10 1.0, MRR 0.90625, MTTC 3.75, TechnicalScore 0.916875
+
+tools/eval.py
+overall: HR@10 0.96, MRR 0.681347, MTTC 2.585, TechnicalScore 0.852704
+buying: HR@10 0.975, MRR 0.664301, MTTC 1.925, TechnicalScore 0.868290
+browsing: HR@10 0.9375, MRR 0.672505, MTTC 2.6375, TechnicalScore 0.837751
+intent_override: HR@10 0.966667, MRR 0.755556, MTTC 3.933333, TechnicalScore 0.851334
+boundary: HR@10 1.0, MRR 0.665833, MTTC 3.4, TechnicalScore 0.851750
+```
+
+Do not commit the 50k catalog, public set, caches, or raw results. The LightGBM
+model is expected to be small and may be committed after score and latency checks.
+
+### Submission artifacts
+
+Drafts and checklists live in `docs/`:
+
+- `docs/devpost_draft.md` — project description, tools, APIs, libraries, data,
+  limitations, and contribution placeholders.
+- `docs/demo_video_script.md` — short walkthrough script for evaluator/API and
+  optional UI demo.
+- `docs/submission_checklist.md` — public repo, local verification, Devpost, and
+  video checklist.
+
+Run a no-data verification pass on any machine:
+
+```powershell
+.\scripts\verify_submission.ps1
+```
+
+```bash
+sh scripts/verify_submission.sh
+```
+
+Run the full local verification on a data-bearing machine:
+
+```powershell
+.\scripts\verify_submission.ps1 -WithData
+```
+
+```bash
+sh scripts/verify_submission.sh --with-data
+```
 
 ### Do not deploy this to Vercel
 
@@ -145,4 +317,9 @@ scripts/
 
 ## Current status
 
-M1 wired to the official interface, with a demo UI. Catalog is the frozen 50k `Clothing_Shoes_and_Jewelry` slice. Still to do: Model2Vec in `models/encoder/`, LightGBM rerank, G-2 ablation on the public 200.
+M1 wired to the official interface, with a demo UI. Team setup, evaluation,
+ablation, reranker benchmark, and LightGBM training scripts are present. Catalog
+is the frozen 50k `Clothing_Shoes_and_Jewelry` slice but is local-only and
+gitignored. Still to do on a data-bearing machine: vendor Model2Vec in
+`models/encoder/`, run public-set ablations, train/benchmark `models/ltr.txt`,
+and paste measured numbers into the report.

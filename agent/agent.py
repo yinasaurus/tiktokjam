@@ -13,6 +13,7 @@ from agent.config import Config
 from agent.determinism import pin_runtime
 from agent.extract import ConstraintExtractor
 from agent.fusion import backfill_popularity, fuse
+from agent.parsing import parse_event
 from agent.question import choose_ask_attribute
 from agent.rerank import rerank
 from agent.routes.dense import DenseIndex, HashEncoder, load_encoder
@@ -102,7 +103,11 @@ class Agent:
             raise FileNotFoundError(
                 "No catalog found. Pass catalog=... or set SHOPPING_AGENT_CATALOG."
             )
-        return CatalogStore.load(path, sparse_threshold=self.config.sparse_threshold)
+        return CatalogStore.load_cached(
+            path,
+            sparse_threshold=self.config.sparse_threshold,
+            cache_dir=self.config.cache_dir,
+        )
 
     def reset(self, session_id: str, user_profile: dict | None = None) -> None:
         self._sessions[session_id] = SessionState(
@@ -146,6 +151,14 @@ class Agent:
             return self._degraded_response(session_id, top_k, "budget exhausted")
 
         state.last_utterance = user_message or ""
+        event = parse_event(user_message or "")
+        if event.kind == "override":
+            state.slots = {}
+            state.free_constraints = []
+            state.disclosed_texts = []
+            state.last_query_vec = None
+        if event.constraints:
+            state.remember_disclosures(event.constraints)
         if self.extractor.utterance_is_decline(user_message) and state.asked:
             state.mark_declined(state.asked[-1])
 
@@ -208,7 +221,10 @@ class Agent:
                 if ask not in self.config.ask_attributes:
                     ask = None
                 else:
-                    state.mark_asked(ask)
+                    if ask == "other":
+                        state.asked.append(ask)
+                    else:
+                        state.mark_asked(ask)
                     self.metrics["ask_attribute_selected"][ask] += 1
         else:
             self.metrics["budget_degradations"]["skip_question"] += 1
@@ -229,6 +245,10 @@ class Agent:
                 hits["exact_phrase"] = self.exact.retrieve(active, self.config.K_exact)
             except Exception:
                 hits["exact_phrase"] = []
+            try:
+                hits["intent_exact"] = self._intent_exact_hits(state, self.config.K_exact)
+            except Exception:
+                hits["intent_exact"] = []
         if self.config.lexical_enabled:
             try:
                 hits["lexical"] = self.lexical.retrieve(active, utterance, self.config.K_lexical)
@@ -249,6 +269,22 @@ class Agent:
             except Exception:
                 hits["dense"] = []
         return hits
+
+    def _intent_exact_hits(self, state: SessionState, k: int) -> list[tuple[str, float]]:
+        if k <= 0 or not state.disclosed_texts:
+            return []
+        scores: dict[str, float] = {}
+        for text in state.disclosed_texts:
+            asins = self.catalog.intent_constraint_to_asins.get(text)
+            if not asins:
+                continue
+            if len(asins) > 50:
+                weight = 0.25
+            else:
+                weight = 20.0 / max(len(asins), 1)
+            for asin in asins:
+                scores[asin] = scores.get(asin, 0.0) + weight
+        return sorted(scores.items(), key=lambda item: (-item[1], item[0]))[:k]
 
     def _recover_empty_pool(
         self,

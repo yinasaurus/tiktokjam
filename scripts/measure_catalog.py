@@ -20,7 +20,9 @@ def main() -> None:
     parser.add_argument("--catalog", required=True, type=Path)
     args = parser.parse_args()
 
-    store = CatalogStore.load(args.catalog)
+    print(f"loading catalog: {args.catalog}", flush=True)
+    store = CatalogStore.load_cached(args.catalog)
+    print("catalog normalised", flush=True)
     n = len(store)
     missing = Counter()
     price_none_literal = 0
@@ -30,6 +32,7 @@ def main() -> None:
 
     # Re-read raw records so we can see the literal "None" before parsing.
     opener = args.catalog.open
+    print("reading raw records for missingness", flush=True)
     with opener(encoding="utf-8") as fh:
         first = fh.read(1)
         fh.seek(0)
@@ -39,7 +42,8 @@ def main() -> None:
         else:
             records = [json.loads(line) for line in fh if line.strip()]
 
-    for rec in records:
+    print(f"measuring {len(records)} raw records", flush=True)
+    for i, rec in enumerate(records, start=1):
         if rec.get("price") == "None":
             price_none_literal += 1
         if isinstance(rec.get("details"), str):
@@ -60,6 +64,8 @@ def main() -> None:
             len(parse_string_list(rec.get("features")))
             + (1 if parse_string_list(rec.get("description")) else 0)
         )
+        if i % 10000 == 0:
+            print(f"  measured {i} records", flush=True)
 
     sparse = sum(1 for p in store.products if p.is_sparse)
     feat_desc_lens.sort()

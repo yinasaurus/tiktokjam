@@ -27,6 +27,14 @@ def choose_ask_attribute(
     ranked: list[tuple[str, float]],
     config: Config,
 ) -> str | None:
+    if (
+        config.question_strategy == "simulator_other"
+        and len(ranked) >= 2
+        and "other" in config.ask_attributes
+        and state.asked.count("other") < config.other_ask_max
+    ):
+        return "other"
+
     filled = set(state.slots.keys())
     if state.leaf_category:
         filled.add("category")
@@ -37,7 +45,7 @@ def choose_ask_attribute(
         if a not in state.asked_set()
         and a not in state.declined_set()
         and a not in filled
-        and a != "other"
+        and a not in {"other", "category", "brand"}
     ]
     if not available:
         return None

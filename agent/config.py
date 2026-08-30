@@ -34,12 +34,14 @@ class Config:
     # fusion
     rrf_k: int = 60
     w_exact: float = 1.0
+    w_intent_exact: float = 3.0
     w_lexical: float = 0.6
     w_dense: float = 0.8
     agreement_alpha: float = 0.10
     route_confidence_floor: dict[str, float] = field(
         default_factory=lambda: {
             "exact_phrase": 0.0,
+            "intent_exact": 0.0,
             "lexical": 0.0,
             "dense": 0.0,
         }
@@ -63,12 +65,15 @@ class Config:
 
     # rerank — M1 ships "heuristic"; M3 swaps in trained LTR
     rerank_mode: Literal["off", "heuristic", "ltr", "cascade"] = "heuristic"
+    ltr_model_path: str = "models/ltr.txt"
     margin_tau_high: float = 0.35
     margin_tau_low: float = 0.10
     cross_encoder_max_candidates: int = 30
     cross_encoder_enabled: bool = False
 
     # question policy
+    question_strategy: Literal["information_gain", "simulator_other"] = "simulator_other"
+    other_ask_max: int = 2
     entropy_stop_s_target: int = 3
     min_information_gain: float = 0.15
     ask_attributes: tuple[str, ...] = ALLOWED_ASK_ATTRIBUTES
@@ -86,6 +91,7 @@ class Config:
     def route_weight(self, name: str) -> float:
         return {
             "exact_phrase": self.w_exact,
+            "intent_exact": self.w_intent_exact,
             "lexical": self.w_lexical,
             "dense": self.w_dense,
         }[name]

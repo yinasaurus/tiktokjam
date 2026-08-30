@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import html
 import re
+from functools import lru_cache
 
 # Keep intra-word hyphens; drop other punctuation.
 _PUNCT_RE = re.compile(r"[^\w\s-]", flags=re.UNICODE)
@@ -47,9 +48,14 @@ HEADER_STOPLIST: frozenset[str] = frozenset(
 
 
 def strip_html(text: str) -> str:
-    return _HTML_TAG_RE.sub(" ", html.unescape(text))
+    if "<" in text:
+        text = _HTML_TAG_RE.sub(" ", text)
+    if "&" in text:
+        text = html.unescape(text)
+    return text
 
 
+@lru_cache(maxsize=200_000)
 def normalise(phrase: str) -> str:
     """Lowercase, unescape, strip punctuation except intra-word hyphen, collapse ws.
 
