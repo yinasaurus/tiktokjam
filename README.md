@@ -344,9 +344,13 @@ scripts/
 
 ## Current status
 
-M1 wired to the official interface, with a demo UI. Team setup, evaluation,
-ablation, reranker benchmark, and LightGBM training scripts are present. Catalog
-is the frozen 50k `Clothing_Shoes_and_Jewelry` slice but is local-only and
-gitignored. Still to do on a data-bearing machine: vendor Model2Vec in
-`models/encoder/`, run public-set ablations, train/benchmark `models/ltr.txt`,
-and paste measured numbers into the report.
+The current submission default is the offline fast agent exported by
+`starter.agent.Agent`. It passes the local official-data acceptance gate at
+`TechnicalScore 0.852704` with zero paid API calls. Team setup, evaluation,
+fixture CI, demo UI, ablation, reranker benchmark, and LightGBM training scripts
+are present. The frozen 50k `Clothing_Shoes_and_Jewelry` catalog remains
+local-only and gitignored.
+
+Dense retrieval, Model2Vec vendoring, and `models/ltr.txt` training are optional
+research paths now. Enable them for submission only if measured ablations beat
+the fast offline default without unacceptable startup or per-turn latency.

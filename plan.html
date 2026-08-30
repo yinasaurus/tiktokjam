@@ -366,26 +366,26 @@ submit best offline method only</code></pre>
       <h2>What Is Lacking</h2>
       <div class="grid">
         <div>
-          <h3><span class="p0">P0</span> Reproduction Inputs</h3>
+          <h3><span class="p0">P0</span> Final Submission Inputs</h3>
           <ul>
-            <li><strong>Full catalog absent:</strong> this checkout only has <code>data/README.md</code>. The 50k <code>data/catalog.jsonl</code> is needed for real scoring.</li>
-            <li><strong>Public set absent:</strong> <code>data/public_set.jsonl</code> is required for the 200-session evaluator.</li>
-            <li><strong>Encoder absent:</strong> <code>models/encoder/</code> contains only a README, so dense retrieval falls back to a test-only hash encoder on tiny catalogs and is effectively not production-ready.</li>
-            <li><strong>No trained ranker:</strong> <code>models/ltr.txt</code> is not present; <code>Config.rerank_mode</code> currently uses the heuristic path.</li>
+            <li><strong>Submission text needs final human fields:</strong> team names, contribution split, YouTube URL, and any final latency note still need to be pasted into Devpost.</li>
+            <li><strong>Final data gate is local-only:</strong> the official 50k catalog and public sessions are downloaded locally, verified, and gitignored. Any teammate running the final gate must run setup first.</li>
+            <li><strong>Demo video still needs recording:</strong> the UI and script exist; the final YouTube link is the remaining deliverable artifact.</li>
+            <li><strong>Optional model paths are not submission blockers:</strong> Model2Vec and LightGBM stay research-only unless they beat the current offline default.</li>
           </ul>
         </div>
         <div>
-          <h3><span class="p1">P1</span> Scoring and Demo Gaps</h3>
+          <h3><span class="p1">P1</span> Score Upside / Polish</h3>
           <ul>
-            <li><strong>No current public-set score:</strong> G-2 ablation and full-system TechnicalScore are still TBD.</li>
-            <li><strong>No ablation runner:</strong> TDD references <code>scripts/run_ablations.py</code>, but the file is not in this repo yet.</li>
-            <li><strong>No reranker benchmark:</strong> TDD references <code>scripts/bench_reranker.py</code>, also not present yet.</li>
-            <li><strong>Demo is local-only:</strong> useful for videos and teammates, but not deployable to Vercel as written because it loads catalog/state in a long-running Python process.</li>
+            <li><strong>Current public-set score is known:</strong> <code>TechnicalScore 0.852704</code> on all 200 public sessions; the <code>0.80</code> gate passes.</li>
+            <li><strong>Ablation and benchmark scripts exist:</strong> <code>scripts/run_ablations.py</code>, <code>scripts/bench_reranker.py</code>, and <code>tools/eval.py</code> are available for further experiments.</li>
+            <li><strong>Hosted CI exists:</strong> GitHub Actions runs unit tests, compile, fixture smoke, and a synthetic fixture-customer gate.</li>
+            <li><strong>Demo remains local by design:</strong> use <code>python -m ui --fixture</code> for instant video setup or <code>python -m ui</code> for official-catalog mode.</li>
           </ul>
         </div>
       </div>
       <div class="callout">
-        The most important missing piece is not UI. It is reproducible local evaluation on the real 50k catalog with the public 200 sessions, then a measured ranker improvement.
+        The current safest submission is the offline fast agent. Further dense/LTR work is upside only: ship it only if measured ablations beat 0.852704 without hurting latency or reliability.
       </div>
     </section>
 
@@ -644,9 +644,9 @@ python scripts/check_determinism.py</code></pre>
       <div class="phase">
         <div class="phase-title"><span>Phase 5: Demo and Team Handoff</span><span>Owner: product/demo</span></div>
         <ul>
-          <li>Add one-command launch: <code>scripts/demo.ps1</code> that checks data, installs deps if needed, runs tests, starts <code>python -m ui</code>, and prints the URL.</li>
-          <li>Add demo seed sessions: a few curated prompts for navy cotton shirts, black leather boots, running shorts, intent override, and no-preference boundary behavior.</li>
-          <li>Add a teammate smoke command that runs on fixture data when official data is missing, so onboarding does not block on downloads.</li>
+          <li><span class="ok">Done:</span> one-command launch via <code>scripts/demo.ps1</code> and <code>scripts/demo.sh</code>.</li>
+          <li><span class="ok">Done:</span> instant UI walkthrough mode via <code>python -m ui --fixture</code>, <code>.\scripts\demo.ps1 -Fixture</code>, or <code>FIXTURE=1 sh scripts/demo.sh</code>.</li>
+          <li><span class="ok">Done:</span> demo script includes curated prompts for search, override, and no-preference behavior.</li>
         </ul>
       </div>
     </section>
@@ -664,7 +664,7 @@ python scripts/check_determinism.py</code></pre>
         <tbody>
           <tr>
             <td>Fast teammate launch</td>
-            <td>Create <code>scripts/demo.ps1</code> and <code>scripts/evaluate.ps1</code>.</td>
+            <td>Use <code>scripts/demo.ps1</code>, <code>scripts/demo.sh</code>, <code>scripts/evaluate.ps1</code>, and <code>scripts/evaluate.sh</code>.</td>
             <td>Team members can start UI and evaluator without memorizing commands.</td>
           </tr>
           <tr>
@@ -674,7 +674,7 @@ python scripts/check_determinism.py</code></pre>
           </tr>
           <tr>
             <td>Clear visual proof</td>
-            <td>UI should show session id, turn count, ask attribute, top 10 products, and matched constraints.</td>
+            <td>UI shows chat, turn behavior through the API, selected ask attribute, and a Top 10 product panel with metadata.</td>
             <td>Judges and teammates can see agent behavior rather than just chat text.</td>
           </tr>
           <tr>
@@ -719,7 +719,7 @@ python scripts/check_determinism.py</code></pre>
           </tr>
           <tr>
             <td>Final verification</td>
-            <td><code>scripts/verify_submission.ps1</code> runs tests, compile, fixture smoke, and optional full data evaluation.</td>
+            <td><code>scripts/verify_submission.ps1</code> and <code>scripts/verify_submission.sh</code> run tests, compile, fixture smoke, synthetic customer gate, and optional full data evaluation.</td>
             <td>Run <code>.\scripts\verify_submission.ps1 -WithData</code> on a data-bearing machine before submission.</td>
           </tr>
         </tbody>
@@ -731,21 +731,21 @@ python scripts/check_determinism.py</code></pre>
       <ul>
         <li><span class="ok">Done now:</span> official <code>Agent</code> interface, local UI, fixture unit tests, defensive degradation path, ignored local data paths.</li>
         <li><span class="ok">Measured:</span> full public-set acceptance score is 0.852704 with zero paid API calls.</li>
-        <li><span class="p0">Must finish:</span> final clean verification, push to main, PostPlan upload, and submission text/video polishing.</li>
-        <li><span class="p1">Should finish:</span> LightGBM ranker, latency benchmark, demo scripts, report numbers, clean-checkout verification.</li>
-        <li><span class="p2">Could finish:</span> richer UI explanations, ngrok demo checklist, optional trained-model comparison appendix.</li>
+        <li><span class="ok">Done now:</span> GitHub Actions fixture CI, synthetic customer gate, PowerShell helpers, and macOS/Linux shell companions.</li>
+        <li><span class="p0">Must finish:</span> final Devpost paste, public YouTube demo link, and last clean <code>-WithData</code> verification before submission.</li>
+        <li><span class="p1">Should finish:</span> concise latency note and final report polish using the measured 0.852704 score.</li>
+        <li><span class="p2">Could finish:</span> optional dense/LTR comparison appendix only if it beats the current default.</li>
       </ul>
     </section>
 
     <section>
       <h2>Immediate Next Actions</h2>
       <ol>
-        <li>Get <code>catalog.jsonl.gz</code> and <code>techjam-participant-kit.zip</code> locally, then create <code>data/catalog.jsonl</code> and <code>data/public_set.jsonl</code>.</li>
-        <li>Run <code>python -m evaluator.local_evaluator</code> and capture the current public-set baseline for this repo.</li>
-        <li>Vendor Model2Vec into <code>models/encoder/</code>; verify no single file exceeds 100 MiB.</li>
-        <li>Add <code>scripts/run_ablations.py</code> and record full versus exact-phrase-disabled score.</li>
-        <li>Train and benchmark LightGBM only after the dense route and ablation floor are measured.</li>
-        <li>Create teammate scripts and update README with exact commands for setup, demo, evaluation, and troubleshooting.</li>
+        <li>Run <code>.\scripts\verify_submission.ps1 -WithData</code> once more on the data-bearing machine before submission.</li>
+        <li>Record the demo using <code>.\scripts\demo.ps1 -Fixture</code> for instant UI flow plus <code>.\scripts\evaluate.ps1</code> for real metrics.</li>
+        <li>Paste <code>docs/devpost_draft.md</code> into Devpost, add team names/contributions, and link the public YouTube video.</li>
+        <li>Confirm GitHub Actions remains green on <code>main</code> and <code>git status --short</code> shows no staged data or secrets.</li>
+        <li>Only spend extra time on Model2Vec/LightGBM if it can be measured quickly and beats the current 0.852704 default.</li>
       </ol>
     </section>
   </main>

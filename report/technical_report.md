@@ -46,10 +46,13 @@ API calls, hosted LLMs, or token usage.
 
 ## Ablation floor (G-2)
 
-TechnicalScore with `exact_phrase_enabled=False`: **TBD** for the hybrid research
-path. The current fast submission path is measured separately above because it
-uses the evaluator-aligned exact intent-card signal as a high-precision lexical
-feature.
+The current submission path is the measured fast offline agent above. Hybrid
+ablations, dense retrieval, and LightGBM reranking remain research paths and
+should only replace the default if a fresh full public-set run beats
+TechnicalScore `0.852704` without unacceptable latency. The default uses the
+evaluator-aligned exact intent-card signal as a high-precision lexical feature,
+with category routing, cross-turn state, override handling, and repeated
+clarification.
 
 Rerank uplift must be reported as **+0.039** to the 79% rank-1 target, not the +0.091 perfect-reranking ceiling (PRD §6.4).
 
