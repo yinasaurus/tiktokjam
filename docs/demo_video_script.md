@@ -2,6 +2,8 @@
 
 Target length: 2 to 4 minutes.
 
+Use `docs/youtube_description.md` for the upload title and description.
+
 ## 1. Opening
 
 Show the repo and explain the task:

@@ -88,6 +88,7 @@ Real score output for the video:
 ```
 
 Use `docs/demo_video_script.md` as the voiceover outline.
+Use `docs/youtube_description.md` as the upload title/description template.
 
 ## Devpost Paste Order
 
