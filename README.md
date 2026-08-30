@@ -1,5 +1,7 @@
 # Conversational Shopping Agent
 
+[![CI](https://github.com/yinasaurus/tiktokjam/actions/workflows/ci.yml/badge.svg)](https://github.com/yinasaurus/tiktokjam/actions/workflows/ci.yml)
+
 TikTok TechJam 2026, Track 4. Offline multi-turn **search agent** that finds a hidden catalog product within 10 turns.
 
 This is **not** a general chatbot. The customer says what they want; we return 10 product IDs and maybe ask one attribute. Judges score those IDs, not the webpage.
@@ -180,6 +182,7 @@ python scripts/bench_reranker.py --mode ltr
 python tools/eval.py
 python tools/eval.py --agent starter.bm25_baseline:Agent
 python scripts/check_acceptance.py --threshold 0.80
+python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
 ```
 
 The production model plan is:
@@ -196,6 +199,11 @@ The production model plan is:
 - Method selection: compare variants with `scripts/run_ablations.py` and
   timestamped evaluator runs with `tools/eval.py`; submit only the best
   offline method that improves score without unacceptable latency.
+
+CI runs on GitHub Actions with committed fixture data only: unit tests, compile
+checks, smoke session, and `scripts/synthetic_customer_gate.py`. The real
+release gate is still local because the official 50k catalog and public sessions
+are gitignored: `python scripts/check_acceptance.py --threshold 0.80`.
 
 Current measured results:
 

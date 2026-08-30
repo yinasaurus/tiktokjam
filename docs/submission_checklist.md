@@ -11,7 +11,9 @@
   `eval_output/`, caches, `.env`, and credentials are not committed.
 - [ ] No paid API call is required for setup, evaluation, demo, or submission.
 - [ ] Best submitted method is chosen from measured ablations, not intuition.
-- [ ] Internal acceptance check reaches `recommended_technical_score >= 0.80`.
+- [ ] GitHub Actions fixture CI is green.
+- [ ] Local official-data acceptance check reaches
+  `recommended_technical_score >= 0.80`.
 - [ ] `models/encoder/` contains only acceptable model artifacts under platform
   limits, or the README clearly describes local setup.
 - [ ] `models/ltr.txt` is committed only after measured score and latency
@@ -26,6 +28,7 @@ python -m pytest tests -q
 python -m compileall agent scripts evaluator ui -q
 .\scripts\setup_local_data.ps1
 .\scripts\evaluate.ps1
+python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
 python scripts/run_ablations.py
 python scripts/bench_reranker.py --mode heuristic
 python scripts/check_acceptance.py --threshold 0.80

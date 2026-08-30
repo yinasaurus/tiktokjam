@@ -18,6 +18,7 @@ PYTHON="python3"
 "$PYTHON" -m pytest tests -q
 "$PYTHON" -m compileall agent scripts tools evaluator ui -q
 "$PYTHON" scripts/smoke_session.py
+"$PYTHON" scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
 
 if [ "$WITH_DATA" -eq 1 ]; then
   [ -f data/catalog.jsonl ] || { echo "Missing data/catalog.jsonl" >&2; exit 1; }

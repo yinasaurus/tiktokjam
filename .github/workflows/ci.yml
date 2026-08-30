@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Unit tests
+        run: python -m pytest tests -q
+
+      - name: Compile modules
+        run: python -m compileall agent scripts tools starter tests ui -q
+
+      - name: Fixture smoke session
+        run: python scripts/smoke_session.py
+
+      - name: Synthetic fixture customer gate
+        run: python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100

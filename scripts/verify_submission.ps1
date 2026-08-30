@@ -22,6 +22,9 @@ Write-Host "Compiling Python modules"
 Write-Host "Running fixture smoke session"
 & $Python scripts/smoke_session.py
 
+Write-Host "Running synthetic fixture customer gate"
+& $Python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
+
 if ($WithData) {
     if (-not (Test-Path "data\catalog.jsonl") -or -not (Test-Path "data\public_set.jsonl")) {
         throw "WithData requested but data\catalog.jsonl or data\public_set.jsonl is missing."
