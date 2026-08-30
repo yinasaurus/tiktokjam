@@ -85,8 +85,23 @@
     form {
       display: flex;
       gap: 8px;
-      padding: 12px 16px 16px;
+      padding: 8px 16px 16px;
       border-top: 1px solid var(--line);
+    }
+    .presets {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 0;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+    }
+    .preset {
+      background: var(--chip);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 7px 9px;
+      font-size: 0.78rem;
+      white-space: nowrap;
     }
     input[type="text"] {
       flex: 1;
@@ -174,6 +189,13 @@
       <section class="panel">
         <h2>Chat</h2>
         <div id="log"></div>
+        <div class="presets" aria-label="Demo prompts">
+          <button class="preset" type="button" data-prompt="navy cotton t-shirts">Buying</button>
+          <button class="preset" type="button" data-prompt="I'm looking for Men Shorts, but I'm still exploring.">Browsing</button>
+          <button class="preset" type="button" data-prompt="I'm looking for Men Accessories. cotton.">Override 1</button>
+          <button class="preset" type="button" data-prompt="Actually, ignore my earlier preference. What I need is: leather.">Override 2</button>
+          <button class="preset" type="button" data-prompt="I don't have a preference for color; please use your judgment.">Boundary</button>
+        </div>
         <form id="form">
           <button class="ghost" type="button" id="reset">Reset</button>
           <input id="box" type="text" placeholder="e.g. navy cotton t-shirts" autocomplete="off" />
@@ -296,6 +318,10 @@
       const text = box.value.trim();
       if (!text) return;
       box.value = "";
+      await sendTurn(text);
+    });
+
+    async function sendTurn(text) {
       bubble(text, "you");
       const res = await fetch("/api/turn", {
         method: "POST",
@@ -310,6 +336,13 @@
       const extra = data.ask_attribute ? "" : "";
       bubble(data.message || "Here are some options.", "bot");
       renderCards(data.recommendations);
+    }
+
+    document.querySelectorAll(".preset").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (!ready) return;
+        await sendTurn(button.dataset.prompt || "");
+      });
     });
 
     document.getElementById("reset").addEventListener("click", reset);

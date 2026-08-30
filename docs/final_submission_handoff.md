@@ -49,6 +49,10 @@ Fast UI flow:
 .\scripts\demo.ps1 -Fixture
 ```
 
+Use the preset buttons in the chat panel for a quick walkthrough of buying,
+browsing, override, and boundary-style messages. For override, click `Reset`,
+then `Override 1`, then `Override 2`.
+
 Official-catalog UI flow:
 
 ```powershell

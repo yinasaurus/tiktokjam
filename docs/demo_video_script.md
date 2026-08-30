@@ -72,7 +72,7 @@ For a quick UI-only recording pass, use:
 The fixture mode is not scored; it exists so the visual walkthrough starts
 instantly. Use `.\scripts\evaluate.ps1` for the real 50k-catalog score.
 
-Use short prompts:
+Use short prompts or the preset buttons:
 
 - `navy cotton t-shirts`
 - `black leather boots`
@@ -83,6 +83,8 @@ Use short prompts:
   `I don't have a preference for color; please use your judgment.`
 
 Show that the right panel returns ranked product IDs and metadata.
+For fixture-mode recording, click `Reset`, then use `Override 1` followed by
+`Override 2` to show an intent change inside the same category.
 
 ## 6. Close
 
