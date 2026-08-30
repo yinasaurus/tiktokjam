@@ -254,6 +254,26 @@ Run the full local verification on a data-bearing machine:
 sh scripts/verify_submission.sh --with-data
 ```
 
+Run optional research checks separately:
+
+```powershell
+.\scripts\verify_submission.ps1 -WithData -WithResearch
+```
+
+```bash
+sh scripts/verify_submission.sh --with-data --with-research
+```
+
+Build a tracked-file-only zip after `git status --short` is clean:
+
+```powershell
+.\scripts\package_submission.ps1
+```
+
+```bash
+sh scripts/package_submission.sh
+```
+
 ### Do not deploy this to Vercel
 
 Vercel is for serverless functions. It looks for a Flask/FastAPI `app`. Our demo is `python -m ui` — a long-running local server that loads **50,000 products into RAM** and keeps chat state in memory.

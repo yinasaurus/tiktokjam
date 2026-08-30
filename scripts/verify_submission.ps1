@@ -1,6 +1,7 @@
 param(
     [switch]$WithData,
-    [switch]$WithLtr
+    [switch]$WithLtr,
+    [switch]$WithResearch
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,7 +18,7 @@ Write-Host "Running unit tests"
 & $Python -m pytest tests -q
 
 Write-Host "Compiling Python modules"
-& $Python -m compileall agent scripts evaluator ui -q
+& $Python -m compileall agent scripts tools starter tests evaluator ui -q
 
 Write-Host "Running fixture smoke session"
 & $Python scripts/smoke_session.py
@@ -29,12 +30,16 @@ if ($WithData) {
     if (-not (Test-Path "data\catalog.jsonl") -or -not (Test-Path "data\public_set.jsonl")) {
         throw "WithData requested but data\catalog.jsonl or data\public_set.jsonl is missing."
     }
-    Write-Host "Running public-set evaluation"
-    & $Python -m evaluator.local_evaluator --catalog data\catalog.jsonl --dataset data\public_set.jsonl --output results.json
-    Write-Host "Running ablations"
-    & $Python scripts/run_ablations.py
-    Write-Host "Benchmarking heuristic reranker"
-    & $Python scripts/bench_reranker.py --mode heuristic
+    Write-Host "Running official-data acceptance gate"
+    & $Python scripts/check_acceptance.py --threshold 0.80
+
+    if ($WithResearch) {
+        Write-Host "Running optional ablations"
+        & $Python scripts/run_ablations.py
+        Write-Host "Benchmarking heuristic reranker"
+        & $Python scripts/bench_reranker.py --mode heuristic
+    }
+
     if ($WithLtr) {
         if (-not (Test-Path "models\ltr.txt")) {
             throw "WithLtr requested but models\ltr.txt is missing."

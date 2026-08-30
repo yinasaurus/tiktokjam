@@ -18,6 +18,8 @@
   limits, or the README clearly describes local setup.
 - [ ] `models/ltr.txt` is committed only after measured score and latency
   improvement.
+- [ ] Submission archive, if used, is built from tracked files only with
+  `scripts/package_submission.ps1` or `scripts/package_submission.sh`.
 
 ## Local Verification
 
@@ -29,11 +31,17 @@ python -m compileall agent scripts evaluator ui -q
 .\scripts\setup_local_data.ps1
 .\scripts\evaluate.ps1
 python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100
-python scripts/run_ablations.py
-python scripts/bench_reranker.py --mode heuristic
 python scripts/check_acceptance.py --threshold 0.80
 python scripts/check_determinism.py
 git status --short
+```
+
+Optional research checks:
+
+```powershell
+python scripts/run_ablations.py
+python scripts/bench_reranker.py --mode heuristic
+.\scripts\verify_submission.ps1 -WithData -WithResearch
 ```
 
 If `models/ltr.txt` exists:

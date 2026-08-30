@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -10,16 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent.agent import Agent
-from agent.config import Config
 from agent.types import asins_of
+from starter.agent import Agent
 
 FIXTURE = ROOT / "tests" / "fixtures" / "catalog.jsonl"
 
 
 def main() -> None:
-    records = [json.loads(line) for line in FIXTURE.read_text(encoding="utf-8").splitlines() if line]
-    agent = Agent(catalog=records, config=Config(lexical_enabled=False))
+    agent = Agent(FIXTURE)
     agent.reset("demo", {"note": "fixture smoke"})
     turns = [
         "I'm looking for navy cotton t-shirts",
@@ -34,8 +31,8 @@ def main() -> None:
         print("message:", out["message"])
         print("recommendations:")
         for asin in asins_of(out):
-            product = agent.catalog.get(asin)
-            title = product.title if product else "?"
+            product = agent.products.get(asin)
+            title = product.get("title") if product else "?"
             print(f"  {asin}  {title}")
 
 
