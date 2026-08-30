@@ -15,7 +15,7 @@ git log -1 --oneline
 Current latest checked commit:
 
 ```text
-95de9ed test(ui): cover demo preset prompts
+3bb92b1 ci: enforce repository hygiene checks
 ```
 
 Public GitHub repository:
@@ -62,7 +62,7 @@ TechnicalScore: 0.852704
 Latest local package after the last rebuild:
 
 ```text
-dist\techjam-track4-submission-95de9ed.zip
+dist\techjam-track4-submission-3bb92b1.zip
 ```
 
 ## Demo Recording
