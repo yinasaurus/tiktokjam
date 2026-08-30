@@ -12,10 +12,10 @@ git status --short
 git log -1 --oneline
 ```
 
-Current latest checked commit:
+Latest checked commit when this handoff section was last updated:
 
 ```text
-3bb92b1 ci: enforce repository hygiene checks
+4133c16 docs: refresh final package reference
 ```
 
 Public GitHub repository:
@@ -59,11 +59,14 @@ MTTC: 2.585000
 TechnicalScore: 0.852704
 ```
 
-Latest local package after the last rebuild:
+The package script writes a commit-specific zip:
 
 ```text
-dist\techjam-track4-submission-3bb92b1.zip
+dist\techjam-track4-submission-<commit>.zip
 ```
+
+Use the filename printed by `scripts/package_submission.ps1` or
+`scripts/package_submission.sh` after the final `git pull`.
 
 ## Demo Recording
 
