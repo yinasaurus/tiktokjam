@@ -274,6 +274,12 @@ Build a tracked-file-only zip after `git status --short` is clean:
 sh scripts/package_submission.sh
 ```
 
+Print the current live handoff status at any time:
+
+```powershell
+python scripts\final_status.py
+```
+
 ### Do not deploy this to Vercel
 
 Vercel is for serverless functions. It looks for a Flask/FastAPI `app`. Our demo is `python -m ui` — a long-running local server that loads **50,000 products into RAM** and keeps chat state in memory.

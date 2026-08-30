@@ -10,6 +10,7 @@ Use the latest pushed `main`. Verify before packaging:
 git pull origin main
 git status --short
 git log -1 --oneline
+python scripts\final_status.py
 ```
 
 Public GitHub repository:
