@@ -153,6 +153,21 @@ git status --short
 
 before committing. Local data and evaluator outputs should not be staged.
 
+Optional local speed-up for repeated experiments:
+
+```powershell
+$env:TECHJAM_FAST_CACHE = "1"
+python scripts\check_acceptance.py --threshold 0.80
+```
+
+```bash
+TECHJAM_FAST_CACHE=1 sh scripts/evaluate.sh
+```
+
+This writes derived indexes under `cache/`, which is gitignored. The submitted
+agent does not require the cache; it rebuilds from `data/catalog.jsonl` when the
+environment variable is absent.
+
 ### Measurement and training commands
 
 ```powershell

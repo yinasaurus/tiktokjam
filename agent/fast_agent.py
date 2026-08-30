@@ -9,8 +9,10 @@ external services.
 from __future__ import annotations
 
 import json
-import random
+import os
+import pickle
 import re
+import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -25,6 +27,7 @@ MATERIAL_RE = re.compile(r"\b(cotton|polyester|nylon|leather|wool|spandex|silk|r
 COLOR_RE = re.compile(r"\b(black|white|blue|red|pink|green|brown|gray|grey|purple|yellow|orange)\b", re.I)
 WORD_RE = re.compile(r"[a-z0-9]+", re.I)
 ASK_PLAN = ("other", "other", "material", "color", "budget", "style", "feature", "use_case", "size")
+FAST_CACHE_VERSION = "fast-agent-v1"
 
 
 def _flatten_values(value: object) -> list[str]:
@@ -52,25 +55,25 @@ def searchable_text(product: dict) -> str:
     return " ".join(parts).strip()
 
 
-def intent_card(product: dict, limit: int = 180) -> dict:
+def intent_card(product: dict, limit: int = 180, corpus: str | None = None) -> dict:
     title = _clean_constraint(str(product.get("title") or "product"), limit)
     candidates = [*_flatten_values(product.get("features")), *_flatten_values(product.get("details"))]
-    corpus = searchable_text(product)
-    material = MATERIAL_RE.search(corpus)
-    color = COLOR_RE.search(corpus)
+    search_blob = searchable_text(product) if corpus is None else corpus
+    material = MATERIAL_RE.search(search_blob)
+    color = COLOR_RE.search(search_blob)
     if material:
         candidates.insert(0, material.group(1).lower())
     if color:
         candidates.insert(1, f"color: {color.group(1).lower()}")
     if product.get("price") not in (None, ""):
         candidates.append(f"budget around ${product['price']}")
-    cleaned = list(
-        dict.fromkeys(
-            _clean_constraint(item, limit)
-            for item in candidates
-            if _clean_constraint(item, limit)
-        )
-    )
+    cleaned = []
+    seen = set()
+    for item in candidates:
+        value = _clean_constraint(item, limit)
+        if value and value not in seen:
+            seen.add(value)
+            cleaned.append(value)
     if not cleaned:
         cleaned = [title]
     return {
@@ -94,13 +97,67 @@ def coarse_category(values: list[str]) -> str:
 class Agent:
     def __init__(self, catalog_path: str | Path = "data/catalog.jsonl") -> None:
         self.catalog_path = Path(catalog_path)
+        self.cache_enabled = os.environ.get("TECHJAM_FAST_CACHE") == "1"
         self.products: dict[str, dict[str, Any]] = {}
         self.tokens: dict[str, set[str]] = {}
         self.by_category: dict[str, list[str]] = defaultdict(list)
         self.by_constraint: dict[str, set[str]] = defaultdict(set)
         self.popularity: list[str] = []
-        self._load_catalog()
+        if not self.cache_enabled or not self._load_cache():
+            self._load_catalog()
+            if self.cache_enabled:
+                self._save_cache()
         self.sessions: dict[str, dict[str, Any]] = {}
+
+    def _cache_path(self) -> Path | None:
+        try:
+            stat = self.catalog_path.stat()
+        except OSError:
+            return None
+        key = f"{FAST_CACHE_VERSION}:{self.catalog_path.resolve()}:{stat.st_size}:{stat.st_mtime_ns}"
+        import hashlib
+
+        digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+        return Path("cache") / f"{digest}.fast.pkl"
+
+    def _load_cache(self) -> bool:
+        path = self._cache_path()
+        if path is None or not path.exists():
+            return False
+        try:
+            with path.open("rb") as handle:
+                payload = pickle.load(handle)
+            if payload.get("version") != FAST_CACHE_VERSION:
+                return False
+            self.products = payload["products"]
+            self.tokens = payload["tokens"]
+            self.by_category = defaultdict(list, payload["by_category"])
+            self.by_constraint = defaultdict(set, payload["by_constraint"])
+            self.popularity = payload["popularity"]
+            return True
+        except Exception:
+            return False
+
+    def _save_cache(self) -> None:
+        path = self._cache_path()
+        if path is None:
+            return
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(f".{time.time_ns()}.tmp")
+            payload = {
+                "version": FAST_CACHE_VERSION,
+                "products": self.products,
+                "tokens": self.tokens,
+                "by_category": dict(self.by_category),
+                "by_constraint": dict(self.by_constraint),
+                "popularity": self.popularity,
+            }
+            with tmp.open("wb") as handle:
+                pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            tmp.replace(path)
+        except Exception:
+            return
 
     def _load_catalog(self) -> None:
         popularity_rows: list[tuple[int, float, str]] = []
@@ -115,7 +172,7 @@ class Agent:
                 self.tokens[pid] = set(WORD_RE.findall(text))
                 bucket = coarse_category([str(v) for v in product.get("categories") or []])
                 self.by_category[bucket].append(pid)
-                card = intent_card(product)
+                card = intent_card(product, corpus=text)
                 for phrase in [*card["hard_constraints"], *card["soft_preferences"]]:
                     if phrase:
                         self.by_constraint[str(phrase)].add(pid)
