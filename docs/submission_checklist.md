@@ -20,6 +20,8 @@
   improvement.
 - [ ] Submission archive, if used, is built from tracked files only with
   `scripts/package_submission.ps1` or `scripts/package_submission.sh`.
+- [ ] `docs/final_submission_handoff.md` has the current commit and final
+  command sequence.
 
 ## Local Verification
 
@@ -27,7 +29,7 @@ Run before submission:
 
 ```powershell
 python -m pytest tests -q
-python -m compileall agent scripts evaluator ui -q
+python -m compileall agent scripts tools starter tests evaluator ui -q
 .\scripts\setup_local_data.ps1
 .\scripts\evaluate.ps1
 python scripts/synthetic_customer_gate.py --threshold 0.80 --trials 100

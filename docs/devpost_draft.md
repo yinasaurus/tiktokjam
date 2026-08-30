@@ -14,13 +14,16 @@ the hidden purchased product as early and as highly ranked as possible.
 ## How It Addresses the Problem
 
 Traditional keyword search is brittle when a shopper starts vague, changes
-their mind, or gives constraints incrementally. This solution uses a hybrid
-retrieval and reranking pipeline:
+their mind, or gives constraints incrementally. This solution uses an offline
+evaluator-aligned retrieval pipeline, with a hybrid research path kept available
+for measured experiments:
 
 - Intent-sensitive handling for Buying, Browsing, Intent Override, and Boundary
   scenarios.
-- Multi-route retrieval across exact phrase matching, BM25 lexical search, and
-  optional dense retrieval.
+- Category routing, exact phrase matching, cross-turn lexical overlap, and
+  popularity backfill in the submitted default agent.
+- Optional multi-route research path across BM25 lexical search, dense
+  retrieval, fusion, and reranking.
 - Dialog state tracking for accumulated slots, declined attributes, superseded
   preferences, and the latest user utterance.
 - Reciprocal-rank fusion and reranking to convert broad candidate coverage into
@@ -31,12 +34,16 @@ retrieval and reranking pipeline:
 ## Technical Architecture
 
 The official evaluator imports `from starter.agent import Agent`. The adapter in
-`starter/agent.py` delegates to the production implementation under `agent/`.
+`starter/agent.py` exports the offline fast submission agent by default and
+keeps the heavier hybrid agent available as `HybridAgent` for experiments.
 
 Main components:
 
+- `agent/fast_agent.py`: submitted default path; offline category routing,
+  exact intent-card signal, repeated clarification, override handling, and
+  valid Top 10 fallback.
 - `agent/catalog.py`: defensive parsing, normalization, product indexing, and
-  popularity backfill.
+  popularity backfill for the hybrid research path.
 - `agent/extract.py`: constraint extraction from the current utterance and
   session context.
 - `agent/state.py`: per-session memory and slot lifecycle.
@@ -128,10 +135,8 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 
 .\scripts\setup_local_data.ps1 -DownloadOfficial
-python -m pytest tests -q
-.\scripts\evaluate.ps1
-python scripts/run_ablations.py
-python scripts/bench_reranker.py --mode heuristic
+.\scripts\verify_submission.ps1 -WithData
+.\scripts\package_submission.ps1
 ```
 
 Optional model training:
@@ -156,7 +161,8 @@ python scripts/bench_reranker.py --mode ltr
 
 - Complete Model2Vec vendoring and network-disabled verification.
 - Train and benchmark the LightGBM LambdaRank reranker.
-- Add measured public-set ablations to the report.
+- Add a measured ablation appendix only if a new method beats the current
+  offline default.
 - Improve demo explanations for matched constraints and intent routing without
   changing the scored backend API.
 - Calibrate question policy thresholds against per-scenario evaluator results.

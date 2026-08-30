@@ -1,6 +1,4 @@
-# Technical report (draft)
-
-TikTok TechJam 2026, Track 4. Fill during M5. Do not invent numbers — paste from `scripts/run_ablations.py` and the isolated reranker bench.
+# Technical report
 
 ## Who this is for
 
@@ -8,13 +6,25 @@ A shopper who knows roughly what they want, cannot phrase it as a keyword query,
 
 ## Architecture
 
-See TDD §1. Six components plus a deadline guard. Three independent retrieval routes (exact-phrase, bm25s, dense brute-force numpy). No ANN. No evaluator imports.
+The submitted default is `starter.agent.Agent`, backed by
+`agent/fast_agent.py`. It loads the frozen catalog locally, builds category,
+token, exact-constraint, and popularity indexes in memory, then maintains
+per-session state for category routing, repeated clarification, intent override,
+and Top 10 fallback.
+
+The heavier hybrid path remains available as `starter.agent.HybridAgent` for
+experiments with BM25, dense retrieval, fusion, and LightGBM reranking. It is
+not the submitted default because it has not beaten the measured fast offline
+score under the same reliability and latency constraints.
 
 ## Model choice
 
-Default encoder: Model2Vec static (`potion-retrieval-32M` class) — torch-free, sub-second 50k encode, weights well under 100 MiB. Escalate to ONNX-int8 MiniLM only if dense-route Recall@50 trails MiniLM by more than 3 points on the holdout (TDD D1).
+Submitted default: no hosted model, no paid API, no external vector database,
+no model artifact required, zero token usage.
 
-Reranker: LightGBM LambdaRank as the default path. Cross-encoder is gated and must earn its place on an isolated p95 < 150 ms bench (TDD D2). Until that model is trained, a linear heuristic over the same features ships so the cascade structure is real.
+Optional research only: vendor a Model2Vec static encoder or train LightGBM
+LambdaRank if fresh ablations beat TechnicalScore `0.852704` without
+unacceptable startup or per-turn latency.
 
 ## Cost, latency, tokens
 
@@ -58,7 +68,9 @@ Rerank uplift must be reported as **+0.039** to the 79% rank-1 target, not the +
 
 ## What generalises
 
-Zero marginal cost, no API dependency, sub-second CPU, no GPU. The same pipeline runs on a phone or a commodity box.
+Zero marginal cost, no API dependency, CPU-only runtime, no GPU. Startup builds
+in-memory indexes over the 50k catalog, so local launch time depends on machine
+and disk speed; per-turn responses avoid hosted services and token spend.
 
 ## What does not
 
