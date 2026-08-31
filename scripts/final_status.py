@@ -14,14 +14,20 @@ MAIN_POSTPLAN_URL = "https://mj4gkxs69b24.postplan.dev"
 STATUS_POSTPLAN_URL = "https://pbexoc8bktvw.postplan.dev"
 
 
-def run(args: list[str]) -> tuple[int, str]:
-    proc = subprocess.run(
-        args,
-        cwd=ROOT,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
+def run(args: list[str], timeout: float = 15.0) -> tuple[int, str]:
+    try:
+        proc = subprocess.run(
+            args,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, f"timed out after {timeout:g}s: {' '.join(args)}"
+    except OSError as exc:
+        return 127, f"failed to run {' '.join(args)}: {exc}"
     return proc.returncode, proc.stdout.strip()
 
 
@@ -49,7 +55,8 @@ def latest_ci() -> str:
             "1",
             "--json",
             "status,conclusion,headSha,url,workflowName",
-        ]
+        ],
+        timeout=10.0,
     )
     if code != 0:
         return "gh unavailable; check GitHub Actions manually"
@@ -65,14 +72,40 @@ def latest_ci() -> str:
     return f"{conclusion} for {sha}: {item.get('url')}"
 
 
+def current_branch() -> str:
+    code, out = run(["git", "branch", "--show-current"], timeout=5.0)
+    return out.strip() if code == 0 else ""
+
+
 def current_pr() -> str:
-    code, out = run(["gh", "pr", "view", "--json", "number,url,state,isDraft,headRefName"])
+    branch = current_branch()
+    if not branch:
+        return f"check {PULLS_URL}"
+    code, out = run(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--head",
+            branch,
+            "--state",
+            "open",
+            "--limit",
+            "1",
+            "--json",
+            "number,url,state,isDraft,headRefName",
+        ],
+        timeout=10.0,
+    )
     if code != 0:
         return f"check {PULLS_URL}"
     try:
-        item = json.loads(out)
+        items = json.loads(out)
     except json.JSONDecodeError:
         return f"check {PULLS_URL}"
+    if not items:
+        return f"none for branch `{branch}`; check {PULLS_URL}"
+    item = items[0]
     draft = "draft" if item.get("isDraft") else "non-draft"
     return f"#{item.get('number')} {item.get('url')} ({item.get('state')}, {draft})"
 
@@ -82,9 +115,9 @@ def yesno(value: bool) -> str:
 
 
 def main() -> None:
-    _, head = run(["git", "log", "-1", "--oneline"])
-    _, status = run(["git", "status", "--short"])
-    hygiene_code, hygiene = run([sys.executable, "scripts/check_repo_hygiene.py"])
+    _, head = run(["git", "log", "-1", "--oneline"], timeout=5.0)
+    _, status = run(["git", "status", "--short"], timeout=5.0)
+    hygiene_code, hygiene = run([sys.executable, "scripts/check_repo_hygiene.py"], timeout=30.0)
     data_ready = (ROOT / "data" / "catalog.jsonl").exists() and (ROOT / "data" / "public_set.jsonl").exists()
 
     print("# Final Submission Status")
