@@ -10,7 +10,7 @@ Branch scope: dense/Model2Vec research only. This branch does not change
 Do **not** switch the submission to dense retrieval yet.
 
 Dense/Model2Vec is a good offline research avenue, but this workspace is not
-ready to prove it can beat the current clean TechnicalScore of `0.908232`.
+ready to prove it can beat the current clean TechnicalScore of `0.955300`.
 The current 50k-catalog agent has no usable local Model2Vec encoder, so dense
 embeddings are not active in the measured default.
 
@@ -18,7 +18,7 @@ embeddings are not active in the measured default.
 
 | Check | Result | Meaning |
 |---|---:|---|
-| Current clean TechnicalScore to beat | `0.908232` | Any dense change must beat this on the full official public set. |
+| Current clean TechnicalScore to beat | `0.955300` | Any dense change must beat this on the full official public set. |
 | Current clean HitRate@10 | `1.000000` | The latest branch now reaches every public target in Top 10. |
 | `requirements.txt` declares `model2vec==0.6.0` | Yes | Dependency is planned. |
 | `models/encoder/` contains complete model files | No | Only README is present, so production dense cannot run. |
@@ -187,7 +187,7 @@ Acceptance rule:
 
 | Result | Decision |
 |---|---|
-| Full public-set TechnicalScore beats `0.908232`, with HR@10 not lower and acceptable latency | Consider merging dense path. |
+| Full public-set TechnicalScore beats `0.955300`, with HR@10 not lower and acceptable latency | Consider merging dense path. |
 | Dense improves MRR but hurts HitRate or MTTC | Reject for submission. |
 | Dense needs network during scoring | Reject for submission. |
 | Dense cannot finish full public-set benchmark quickly | Keep research-only. |

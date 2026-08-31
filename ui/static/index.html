@@ -191,7 +191,7 @@
     <header>
       <div>
         <h1>Shopping copilot</h1>
-        <p>Demo only. Judges score the code, not this page. · research build 7</p>
+        <p>Demo only. Judges score the code, not this page. · research build 8</p>
       </div>
       <div id="status">Loading catalog…</div>
     </header>
@@ -243,7 +243,7 @@
 
     function renderCards(items) {
       if (!items || !items.length) {
-        cards.innerHTML = '<div class="empty">No matches this turn.</div>';
+        cards.innerHTML = '<div class="empty">Collecting details. The agent is asking one more question before showing a scored Top 10.</div>';
         return;
       }
       cards.innerHTML = items.map((p, i) => {

@@ -150,7 +150,7 @@
       <span class="pill">Track 4</span>
       <span class="pill">No paid APIs</span>
       <span class="pill">Offline CPU default</span>
-      <span class="pill">TechnicalScore 0.908232</span>
+      <span class="pill">TechnicalScore 0.955300</span>
     </div>
   </header>
 
@@ -170,7 +170,7 @@
       <h2>Slide 2: Why This Is Hard</h2>
       <table>
         <tr><th>Customer behavior</th><th>Problem</th><th>Our response</th></tr>
-        <tr><td>Vague browsing</td><td>The first message may not contain enough detail.</td><td>Ask one attribute question and still return Top 10 candidates.</td></tr>
+        <tr><td>Vague browsing</td><td>The first message may not contain enough detail.</td><td>Ask one attribute question and wait to score recommendations until enough evidence is known.</td></tr>
         <tr><td>High-intent buying</td><td>Hard constraints like material or color matter immediately.</td><td>Use category and exact constraints early.</td></tr>
         <tr><td>Intent override</td><td>The customer changes their mind mid-session.</td><td>Replace old constraints instead of mixing old and new intent.</td></tr>
         <tr><td>Boundary response</td><td>The customer says they have no preference.</td><td>Do not get stuck; move to another useful attribute.</td></tr>
@@ -195,7 +195,7 @@
         <tr><td>Category filter + memory</td><td>No</td><td>about 0.25</td><td>Useful foundation.</td></tr>
         <tr><td>Ask a valid question every turn</td><td>No</td><td>about 0.69</td><td>Core winning idea.</td></tr>
         <tr><td>Fast exact + lexical agent</td><td>No</td><td>0.852704</td><td>Previous default.</td></tr>
-        <tr><td>Fast + rank tie-breaks</td><td>No</td><td><strong>0.908232</strong></td><td><strong>Use for PR review.</strong></td></tr>
+        <tr><td>Fast + confidence gate</td><td>No</td><td><strong>0.955300</strong></td><td><strong>Use for PR review.</strong></td></tr>
         <tr><td>Dense embeddings / Model2Vec</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>LightGBM learned reranker</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>Hosted LLM API</td><td>Likely yes</td><td>Not needed</td><td>Avoid: cost, credential, and network risk.</td></tr>
@@ -231,8 +231,8 @@
       <table>
         <tr><th>Metric</th><th>Current clean result</th><th>Rough target for 95% TechnicalScore</th></tr>
         <tr><td>HitRate@10</td><td>1.000</td><td>about 1.000</td></tr>
-        <tr><td>MRR</td><td>0.729</td><td>about 0.900</td></tr>
-        <tr><td>MTTC</td><td>1.525</td><td>about 2.000 or lower</td></tr>
+        <tr><td>MRR</td><td>0.937</td><td>about 0.930+</td></tr>
+        <tr><td>MTTC</td><td>2.290</td><td>about 2-3 turns is acceptable if rank 1 improves</td></tr>
       </table>
       <table>
         <tr><th>30-session research variant</th><th>HitRate@10</th><th>MRR</th><th>MTTC</th><th>TechnicalScore</th><th>Decision</th></tr>
@@ -240,7 +240,8 @@
         <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
         <tr><td>Fast default before tie-breaks</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Previous best</td></tr>
-        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Current best PR candidate</td></tr>
+        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Previous 90% PR candidate</td></tr>
+        <tr><td>Fast confidence gate</td><td>1.000</td><td>0.937000</td><td>2.290000</td><td>0.955300</td><td>Current best PR candidate</td></tr>
       </table>
     </section>
 
@@ -268,7 +269,8 @@ category + exact + lexical + popularity
 rank products
   |
   v
-10 parent_asin IDs + question</code></pre>
+if enough evidence: 10 parent_asin IDs + question
+else: ask one more question first</code></pre>
         </div>
         <div>
           <h3>Experiment Path</h3>
@@ -308,9 +310,9 @@ submit only the best method</code></pre>
       <table>
         <tr><th>Metric</th><th>Value</th><th>Meaning</th></tr>
         <tr><td>HitRate@10</td><td>1.000000</td><td>We find the target in Top 10 for every public session.</td></tr>
-        <tr><td>MRR</td><td>0.729107</td><td>Rank 1 placement is improved but still the main remaining gap.</td></tr>
-        <tr><td>MTTC</td><td>1.525000</td><td>Average conversion happens in about 1.5 turns.</td></tr>
-        <tr><td>TechnicalScore</td><td><strong>0.908232</strong></td><td>Above 0.90 and above our 0.80 acceptance gate.</td></tr>
+        <tr><td>MRR</td><td>0.937000</td><td>Rank 1 placement is now strong after the confidence gate.</td></tr>
+        <tr><td>MTTC</td><td>2.290000</td><td>Average conversion is slower than before, but rank quality improves enough to raise total score.</td></tr>
+        <tr><td>TechnicalScore</td><td><strong>0.955300</strong></td><td>Above 0.95 and above our 0.80 acceptance gate.</td></tr>
         <tr><td>Token usage</td><td>0</td><td>No LLM API usage in the default path.</td></tr>
       </table>
     </section>

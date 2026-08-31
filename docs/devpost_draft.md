@@ -54,7 +54,8 @@ category + exact + lexical + popularity routes
 rank candidates
     |
     v
-return 10 valid parent_asin IDs + one question
+if enough evidence: return 10 valid parent_asin IDs + one question
+else: ask one more question before scoring a slate
 ```
 
 ## 4. Method Comparison
@@ -65,7 +66,7 @@ return 10 valid parent_asin IDs + one question
 | Category + memory | No | Remembers earlier turns and category. | about 0.25 | Useful foundation. |
 | Ask every turn | No | Always asks a valid attribute question while recommending. | about 0.69 | Core idea. |
 | Fast exact + lexical agent | No | Uses category, exact constraints, lexical ranking, and fallback. | 0.852704 | Previous default. |
-| Fast + rank tie-breaks | No | Adds semicolon-safe constraints, top-50 reranking, position matching, and popularity tie-breaks. | **0.908232** | **PR candidate.** |
+| Fast + confidence gate | No | Adds semicolon-safe constraints, top-50 reranking, position matching, and waits for enough evidence before submitting a scored slate. | **0.955300** | **PR candidate.** |
 | Dense embeddings | No | Optional semantic search. | Must beat default first. | Research only. |
 | LightGBM reranker | No | Optional learned ranking model. | Must beat default first. | Research only. |
 | Hosted LLM API | Usually yes | External model calls for rewriting/ranking. | Not needed. | Avoided. |
@@ -96,9 +97,9 @@ domain logic or cloud/LLM workflow code into this shopping agent.
 | Metric | Value | Meaning |
 |---|---:|---|
 | HitRate@10 | 1.000000 | The correct product appears in the Top 10 for every public session. |
-| MRR | 0.729107 | The correct product is usually ranked high, but rank 1 is still the main gap. |
-| MTTC | 1.525000 | The agent usually converts in about 1 to 2 turns. |
-| TechnicalScore | **0.908232** | Above our internal 0.80 acceptance gate. |
+| MRR | 0.937000 | The correct product is usually rank 1 after enough details are known. |
+| MTTC | 2.290000 | The agent waits a little longer so the first scored slate is stronger. |
+| TechnicalScore | **0.955300** | Above our internal 0.80 acceptance gate and above 95%. |
 | Token usage | 0 | No paid API calls in the submitted path. |
 
 ## 7. Tools, Libraries, APIs

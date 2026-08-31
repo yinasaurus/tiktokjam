@@ -3,7 +3,7 @@
 Team: **kpopy demon hunter**
 
 Scope: investigate whether the existing LightGBM/LambdaRank research path can
-realistically beat the current default `TechnicalScore 0.908232` without paid
+realistically beat the current default `TechnicalScore 0.955300` without paid
 API calls.
 
 ## 1. Short Answer
@@ -12,7 +12,7 @@ Do **not** switch the submission to LightGBM yet.
 
 | Check | Result | Decision |
 |---|---:|---|
-| Current default score to beat | 0.908232 | Rank tie-break PR remains stronger. |
+| Current default score to beat | 0.955300 | Confidence-gated FastAgent remains stronger. |
 | Research heuristic reranker, 20-session slice | 0.555500 | Too low. |
 | LTR mode without trained model, 20-session slice | 0.544167 | Too low. |
 | LightGBM dependency | Installed locally, then import stalled | Environment risk. |
@@ -84,7 +84,7 @@ default full public-set score.
 
 | Blocker | Why it matters |
 |---|---|
-| No trained model benchmark beat `0.908232`. | The project rule says we only submit the best measured method. |
+| No trained model benchmark beat `0.955300`. | The project rule says we only submit the best measured method. |
 | Local LightGBM import stalls after installation. | Training and scoring are not reproducible on this machine yet. |
 | Full research ablation did not finish quickly. | Deadline risk and demo risk. |
 | Training data is only 200 public sessions. | High overfit risk; private transfer is uncertain. |
@@ -117,7 +117,7 @@ python scripts/run_ablations.py --variant full --variant ltr --variant cascade -
 ```
 
 Merge rule: only consider enabling LTR if the full public-set run improves
-TechnicalScore above `0.908232`, keeps HitRate@10 at least `1.000000`, and has
+TechnicalScore above `0.955300`, keeps HitRate@10 at least `1.000000`, and has
 acceptable latency.
 
 ## 8. Sources

@@ -68,5 +68,5 @@ Do not port HealthKaki code into the scoring agent. Port the process lessons:
 | Keep PR-based review | PR #1 remains open against `main`; do not merge without review. |
 | Keep paired scripts | Every important Windows command needs a macOS/Linux shell equivalent. |
 | Improve teammate handoff | Use `docs/evaluation_runbook.md` for final demo/submission steps. |
-| Keep zero paid APIs | Dense/LTR/LLM routes stay research-only unless they beat `0.908232`. |
-| Keep measuring honestly | Submit only the best measured method, currently FastAgent rank tie-breaks. |
+| Keep zero paid APIs | Dense/LTR/LLM routes stay research-only unless they beat `0.955300`. |
+| Keep measuring honestly | Submit only the best measured method, currently confidence-gated FastAgent. |

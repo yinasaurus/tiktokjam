@@ -52,7 +52,7 @@ evaluator and our current repo status.
 | Category + memory | No | Remembers turns and uses category narrowing | about 0.25 | Useful but not enough. |
 | Ask every turn | No | Always asks valid `ask_attribute` while ranking | about 0.69 | Strong core idea. |
 | Exact + lexical fast agent | No | Category, exact constraints, lexical ranking, fallback | 0.852704 | Previous default. |
-| Fast agent + rank tie-breaks | No | Adds semicolon-safe constraints, top-50 reranking, position match, and popularity tie-breaks | **0.908232** | Submit this by default. |
+| Fast agent + confidence gate | No | Adds semicolon-safe constraints, top-50 reranking, position match, and waits for enough evidence before submitting a scored slate | **0.955300** | Submit this by default. |
 | Dense / Model2Vec | No | Optional semantic embeddings | Not submitted unless it beats default | Research only. |
 | LightGBM LTR | No | Optional learned reranker | Not submitted unless it beats default | Research only. |
 | Hosted LLM API | Usually yes | Could rerank or rewrite queries | Not needed | Avoid for cost, credential, and network risk. |
@@ -91,13 +91,14 @@ docs/evaluation_runbook.md
 | Metric | Current clean result | Rough target for 95% TechnicalScore |
 |---|---:|---:|
 | HitRate@10 | 1.000 | about 1.000 |
-| MRR | 0.729 | about 0.900 |
-| MTTC | 1.525 | about 2.000 or lower |
+| MRR | 0.937 | about 0.930+ |
+| MTTC | 2.290 | about 2-3 turns is acceptable if MRR improves |
 
 The latest research-branch ranker raises the official clean TechnicalScore to
-`0.908232`. We are now above 90% TechnicalScore, but not yet at 95%; the
-remaining gap is mostly MRR because many correct products are still rank 2-10
-instead of rank 1.
+`0.955300`. We are now above the 95% TechnicalScore target because the agent
+waits for enough evidence before submitting recommendations. HitRate was already
+maxed out at 1.0; the improvement came from moving many correct products to
+rank 1 and raising MRR.
 
 Quick research-branch ablation on 30 sessions:
 
@@ -107,7 +108,8 @@ Quick research-branch ablation on 30 sessions:
 | Hybrid `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Below default. |
 | Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
 | Fast default before rank tie-breaks | 0.960 | 0.681347 | 2.585000 | 0.852704 | Previous best. |
-| Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Current best PR candidate. |
+| Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% PR candidate. |
+| Fast confidence gate | 1.000 | 0.937000 | 2.290000 | 0.955300 | Current best PR candidate. |
 
 ## Slide 5: Final Architecture
 
@@ -136,7 +138,8 @@ retrieval routes
 rank candidates
     |
     v
-return 10 valid parent_asin IDs + one ask_attribute
+if enough evidence: return 10 valid parent_asin IDs + one ask_attribute
+else: ask one more question before scoring a slate
 ```
 
 ## Slide 6: What Each Component Means
@@ -158,9 +161,9 @@ return 10 valid parent_asin IDs + one ask_attribute
 | Metric | Current value |
 |---|---:|
 | HitRate@10 | 1.000000 |
-| MRR | 0.729107 |
-| MTTC | 1.525000 |
-| TechnicalScore | **0.908232** |
+| MRR | 0.937000 |
+| MTTC | 2.290000 |
+| TechnicalScore | **0.955300** |
 | Token usage | 0 |
 | Paid API calls | 0 |
 
@@ -180,7 +183,8 @@ The fix strips a short filler list and searches the full utterance for each
 event pattern independently, while leaving the original anchored path in place
 for clean input. After the fix, the same reworded set scored 0.844094 (1.01%
 gap) and the clean score stayed 0.852704. The later rank tie-break PR lifts
-the clean official-style score to 0.908232. Five additional harder paraphrase
+the clean official-style score to 0.908232, and the confidence gate lifts it to
+0.955300. Five additional harder paraphrase
 styles — synonym substitution, run-on merging, dropping connectives, placing
 the override marker mid-utterance, and combining filler with reorder — were
 also tested against the committed FastAgent; 5/5 sessions still hit the target

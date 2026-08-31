@@ -1,4 +1,4 @@
-"""One-turn smoke session against the fixture catalog."""
+"""Smoke session against the fixture catalog."""
 
 from __future__ import annotations
 
@@ -19,9 +19,9 @@ def main() -> None:
     agent = Agent(FIXTURE)
     agent.reset("demo", {"note": "fixture smoke"})
     turns = [
-        "I'm looking for navy cotton t-shirts",
-        "crew neck please",
-        "regular fit is fine",
+        "I'm looking for Men T-Shirts, but I'm still exploring.",
+        "For that, what matters is: cotton; 100% cotton.",
+        "For that, what matters is: crew neck; short sleeve.",
     ]
     for i, msg in enumerate(turns, start=1):
         out = agent.respond("demo", msg, turn=i, top_k=5)

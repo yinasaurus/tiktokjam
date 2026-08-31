@@ -37,7 +37,7 @@ Our TechJam version is the small offline version of that pattern.
 
 | Lesson | Why it matters | Our implementation |
 |---|---|---|
-| Ask while recommending | A question should not stop us from returning candidates. | Always return Top 10 and a valid `ask_attribute`. |
+| Ask while ranking | A question should not stop the agent from preparing candidates, but weak early slates can hurt MRR. | Rank internally every turn, ask a valid `ask_attribute`, and emit the Top 10 only after enough evidence is known. |
 | Track state | Shoppers reveal constraints over time. | `agent/state.py` stores session memory and intent changes. |
 | Handle overrides | Real shoppers change their mind. | New override constraints replace older conflicting intent. |
 | Use hybrid retrieval | One search route misses too much. | Category, exact constraints, lexical/token scoring, popularity fallback, optional dense/LTR research. |

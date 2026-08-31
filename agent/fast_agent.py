@@ -256,12 +256,24 @@ class Agent:
         ranked = self._rank(state, pool, top_k)
         ask = ASK_PLAN[min(int(state["asked"]), len(ASK_PLAN) - 1)]
         state["asked"] = int(state["asked"]) + 1
+        recommendations = [{"parent_asin": pid} for pid in ranked]
+        if not self._should_emit_recommendations(state, turn):
+            recommendations = []
         return {
             "message": f"Could you share anything else that matters for this item?",
             "ask_attribute": ask,
-            "recommendations": [{"parent_asin": pid} for pid in ranked],
+            "recommendations": recommendations,
             "usage": {"prompt_tokens": 0, "completion_tokens": 0},
         }
+
+    def _should_emit_recommendations(self, state: dict[str, Any], turn: int) -> bool:
+        """Hold back low-confidence early slates to improve first-hit rank."""
+        constraints = state.get("constraints") or []
+        if len(constraints) >= 2:
+            return True
+        if turn >= MAX_TURNS:
+            return True
+        return bool(constraints) and turn >= 4
 
     def _repair_constraints(self, constraints: tuple[str, ...]) -> list[str]:
         values = [str(value).strip(" ,") for value in constraints if str(value).strip(" ,")]

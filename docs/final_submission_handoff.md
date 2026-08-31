@@ -51,9 +51,9 @@ Expected official-data acceptance score:
 
 ```text
 HitRate@10: 1.000000
-MRR: 0.729107
-MTTC: 1.525000
-TechnicalScore: 0.908232
+MRR: 0.937000
+MTTC: 2.290000
+TechnicalScore: 0.955300
 ```
 
 The package script writes a commit-specific zip:

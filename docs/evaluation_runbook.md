@@ -37,9 +37,9 @@ Expected public-set result for PR #1:
 | Metric | Value |
 |---|---:|
 | HitRate@10 | 1.000000 |
-| MRR | 0.729107 |
-| MTTC | 1.525000 |
-| TechnicalScore | 0.908232 |
+| MRR | 0.937000 |
+| MTTC | 2.290000 |
+| TechnicalScore | 0.955300 |
 
 If the number is lower, stop and check:
 
@@ -81,7 +81,7 @@ uses the downloaded 50,000-product catalog through the evaluator.
 | 1 | README / team name | "We are team kpopy demon hunter." |
 | 2 | Architecture diagram | "The official evaluator imports a Python backend agent, not the UI." |
 | 3 | Method table | "We tested BM25, dense/LTR research, and an offline FastAgent." |
-| 4 | Evaluator output | "The current public-set TechnicalScore is 0.908232 with zero paid API calls." |
+| 4 | Evaluator output | "The current public-set TechnicalScore is 0.955300 with zero paid API calls." |
 | 5 | Local UI fixture | "This 13-product UI is just for a quick demo recording." |
 | 6 | Devpost draft | "The final submission includes setup, limitations, and team contributions." |
 

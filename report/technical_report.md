@@ -35,7 +35,8 @@ FastAgent
 category + exact + lexical + popularity routes
     |
     v
-return 10 valid parent_asin IDs
+if enough evidence: return 10 valid parent_asin IDs
+else: ask one more question before scoring a slate
 ```
 
 | Component | File | Purpose |
@@ -67,8 +68,8 @@ database, no committed private credential, and zero token usage.
 | Category + memory | Remember turns and category | about 0.25 | Memory matters. |
 | Valid question each turn | Ask while recommending | about 0.69 | Clarification is the biggest win. |
 | Fast exact + lexical | Add exact constraints and fallback | 0.852704 | Previous best. |
-| Fast + rank tie-breaks | Semicolon-safe constraints, top-50 reranking, position matching, popularity tie-breaks | **0.908232** | Best current PR candidate. |
-| Dense/LTR research | Add semantic/model ranking | Must beat 0.908232 | Only ship if measured better. |
+| Fast + confidence gate | Semicolon-safe constraints, top-50 reranking, position matching, and delayed scored slates until enough evidence is known | **0.955300** | Best current PR candidate. |
+| Dense/LTR research | Add semantic/model ranking | Must beat 0.955300 | Only ship if measured better. |
 
 ## 6. Current Public-Set Result
 
@@ -76,11 +77,11 @@ Measured with the official-style local evaluator on 200 public sessions.
 
 | Scope | HitRate@10 | MRR | MTTC | TechnicalScore |
 |---|---:|---:|---:|---:|
-| Overall | 1.000000 | 0.729107 | 1.525000 | 0.908232 |
-| Buying | 1.000000 | 0.756285 | 1.075000 | 0.925385 |
-| Browsing | 1.000000 | 0.649648 | 1.212500 | 0.890644 |
+| Overall | 1.000000 | 0.937000 | 2.290000 | 0.955300 |
+| Buying | 1.000000 | 0.973958 | 2.000000 | 0.972187 |
+| Browsing | 1.000000 | 0.902917 | 2.000000 | 0.950875 |
 | Intent Override | 1.000000 | 0.925000 | 3.600000 | 0.925500 |
-| Boundary | 1.000000 | 0.559683 | 1.400000 | 0.859905 |
+| Boundary | 1.000000 | 0.950000 | 3.000000 | 0.945000 |
 
 ## 7. Cost, Latency, Tokens
 
@@ -115,4 +116,4 @@ Measured with the official-style local evaluator on 200 public sessions.
 ## 10. Final Submission Position
 
 Submit the fast offline agent unless a fresh full public-set ablation beats
-`TechnicalScore 0.908232` with acceptable latency and no paid API calls.
+`TechnicalScore 0.955300` with acceptable latency and no paid API calls.
