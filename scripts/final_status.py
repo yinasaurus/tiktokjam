@@ -31,7 +31,12 @@ def latest_package() -> str:
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
-    return str(packages[0].relative_to(ROOT)) if packages else "missing; run scripts/package_submission.ps1"
+    if not packages:
+        return "missing; run scripts/package_submission.ps1"
+    package = packages[0]
+    checksum = package.with_suffix(package.suffix + ".sha256")
+    checksum_note = "checksum present" if checksum.exists() else "checksum missing"
+    return f"{package.relative_to(ROOT)} ({checksum_note})"
 
 
 def latest_ci() -> str:
