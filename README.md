@@ -265,6 +265,7 @@ scores the official 50,000-product backend agent.
 | Done | Offline agent exported as `starter.agent.Agent`. |
 | Done | No paid API calls required. |
 | Done | Windows `.ps1` and macOS/Linux `.sh` scripts exist. |
+| Done | Package scripts write both the submission zip and a `.zip.sha256` checksum. |
 | Done | Simple local UI exists for demo recording. |
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
