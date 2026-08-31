@@ -192,7 +192,49 @@
     </section>
 
     <section>
-      <h2>4. Architecture Diagram</h2>
+      <h2>4. What Are We Actually Using?</h2>
+      <table>
+        <tr><th>Question</th><th>Answer</th></tr>
+        <tr><td>Are we using an LLM?</td><td>No hosted LLM is used in the submitted default. No paid API call is required.</td></tr>
+        <tr><td>Are we using BM25?</td><td>BM25-style/hybrid search exists in the research path, but the current default fast agent uses offline ranked retrieval.</td></tr>
+        <tr><td>What is the main search method?</td><td>Category filtering, exact disclosed constraints, lexical/token overlap, and popularity fallback.</td></tr>
+        <tr><td>Are we training a model?</td><td>Not for the submitted default. LightGBM training is a research branch only.</td></tr>
+        <tr><td>Why this method?</td><td>It is faster, cheaper, reproducible, and currently beats the heavier research path.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>5. Marketplace Research</h2>
+      <table>
+        <tr><th>Platform</th><th>What they do</th><th>Lesson for us</th></tr>
+        <tr><td>Taobao</td><td>Qwen/Taobao-style conversational shopping and follow-up questions.</td><td>Shopping should be a guided conversation, not a single keyword box.</td></tr>
+        <tr><td>Lazada</td><td>LazzieChat/AI Lazzie gives product suggestions from natural questions.</td><td>Keep suggestions grounded in product facts.</td></tr>
+        <tr><td>Shopee</td><td>Search/recommendation systems and conversational discovery integrations.</td><td>Embeddings and recommendation signals are worth researching offline.</td></tr>
+        <tr><td>Amazon</td><td>Rufus/Alexa uses query understanding, retrieval, product facts, and ranking.</td><td>Use a funnel: parse, retrieve from multiple routes, rank Top 10.</td></tr>
+      </table>
+      <div class="callout">Detailed branch docs: <code>docs/research/marketplace_search_patterns.md</code> and <code>docs/research/model_avenues.md</code>.</div>
+    </section>
+
+    <section>
+      <h2>6. 95% TechnicalScore Reality Check</h2>
+      <table>
+        <tr><th>Metric</th><th>Current clean result</th><th>Rough target for 95% TechnicalScore</th></tr>
+        <tr><td>HitRate@10</td><td>0.960</td><td>about 1.000</td></tr>
+        <tr><td>MRR</td><td>0.681</td><td>about 0.900</td></tr>
+        <tr><td>MTTC</td><td>2.585</td><td>about 2.000 or lower</td></tr>
+      </table>
+      <table>
+        <tr><th>30-session research variant</th><th>HitRate@10</th><th>MRR</th><th>MTTC</th><th>TechnicalScore</th><th>Decision</th></tr>
+        <tr><td>Hybrid <code>full</code></td><td>0.800</td><td>0.689815</td><td>3.933333</td><td>0.748278</td><td>Below default</td></tr>
+        <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
+        <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
+        <tr><td>Fast default reference</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Still best</td></tr>
+      </table>
+      <div class="callout">Verified: the "more than 90%" claim matches HitRate@10, not official TechnicalScore.</div>
+    </section>
+
+    <section>
+      <h2>7. Architecture Diagram</h2>
       <div class="grid two">
         <div>
           <h3>Submitted Offline System</h3>
@@ -241,7 +283,7 @@ never use paid API by default</code></pre>
     </section>
 
     <section>
-      <h2>5. Current Result Table</h2>
+      <h2>8. Current Result Table</h2>
       <table>
         <tr><th>Metric</th><th>Value</th><th>Easy reading</th></tr>
         <tr><td>HitRate@10</td><td>0.960000</td><td>The agent usually includes the hidden product in its Top 10.</td></tr>
@@ -253,7 +295,7 @@ never use paid API by default</code></pre>
     </section>
 
     <section>
-      <h2>6. File Map</h2>
+      <h2>9. File Map</h2>
       <table>
         <tr><th>File/folder</th><th>Purpose</th><th>Why teammates care</th></tr>
         <tr><td><code>starter/agent.py</code></td><td>Official import path.</td><td>This must stay valid for submission.</td></tr>
@@ -268,7 +310,7 @@ never use paid API by default</code></pre>
     </section>
 
     <section>
-      <h2>7. Team Setup Commands</h2>
+      <h2>10. Team Setup Commands</h2>
       <div class="grid two">
         <div>
           <h3>Windows</h3>
@@ -290,7 +332,7 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>8. Useful vs Not Useful Right Now</h2>
+      <h2>11. Useful vs Not Useful Right Now</h2>
       <table>
         <tr><th>Useful</th><th>Why</th></tr>
         <tr><td>Keep no-paid-API default.</td><td>Simple, cheap, reproducible, no private credentials.</td></tr>
@@ -307,7 +349,7 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>9. Demo Video Script</h2>
+      <h2>12. Demo Video Script</h2>
       <ol>
         <li>Say: "We are team kpopy demon hunter."</li>
         <li>Explain the challenge: find a hidden product in 10 turns.</li>
@@ -320,7 +362,7 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>10. Remaining Tasks</h2>
+      <h2>13. Remaining Tasks</h2>
       <table>
         <tr><th>Task</th><th>Owner</th><th>Status</th></tr>
         <tr><td>Fill individual member names and contribution split.</td><td>Team</td><td class="warn">Still needed</td></tr>

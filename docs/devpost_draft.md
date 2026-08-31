@@ -69,7 +69,23 @@ return 10 valid parent_asin IDs + one question
 | LightGBM reranker | No | Optional learned ranking model. | Must beat default first. | Research only. |
 | Hosted LLM API | Usually yes | External model calls for rewriting/ranking. | Not needed. | Avoided. |
 
-## 5. Current Measured Result
+## 5. Marketplace Research
+
+We looked at Taobao, Lazada, Shopee, and Amazon to understand how mature
+shopping platforms tackle the same issue.
+
+| Platform | Useful lesson |
+|---|---|
+| Taobao | Shopping assistants ask follow-up questions and support comparison-style discovery. |
+| Lazada | Conversational product suggestions should stay grounded in product facts and links. |
+| Shopee | Recommendation/search systems use matching, ranking, and lightweight representation learning. |
+| Amazon | The closest match to this challenge is a retrieval funnel: query understanding, candidate retrieval, ranking, and conversational guidance. |
+
+We copied the safe offline parts of this pattern: state tracking, clarification,
+hybrid-style retrieval signals, ranked Top 10 output, and fallback behavior. We
+did not copy cloud-only or paid-API dependencies.
+
+## 6. Current Measured Result
 
 | Metric | Value | Meaning |
 |---|---:|---|
@@ -79,7 +95,7 @@ return 10 valid parent_asin IDs + one question
 | TechnicalScore | **0.852704** | Above our internal 0.80 acceptance gate. |
 | Token usage | 0 | No paid API calls in the submitted path. |
 
-## 6. Tools, Libraries, APIs
+## 7. Tools, Libraries, APIs
 
 | Category | Used |
 |---|---|
@@ -89,7 +105,7 @@ return 10 valid parent_asin IDs + one question
 | UI | Standard-library local HTTP server and static HTML |
 | Development | VSCode / terminal-friendly scripts |
 
-## 7. Dataset and Assets
+## 8. Dataset and Assets
 
 | Asset | How we use it |
 |---|---|
@@ -102,7 +118,7 @@ We do not reconstruct the full upstream Amazon Reviews 2023 dataset. We use the
 official participant kit assets only. Local data files are gitignored and are
 not committed.
 
-## 8. Reproducibility
+## 9. Reproducibility
 
 Windows:
 
@@ -126,7 +142,7 @@ sh scripts/verify_submission.sh --with-data
 sh scripts/demo.sh --fixture
 ```
 
-## 9. Limitations
+## 10. Limitations
 
 | Limitation | What we would improve |
 |---|---|
@@ -136,7 +152,7 @@ sh scripts/demo.sh --fixture
 | Demo UI is simple | Build a richer product-facing UI after the backend competition. |
 | Optional dense/LTR paths are research-only | Submit them only if measured score and latency improve. |
 
-## 10. Team Contributions
+## 11. Team Contributions
 
 Team name: **kpopy demon hunter**
 

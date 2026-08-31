@@ -56,6 +56,53 @@ evaluator and our current repo status.
 | LightGBM LTR | No | Optional learned reranker | Not submitted unless it beats default | Research only. |
 | Hosted LLM API | Usually yes | Could rerank or rewrite queries | Not needed | Avoid for cost, credential, and network risk. |
 
+## Slide 4A: What Are We Actually Using?
+
+| Question | Answer |
+|---|---|
+| Are we using an LLM? | Not in the submitted default. No GPT/Claude/OpenAI/paid API call is required. |
+| Are we using BM25? | The repo has BM25-style/hybrid research code, but the current default fast agent uses simpler offline ranked retrieval. |
+| What is the main method? | Ranked search over category, exact disclosed constraints, lexical token overlap, and popularity fallback. |
+| Is it machine learning? | The submitted path is mostly deterministic retrieval/ranking. Optional LightGBM training is research-only. |
+| Why this choice? | It is faster, cheaper, easier to reproduce, and currently scores better than the heavier research path. |
+
+## Slide 4B: What We Learned From Big Marketplaces
+
+| Platform | What they do | Lesson for us |
+|---|---|---|
+| Taobao | Qwen/Taobao-style conversational shopping, comparison, and follow-up questions. | Treat shopping as a conversation, not one search box. |
+| Lazada | LazzieChat/AI Lazzie gives product suggestions and product links from natural questions. | Keep the assistant helpful and product-grounded. |
+| Shopee | Search/recommendation teams and conversational discovery integrations. | Lightweight embeddings and recommendation signals are worth researching, but not at the cost of reliability. |
+| Amazon | Rufus/Alexa for Shopping uses query understanding, retrieval, product facts, reviews, and ranking. | Our architecture should be a funnel: parse, retrieve from multiple routes, rerank, return Top 10. |
+
+Detailed research is stored on the research branch in:
+
+```text
+docs/research/marketplace_search_patterns.md
+docs/research/model_avenues.md
+```
+
+## Slide 4C: 95% TechnicalScore Reality Check
+
+| Metric | Current clean result | Rough target for 95% TechnicalScore |
+|---|---:|---:|
+| HitRate@10 | 0.960 | about 1.000 |
+| MRR | 0.681 | about 0.900 |
+| MTTC | 2.585 | about 2.000 or lower |
+
+The friend update improves paraphrase robustness, but I verified the official
+clean TechnicalScore is still `0.852704`. The "more than 90%" claim appears to
+refer to HitRate@10, not TechnicalScore.
+
+Quick research-branch ablation on 30 sessions:
+
+| Variant | HitRate@10 | MRR | MTTC | TechnicalScore | Decision |
+|---|---:|---:|---:|---:|---|
+| Hybrid `full` | 0.800 | 0.689815 | 3.933333 | 0.748278 | Below default. |
+| Hybrid `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Below default. |
+| Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
+| Fast default | 0.960 | 0.681347 | 2.585000 | 0.852704 | Still best. |
+
 ## Slide 5: Final Architecture
 
 ```text
