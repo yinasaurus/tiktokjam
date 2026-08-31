@@ -1,4 +1,10 @@
-"""Agent orchestration + deadline guard. Exports the official `Agent` surface (C-2)."""
+"""Not the submitted agent — see README Limitations.
+
+Hybrid orchestration + deadline guard (research path). The official
+evaluator does `from starter.agent import Agent`, which is FastAgent
+(`agent/fast_agent.py`). This module remains as HybridAgent for documented
+future work.
+"""
 
 from __future__ import annotations
 

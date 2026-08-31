@@ -1,4 +1,11 @@
-"""Parse deterministic simulator messages into structured dialog events."""
+"""Constraint extraction for submitted FastAgent (PRD Component 1).
+
+Turns customer utterances into structured dialog events: opening
+category/constraint, override, disclosure, exhausted, no-preference, and
+rebuke. Anchored evaluator templates run first; if they miss, a short filler
+list is stripped and the same patterns are searched order-invariantly.
+Hybrid uses a separate extractor in `agent/extract.py`.
+"""
 
 from __future__ import annotations
 

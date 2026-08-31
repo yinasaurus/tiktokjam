@@ -1,4 +1,10 @@
-"""Dialog state manager (TDD §6). All session state lives here, keyed by session_id."""
+"""Dialog state for the Hybrid research path (PRD Component 2).
+
+SessionState / DialogStateManager keep slots, asked/declined attributes,
+and constraints keyed by session_id. Not used by submitted FastAgent, which
+stores a lighter session dict in `agent/fast_agent.py`. See README
+Limitations.
+"""
 
 from __future__ import annotations
 

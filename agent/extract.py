@@ -1,4 +1,7 @@
-"""Component 1 — constraint extraction (TDD §5)."""
+"""Constraint extraction for the Hybrid research path (TDD §5).
+
+Submitted FastAgent uses `agent/parsing.py` instead. See README Limitations.
+"""
 
 from __future__ import annotations
 
