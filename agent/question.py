@@ -1,4 +1,9 @@
-"""Question policy — entropy + stopping rule (TDD §10). Biased toward not asking."""
+"""Question policy for the Hybrid research path (PRD question policy / TDD §10).
+
+Chooses the next ask_attribute via entropy / information gain, with a
+simulator-aligned `other` bias. Submitted FastAgent does not call this; it
+uses the ASK_PLAN sequence in `agent/fast_agent.py`. See README Limitations.
+"""
 
 from __future__ import annotations
 

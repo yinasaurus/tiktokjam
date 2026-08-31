@@ -1,9 +1,16 @@
-"""Fast offline submission candidate for the deterministic TechJam evaluator.
+"""Submitted FastAgent: retrieval, reranking, and question policy.
 
-This agent implements the measured high-value ladder:
-category bucket + cross-turn memory + repeated `other` clarification + exact
-intent-card string signal. It uses no paid APIs, no hosted models, and no
-external services.
+The official evaluator imports `starter.agent.Agent`, which is this class —
+not Hybrid (`agent/agent.py`). Constraint extraction lives in
+`agent/parsing.py`. Dialog state is a per-session dict here (Hybrid uses
+`agent/state.py`).
+
+Retrieval scores the catalog with category, exact disclosed constraints,
+lexical overlap, and popularity. A top-50 heuristic then reranks before the
+Top 10 (Hybrid's cascade is `agent/rerank.py`). Question policy is the fixed
+ASK_PLAN sequence plus a confidence gate that withholds scored
+recommendations until enough constraints are known, or turn 4. Offline,
+CPU-only, zero paid APIs.
 """
 
 from __future__ import annotations

@@ -1,8 +1,12 @@
-"""Reranker cascade (TDD §9). M1 ships a linear heuristic; M3 swaps in LightGBM."""
+"""Reranker cascade for the Hybrid research path (PRD Component 5).
+
+Linear heuristic by default; optional LightGBM LTR needs models/ltr.txt.
+Submitted FastAgent does not import this module — it reranks its own top-50
+shortlist in `agent/fast_agent.py`. See README Limitations.
+"""
 
 from __future__ import annotations
 
-import math
 from functools import lru_cache
 from pathlib import Path
 

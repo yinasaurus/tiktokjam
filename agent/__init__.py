@@ -1,3 +1,5 @@
+# Hybrid research stack. The submitted evaluator path is
+# `from starter.agent import Agent` -> agent.fast_agent.Agent.
 # Import determinism FIRST so BLAS thread pins land before numpy (NFR-10).
 from agent.determinism import pin_runtime
 
