@@ -2,6 +2,9 @@
 
 ## Public Repository
 
+- [ ] PR #1 is reviewed by the team and merged to `main`.
+- [ ] Final packaging is run from merged `main`, not only from the review
+  branch.
 - [ ] `README.md` includes overview, setup, reproduction, limitations, and team
   contributions.
 - [ ] `starter/agent.py` exports the final `Agent`.
@@ -13,7 +16,7 @@
 - [ ] Best submitted method is chosen from measured ablations, not intuition.
 - [ ] GitHub Actions fixture CI is green.
 - [ ] Local official-data acceptance check reaches
-  `recommended_technical_score >= 0.80`.
+  `recommended_technical_score >= 0.80`; current expected score is `0.955300`.
 - [ ] `models/encoder/` contains only acceptable model artifacts under platform
   limits, or the README clearly describes local setup.
 - [ ] `models/ltr.txt` is committed only after measured score and latency
