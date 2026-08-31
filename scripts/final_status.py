@@ -26,6 +26,8 @@ def run(args: list[str], timeout: float = 15.0) -> tuple[int, str]:
         )
     except subprocess.TimeoutExpired:
         return 124, f"timed out after {timeout:g}s: {' '.join(args)}"
+    except OSError as exc:
+        return 127, f"failed to run {' '.join(args)}: {exc}"
     return proc.returncode, proc.stdout.strip()
 
 
@@ -115,7 +117,7 @@ def yesno(value: bool) -> str:
 def main() -> None:
     _, head = run(["git", "log", "-1", "--oneline"], timeout=5.0)
     _, status = run(["git", "status", "--short"], timeout=5.0)
-    hygiene_code, hygiene = run([sys.executable, "scripts/check_repo_hygiene.py"])
+    hygiene_code, hygiene = run([sys.executable, "scripts/check_repo_hygiene.py"], timeout=30.0)
     data_ready = (ROOT / "data" / "catalog.jsonl").exists() and (ROOT / "data" / "public_set.jsonl").exists()
 
     print("# Final Submission Status")
