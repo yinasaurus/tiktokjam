@@ -269,7 +269,7 @@ scores the official 50,000-product backend agent.
 | Done | Simple local UI exists for demo recording. |
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
-| Todo | Review and merge PR #1 before final packaging from `main`. |
+| Todo | Review and merge any open final PR before final packaging from `main`. |
 | Todo | Fill individual member names and contribution split. |
 | Todo | Record and upload the public YouTube demo. |
 | Todo | Paste Devpost draft and submit before the deadline. |

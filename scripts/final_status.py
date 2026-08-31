@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_SCORE = "0.955300"
-PR_URL = "https://github.com/yinasaurus/tiktokjam/pull/1"
+PULLS_URL = "https://github.com/yinasaurus/tiktokjam/pulls"
 MAIN_POSTPLAN_URL = "https://mj4gkxs69b24.postplan.dev"
 STATUS_POSTPLAN_URL = "https://pbexoc8bktvw.postplan.dev"
 
@@ -65,6 +65,18 @@ def latest_ci() -> str:
     return f"{conclusion} for {sha}: {item.get('url')}"
 
 
+def current_pr() -> str:
+    code, out = run(["gh", "pr", "view", "--json", "number,url,state,isDraft,headRefName"])
+    if code != 0:
+        return f"check {PULLS_URL}"
+    try:
+        item = json.loads(out)
+    except json.JSONDecodeError:
+        return f"check {PULLS_URL}"
+    draft = "draft" if item.get("isDraft") else "non-draft"
+    return f"#{item.get('number')} {item.get('url')} ({item.get('state')}, {draft})"
+
+
 def yesno(value: bool) -> str:
     return "yes" if value else "no"
 
@@ -88,7 +100,7 @@ def main() -> None:
     print(f"- Latest local package: `{latest_package()}`")
     print(f"- Latest GitHub Actions: {latest_ci()}")
     print(f"- Expected official-data TechnicalScore: `{EXPECTED_SCORE}`")
-    print(f"- Review PR: {PR_URL}")
+    print(f"- Current review PR: {current_pr()}")
     print(f"- Main PostPlan: {MAIN_POSTPLAN_URL}")
     print(f"- Status PostPlan: {STATUS_POSTPLAN_URL}")
     print()
@@ -103,7 +115,7 @@ def main() -> None:
     print()
     print("## External Items")
     print()
-    print(f"- Ask the team to review and merge PR #1 before final packaging: {PR_URL}")
+    print(f"- Ask the team to review and merge any open final PR before final packaging: {PULLS_URL}")
     print("- Team name is `kpopy demon hunter`; fill individual names and contribution split in Devpost.")
     print("- Record/upload the public YouTube demo.")
     print("- Paste `docs/devpost_draft.md` into Devpost and submit before 2026-09-01 12:00 Singapore time.")
