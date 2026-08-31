@@ -9,6 +9,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_SCORE = "0.955300"
+PR_URL = "https://github.com/yinasaurus/tiktokjam/pull/1"
+MAIN_POSTPLAN_URL = "https://mj4gkxs69b24.postplan.dev"
+STATUS_POSTPLAN_URL = "https://pbexoc8bktvw.postplan.dev"
 
 
 def run(args: list[str]) -> tuple[int, str]:
@@ -80,6 +83,9 @@ def main() -> None:
     print(f"- Latest local package: `{latest_package()}`")
     print(f"- Latest GitHub Actions: {latest_ci()}")
     print(f"- Expected official-data TechnicalScore: `{EXPECTED_SCORE}`")
+    print(f"- Review PR: {PR_URL}")
+    print(f"- Main PostPlan: {MAIN_POSTPLAN_URL}")
+    print(f"- Status PostPlan: {STATUS_POSTPLAN_URL}")
     print()
     print("## Final Commands")
     print()
@@ -92,6 +98,7 @@ def main() -> None:
     print()
     print("## External Items")
     print()
+    print(f"- Ask the team to review and merge PR #1 before final packaging: {PR_URL}")
     print("- Team name is `kpopy demon hunter`; fill individual names and contribution split in Devpost.")
     print("- Record/upload the public YouTube demo.")
     print("- Paste `docs/devpost_draft.md` into Devpost and submit before 2026-09-01 12:00 Singapore time.")
