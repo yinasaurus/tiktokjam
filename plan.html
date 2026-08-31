@@ -3,268 +3,203 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>kpopy demon hunter: TikTok TechJam Shopping Agent Execution Plan</title>
+  <title>kpopy demon hunter - Shopping Copilot Plan</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #101214;
-      --panel: #171b20;
-      --panel-2: #1f252c;
-      --text: #eef2f4;
-      --muted: #aab5bd;
-      --line: #2e3740;
-      --accent: #53d6a2;
-      --accent-2: #72a7ff;
-      --warn: #ffd166;
-      --bad: #ff7a90;
-      --good: #7ee787;
-      --code: #0c0f12;
+      --bg: #0f1115;
+      --panel: #171b22;
+      --panel2: #202632;
+      --text: #f2f5f7;
+      --muted: #b5c0ca;
+      --line: #313946;
+      --green: #55d6a0;
+      --blue: #79aaff;
+      --yellow: #ffd166;
+      --red: #ff7a90;
+      --code: #0a0d11;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font: 16px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     header {
+      padding: 34px 22px;
       border-bottom: 1px solid var(--line);
-      background: #0c0f12;
-      padding: 32px 24px 26px;
+      background: #0a0d11;
     }
-    main {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 28px 20px 48px;
-    }
-    .hero {
+    main, .hero {
       max-width: 1180px;
       margin: 0 auto;
     }
-    h1 {
-      margin: 0 0 10px;
-      font-size: 34px;
-      line-height: 1.12;
-      letter-spacing: 0;
+    main { padding: 22px 18px 48px; }
+    h1, h2, h3 { margin: 0; letter-spacing: 0; }
+    h1 { font-size: 36px; line-height: 1.1; }
+    h2 { font-size: 24px; margin-bottom: 12px; }
+    h3 { font-size: 17px; margin: 0 0 8px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    section {
+      margin: 18px 0;
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
     }
-    h2 {
-      margin: 0 0 14px;
-      font-size: 22px;
-      letter-spacing: 0;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
     }
-    h3 {
-      margin: 18px 0 8px;
-      font-size: 16px;
-      letter-spacing: 0;
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      min-height: 118px;
+      padding: 15px;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
     }
-    p { margin: 0 0 12px; color: var(--muted); }
-    strong { color: var(--text); }
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .value {
+      display: block;
+      margin-top: 7px;
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+    .ok { color: var(--green); }
+    .warn { color: var(--yellow); }
+    .bad { color: var(--red); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: var(--panel2);
+      color: var(--text);
+      font-weight: 700;
+    }
+    td { color: var(--muted); }
     code {
       background: var(--code);
       border: 1px solid var(--line);
+      color: #d9e8ff;
       border-radius: 5px;
       padding: 2px 5px;
-      color: #d8e7ff;
-      font-size: 0.92em;
+      font-size: .92em;
     }
     pre {
+      margin: 10px 0 0;
+      padding: 15px;
       overflow-x: auto;
       background: var(--code);
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 14px;
-      color: #d8e7ff;
-      margin: 10px 0 16px;
+      color: #d9e8ff;
     }
     pre code {
       border: 0;
       padding: 0;
       background: transparent;
     }
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 22px;
-    }
-    .metric, section, .phase {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-    }
-    .metric {
-      padding: 14px;
-      min-height: 96px;
-    }
-    .metric .label {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-    }
-    .metric .value {
-      display: block;
-      margin-top: 7px;
-      font-size: 22px;
-      color: var(--text);
-      font-weight: 700;
-    }
-    .metric .note {
-      display: block;
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    section {
-      margin: 18px 0;
-      padding: 20px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-    ul, ol { margin: 8px 0 0 20px; padding: 0; }
-    li { margin: 7px 0; color: var(--muted); }
-    li strong { color: var(--text); }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      overflow: hidden;
-      border-radius: 8px;
-    }
-    th, td {
-      border: 1px solid var(--line);
-      padding: 10px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background: var(--panel-2);
-      color: var(--text);
-      font-size: 13px;
-    }
-    td { color: var(--muted); }
-    .tag {
+    .pill {
       display: inline-block;
+      margin: 12px 8px 0 0;
+      padding: 4px 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 2px 8px;
-      font-size: 12px;
       color: var(--muted);
-      margin-right: 6px;
-    }
-    .p0 { color: var(--bad); }
-    .p1 { color: var(--warn); }
-    .p2 { color: var(--accent-2); }
-    .ok { color: var(--good); }
-    .callout {
-      border-left: 4px solid var(--accent);
-      background: #12201b;
-      padding: 12px 14px;
-      border-radius: 6px;
-      margin: 12px 0;
-      color: var(--muted);
-    }
-    .phase {
-      padding: 16px;
-      margin: 12px 0;
-    }
-    .phase-title {
-      display: flex;
-      gap: 10px;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-    .phase-title span:first-child {
-      font-weight: 700;
-      color: var(--text);
-    }
-    .phase-title span:last-child {
-      color: var(--muted);
+      background: var(--panel);
       font-size: 13px;
     }
+    .callout {
+      margin-top: 12px;
+      padding: 13px 15px;
+      border-left: 4px solid var(--green);
+      border-radius: 6px;
+      background: #12201b;
+      color: var(--muted);
+    }
+    ol, ul { margin: 8px 0 0 20px; padding: 0; color: var(--muted); }
+    li { margin: 6px 0; }
     @media (max-width: 860px) {
-      .summary, .grid { grid-template-columns: 1fr; }
-      h1 { font-size: 28px; }
-      header { padding: 26px 18px 22px; }
+      .grid, .two { grid-template-columns: 1fr; }
+      h1 { font-size: 29px; }
     }
   </style>
 </head>
 <body>
   <header>
     <div class="hero">
-      <h1>kpopy demon hunter: TikTok TechJam Shopping Agent Execution Plan</h1>
-      <p>Repo: <code>X:\01 REPOSITORIES\tiktokjam</code>. This plan keeps the team aligned on the reproducible, teammate-friendly, demo-ready production submission path for the Shopping Copilot challenge.</p>
-      <div class="summary">
-        <div class="metric">
-          <span class="label">Current state</span>
-          <span class="value">M1 wired</span>
-          <span class="note">Official Agent interface, UI, fixture tests pass.</span>
-        </div>
-        <div class="metric">
-          <span class="label">Missing locally</span>
-          <span class="value">Data + models</span>
-          <span class="note"><code>data/catalog.jsonl</code>, <code>public_set.jsonl</code>, Model2Vec, LTR.</span>
-        </div>
-        <div class="metric">
-          <span class="label">Target model path</span>
-          <span class="value">Offline CPU</span>
-          <span class="note">Submitted path uses no paid API; Model2Vec/LTR stay research-only unless they beat the gate.</span>
-        </div>
-        <div class="metric">
-          <span class="label">Validation target</span>
-          <span class="value">0.852704</span>
-          <span class="note">Measured full public-set TechnicalScore; clears 0.80 gate.</span>
-        </div>
-      </div>
+      <h1>kpopy demon hunter - Shopping Copilot Plan</h1>
+      <p>Simple slide-style plan for the TikTok TechJam Track 4 backend agent: what it does, why it works, what we compared, and how teammates run it.</p>
+      <span class="pill">No paid APIs</span>
+      <span class="pill">Offline default</span>
+      <span class="pill">Local UI for demo</span>
+      <span class="pill">Windows + macOS/Linux scripts</span>
+      <span class="pill">TechnicalScore 0.852704</span>
     </div>
   </header>
 
   <main>
     <section>
-      <h2>Webinar Framing</h2>
-      <p>The implementation should be presented as a conversational commerce system, not just a catalog search script. The four pillars map directly to repo work:</p>
+      <h2>1. What The Challenge Wants</h2>
       <table>
-        <thead>
-          <tr>
-            <th>Pillar</th>
-            <th>Repo Evidence</th>
-            <th>Demo Message</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Intent Routing & Hybrid Pipeline</td>
-            <td><code>agent/routes/</code>, RRF fusion, dense route, reranker.</td>
-            <td>Buying favors hard constraints; browsing keeps broader candidate coverage.</td>
-          </tr>
-          <tr>
-            <td>Multi-Turn Scenario Evolution</td>
-            <td><code>SessionState</code>, asked/declined attributes, superseded slots.</td>
-            <td>The agent accumulates preferences and handles abrupt intent override.</td>
-          </tr>
-          <tr>
-            <td>Dynamic Context Programming</td>
-            <td>Active constraints are rebuilt every turn; question policy and deadline guard adapt runtime behavior.</td>
-            <td>The workflow changes based on dialog history, candidate quality, and budget.</td>
-          </tr>
-          <tr>
-            <td>Product & Efficiency Metrics</td>
-            <td><code>evaluator/local_evaluator.py</code>, ablation runner, reranker benchmark.</td>
-            <td>Coverage is retrieval recall; precision is MRR/top-rank movement; efficiency is fast convergence.</td>
-          </tr>
-        </tbody>
+        <tr><th>Challenge requirement</th><th>What that means in normal words</th><th>Our answer</th></tr>
+        <tr><td>Conversational search</td><td>The customer can be vague and speak over multiple turns.</td><td>Keep session memory and ask useful questions.</td></tr>
+        <tr><td>Buying vs browsing</td><td>Some users know exact constraints; others are exploring.</td><td>Narrow hard constraints but keep broad fallback candidates.</td></tr>
+        <tr><td>Intent override</td><td>The customer may change their mind.</td><td>Replace old constraints instead of mixing them with new ones.</td></tr>
+        <tr><td>Backend-only scoring</td><td>UI is not the judged product.</td><td>Focus on the official Python agent API and use UI only for demo video.</td></tr>
       </table>
     </section>
 
     <section>
-      <h2>Architecture Diagrams</h2>
+      <h2>2. Scoring Cheat Sheet</h2>
       <div class="grid">
+        <div class="card"><span class="label">HitRate@10</span><span class="value">Did we find it?</span><p>Correct product appears somewhere in our 10 returned IDs.</p></div>
+        <div class="card"><span class="label">MRR</span><span class="value">How high?</span><p>Rank 1 is best. Rank 10 is weaker but still useful.</p></div>
+        <div class="card"><span class="label">MTTC</span><span class="value">How fast?</span><p>Average turns before the evaluator sees the correct product.</p></div>
+      </div>
+      <pre><code>TechnicalScore = 0.50 * HitRate@10 + 0.30 * MRR + 0.20 * Efficiency</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Method Comparison</h2>
+      <table>
+        <tr><th>Method</th><th>What it means</th><th>Paid API?</th><th>Expected score</th><th>Use?</th></tr>
+        <tr><td>Starter BM25</td><td>Simple keyword search.</td><td>No</td><td>0.1067</td><td class="bad">No</td></tr>
+        <tr><td>Category + memory</td><td>Remember previous turns and use category clues.</td><td>No</td><td>about 0.25</td><td>Foundation only</td></tr>
+        <tr><td>Ask every turn</td><td>Always ask a valid attribute question while recommending.</td><td>No</td><td>about 0.69</td><td>Yes, core behavior</td></tr>
+        <tr><td>Fast exact + lexical</td><td>Use category, exact constraints, words, and fallback ranking.</td><td>No</td><td><strong>0.852704</strong></td><td class="ok"><strong>Submit</strong></td></tr>
+        <tr><td>Dense embeddings</td><td>Optional semantic search model.</td><td>No</td><td>Must beat default first</td><td>Research only</td></tr>
+        <tr><td>LightGBM reranker</td><td>Optional trained ranking model.</td><td>No</td><td>Must beat default first</td><td>Research only</td></tr>
+        <tr><td>Hosted LLM</td><td>External model call for ranking or rewriting.</td><td>Likely yes</td><td>Not needed</td><td class="bad">Avoid</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>4. Architecture Diagram</h2>
+      <div class="grid two">
         <div>
-          <h3>Submitted Offline Runtime</h3>
-          <pre><code>official evaluator / demo UI
+          <h3>Submitted Offline System</h3>
+          <pre><code>customer message
+  |
+  v
+official evaluator / demo UI
   |
   v
 starter.agent.Agent
@@ -272,527 +207,128 @@ starter.agent.Agent
   v
 FastAgent
   |
-  +-- template parser
-  +-- SessionState
-  +-- question policy
+  +-- parse message
+  +-- remember session state
+  +-- ask one useful attribute
   |
   v
-category + exact + lexical + popularity routes
+category + exact + lexical + popularity
   |
   v
-score candidates
+rank products
   |
   v
-10 valid parent_asin + ask_attribute</code></pre>
+10 product IDs + next question</code></pre>
         </div>
         <div>
-          <h3>Research Pipeline</h3>
-          <pre><code>customer turn
+          <h3>Experiment Decision Flow</h3>
+          <pre><code>new idea
   |
   v
-template parser
+run tests + evaluator
   |
   v
-session state -----> question policy
-  |                       |
-  v                       v
-active constraints     ask_attribute
+compare score table
+  |
+  +-- score > 0.852704 and stable -> consider submit
+  |
+  +-- score <= 0.852704 or slower -> keep as research
   |
   v
-exact + lexical + dense retrieval
-  |
-  v
-fusion -> rerank/fallback -> Top 10 parent_asin</code></pre>
+never use paid API by default</code></pre>
         </div>
       </div>
-      <div class="grid">
+    </section>
+
+    <section>
+      <h2>5. Current Result Table</h2>
+      <table>
+        <tr><th>Metric</th><th>Value</th><th>Easy reading</th></tr>
+        <tr><td>HitRate@10</td><td>0.960000</td><td>The agent usually includes the hidden product in its Top 10.</td></tr>
+        <tr><td>MRR</td><td>0.681347</td><td>The hidden product is usually ranked fairly high.</td></tr>
+        <tr><td>MTTC</td><td>2.585000</td><td>The agent usually converges in about 2 to 3 turns.</td></tr>
+        <tr><td>TechnicalScore</td><td><strong>0.852704</strong></td><td>Above our 0.80 acceptance target.</td></tr>
+        <tr><td>Token usage</td><td>0</td><td>No LLM API calls are used in the submitted path.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>6. File Map</h2>
+      <table>
+        <tr><th>File/folder</th><th>Purpose</th><th>Why teammates care</th></tr>
+        <tr><td><code>starter/agent.py</code></td><td>Official import path.</td><td>This must stay valid for submission.</td></tr>
+        <tr><td><code>agent/fast_agent.py</code></td><td>Default scoring agent.</td><td>Main logic for the submitted method.</td></tr>
+        <tr><td><code>agent/state.py</code></td><td>Conversation memory.</td><td>Prevents forgetting or mixing old intent.</td></tr>
+        <tr><td><code>agent/question.py</code></td><td>Clarification policy.</td><td>Controls what the agent asks next.</td></tr>
+        <tr><td><code>tools/eval.py</code></td><td>Score reporting.</td><td>Use it to compare methods.</td></tr>
+        <tr><td><code>scripts/*.ps1</code></td><td>Windows commands.</td><td>For Bryan / Windows machines.</td></tr>
+        <tr><td><code>scripts/*.sh</code></td><td>macOS/Linux commands.</td><td>For teammates on other machines.</td></tr>
+        <tr><td><code>ui/</code></td><td>Demo UI.</td><td>Use for the video, not for scoring.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>7. Team Setup Commands</h2>
+      <div class="grid two">
         <div>
-          <h3>Evaluation Loop</h3>
-          <pre><code>official catalog + public_set
-  |
-  v
-tools/eval.py / run_ablations.py
-  |
-  v
-overall + scenario metrics
-  |
-  v
-compare variants
-  |
-  v
-submit best offline method only</code></pre>
-        </div>
-        <div>
-          <h3>Team Machine Setup</h3>
+          <h3>Windows</h3>
           <pre><code>git pull origin main
-  |
-  v
-setup_local_data.ps1 / setup_local_data.sh
-  |
-  v
-verify_submission.ps1 / verify_submission.sh
-  |
-  v
-demo.ps1 / demo.sh for recording
-  |
-  v
-package_submission.ps1 / package_submission.sh</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>Official Resources</h2>
-      <ul>
-        <li><strong>Participant repository:</strong> <code>https://github.com/TechJam2026/techjam-conversational-search</code></li>
-        <li><strong>Participant Kit Release:</strong> <code>https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit</code></li>
-        <li><strong>Original data documentation:</strong> <code>https://amazon-reviews-2023.github.io/</code></li>
-      </ul>
-      <div class="callout">
-        The organizer freezes the competition catalog and sessions. Do not reconstruct the full upstream Amazon Reviews 2023 dataset; download the participant kit release assets and keep them local.
-      </div>
-    </section>
-
-    <section>
-      <h2>Useful vs Not Useful</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Information</th>
-            <th>Usefulness</th>
-            <th>How We Act On It</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Frozen 50k participant-kit catalog and 200 public sessions</td>
-            <td><strong>Implementation-critical</strong></td>
-            <td>Download only the official release assets with <code>scripts/setup_local_data.ps1 -DownloadOfficial</code>; evaluate with the local scorer.</td>
-          </tr>
-          <tr>
-            <td>Coverage, Precision, Efficiency metric split</td>
-            <td><strong>Implementation-critical</strong></td>
-            <td>Compare methods by HitRate@10 for retrieval coverage, MRR/top-rank share for precision, and MTTC/Efficiency for dialog quality.</td>
-          </tr>
-          <tr>
-            <td>Buying vs Browsing and Intent Override scenarios</td>
-            <td><strong>Implementation-critical</strong></td>
-            <td>Preserve state tracking, slot decay/supersession, and per-scenario ablation reporting.</td>
-          </tr>
-          <tr>
-            <td>No paid API calls / no organizer-provided model access</td>
-            <td><strong>Hard constraint</strong></td>
-            <td>Use offline local models only: Model2Vec static encoder and LightGBM ranker. Hosted LLMs are out for the submission path.</td>
-          </tr>
-          <tr>
-            <td>Original Amazon Reviews 2023 full dataset</td>
-            <td><strong>Context only</strong></td>
-            <td>Cite as provenance, but do not download or reconstruct it. The competition slice is the source of truth.</td>
-          </tr>
-          <tr>
-            <td>UI/UX development</td>
-            <td><strong>Demo-only</strong></td>
-            <td>Keep the local UI useful for a video, but do not optimize for UI scoring because the backend API is what counts.</td>
-          </tr>
-          <tr>
-            <td>External vector DBs, multimodal retrieval, base LLM fine-tuning</td>
-            <td><strong>Not useful / out of scope</strong></td>
-            <td>Avoid. They add risk, cost, and packaging complexity without matching the evaluation contract.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>What Is Lacking</h2>
-      <div class="grid">
-        <div>
-          <h3><span class="p0">P0</span> Final Submission Inputs</h3>
-          <ul>
-            <li><strong>Submission text needs final human fields:</strong> individual names, contribution split, YouTube URL, and any final latency note still need to be pasted into Devpost. Team name is <strong>kpopy demon hunter</strong>.</li>
-            <li><strong>Final data gate is local-only:</strong> the official 50k catalog and public sessions are downloaded locally, verified, and gitignored. Any teammate running the final gate must run setup first.</li>
-            <li><strong>Demo video still needs recording:</strong> the UI and script exist; the final YouTube link is the remaining deliverable artifact.</li>
-            <li><strong>Optional model paths are not submission blockers:</strong> Model2Vec and LightGBM stay research-only unless they beat the current offline default.</li>
-          </ul>
-        </div>
-        <div>
-          <h3><span class="p1">P1</span> Score Upside / Polish</h3>
-          <ul>
-            <li><strong>Current public-set score is known:</strong> <code>TechnicalScore 0.852704</code> on all 200 public sessions; the <code>0.80</code> gate passes.</li>
-            <li><strong>Ablation and benchmark scripts exist:</strong> <code>scripts/run_ablations.py</code>, <code>scripts/bench_reranker.py</code>, and <code>tools/eval.py</code> are available for further experiments.</li>
-            <li><strong>Hosted CI exists:</strong> GitHub Actions runs unit tests, compile, repository hygiene, fixture smoke, and a synthetic fixture-customer gate.</li>
-            <li><strong>Demo remains local by design:</strong> use <code>python -m ui --fixture</code> for instant video setup or <code>python -m ui</code> for official-catalog mode.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="callout">
-        The current safest submission is the offline fast agent. Further dense/LTR work is upside only: ship it only if measured ablations beat 0.852704 without hurting latency or reliability.
-      </div>
-    </section>
-
-    <section>
-      <h2>Model Choices</h2>
-      <div class="callout">
-        Hard rule for submission: no paid API calls and no hosted LLM dependency. The ranked output must run offline from the repo plus local participant-kit data.
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Layer</th>
-            <th>Use</th>
-            <th>Why</th>
-            <th>Where It Lives</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Dense encoder</td>
-            <td><strong>Model2Vec static encoder</strong>, preferably <code>potion-retrieval-32M</code>-class.</td>
-            <td>CPU-only, torch-free, small enough to commit if under 100 MiB, fast enough to build 50k embeddings locally.</td>
-            <td><code>models/encoder/</code></td>
-          </tr>
-          <tr>
-            <td>Reranker</td>
-            <td><strong>LightGBM LGBMRanker</strong> with LambdaRank objective.</td>
-            <td>Microsecond inference, small artifact, no API key, no transformer latency risk.</td>
-            <td><code>models/ltr.txt</code></td>
-          </tr>
-          <tr>
-            <td>Fallback</td>
-            <td>Current heuristic reranker.</td>
-            <td>Keeps system shippable if trained LTR fails or has no measured uplift.</td>
-            <td><code>agent/rerank.py</code></td>
-          </tr>
-          <tr>
-            <td>Do not use by default</td>
-            <td>Cross-encoder, hosted LLM, or paid API reranking.</td>
-            <td>Latency, offline scoring, packaging, cost, and secret-management risks outweigh likely gain for this competition.</td>
-            <td>Only behind a benchmark gate, not the default path.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>Method Comparison Matrix</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Variant</th>
-            <th>Purpose</th>
-            <th>Command</th>
-            <th>Decision Rule</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Fast offline submission</td>
-            <td>Category bucket + cross-turn memory + repeated <code>other</code> questions + exact intent-card signal.</td>
-            <td><code>python tools/eval.py</code></td>
-            <td>Current best candidate; full 200-session public set scored 0.852704 and passed the 0.80 gate.</td>
-          </tr>
-          <tr>
-            <td>Full heuristic</td>
-            <td>Current default baseline.</td>
-            <td><code>python scripts/run_ablations.py --variant full</code></td>
-            <td>Must be stable, valid, and fast enough before any model swap.</td>
-          </tr>
-          <tr>
-            <td>No exact phrase</td>
-            <td>Robustness / G-2 ablation floor.</td>
-            <td><code>python scripts/run_ablations.py --variant no_exact_phrase</code></td>
-            <td>Shows whether semantic/lexical retrieval survives paraphrase-like cases.</td>
-          </tr>
-          <tr>
-            <td>No dense</td>
-            <td>Dense route value.</td>
-            <td><code>python scripts/run_ablations.py --variant no_dense</code></td>
-            <td>Keep dense only if it improves coverage or robustness without latency failure.</td>
-          </tr>
-          <tr>
-            <td>No rerank</td>
-            <td>Reranker value.</td>
-            <td><code>python scripts/run_ablations.py --variant no_rerank</code></td>
-            <td>Rerank must improve MRR/top-rank share, not just HitRate@10.</td>
-          </tr>
-          <tr>
-            <td>LightGBM LTR</td>
-            <td>Best offline precision candidate.</td>
-            <td><code>python scripts/train_ltr.py</code> then <code>python scripts/bench_reranker.py --mode ltr</code></td>
-            <td>Use for submission only if public-set score and p95 latency beat heuristic.</td>
-          </tr>
-        </tbody>
-      </table>
-      <h3>Fast Iteration Commands</h3>
-      <pre><code>python tools/eval.py --limit 25
-python scripts/run_ablations.py --limit 25 --variant no_dense
-python scripts/run_ablations.py --limit 50 --scenario intent_override --variant no_dense
-python scripts/bench_reranker.py --limit 50 --mode heuristic
-python scripts/check_acceptance.py --limit 50 --threshold 0.80
-python scripts/compare_results.py eval_output/ablation_summary*.json</code></pre>
-      <p>Full 200-session sweeps should run after the limited commands are stable. This keeps iteration practical on slower machines.</p>
-    </section>
-
-    <section>
-      <h2>Task Cards</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Card</th>
-            <th>Priority</th>
-            <th>Current Repo Status</th>
-            <th>Next Evidence</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>T0 Harness</td>
-            <td>Blocking</td>
-            <td><code>tools/eval.py</code> added for timestamped runs and deltas; evaluator remains untouched.</td>
-            <td>Reproduce official BM25 baseline and run limited comparisons first.</td>
-          </tr>
-          <tr>
-            <td>T1 Catalog indexes</td>
-            <td>High</td>
-            <td>Existing <code>CatalogStore</code> handles defensive parsing and indexes phrases/categories/popularity; local cache added under <code>cache/</code>.</td>
-            <td>Measure cold and cached load times; keep cache local and version-keyed.</td>
-          </tr>
-          <tr>
-            <td>T2 Template parsing</td>
-            <td>High</td>
-            <td><code>agent/parsing.py</code> parses openings, disclosures, overrides, refusals, and rebukes.</td>
-            <td>Unit tests prove all eight simulator templates.</td>
-          </tr>
-          <tr>
-            <td>T3 State and override</td>
-            <td>High</td>
-            <td>Session state is keyed by <code>session_id</code>; exact override template clears prior slot/free constraints before rerank.</td>
-            <td>Intent-override scenario metrics must not regress.</td>
-          </tr>
-          <tr>
-            <td>T4 Questioning</td>
-            <td>Highest</td>
-            <td>Default policy now asks <code>other</code> up to twice, then targeted attributes; skips <code>category</code>/<code>brand</code>.</td>
-            <td>Limited and full ablations should show MTTC/TechnicalScore lift.</td>
-          </tr>
-          <tr>
-            <td>T5 Exact reverse index</td>
-            <td>Medium-high</td>
-            <td>Not yet implemented as evaluator-derived <code>intent_card()</code> signal.</td>
-            <td>Add as a weighted feature, not as the project centrepiece; report fallback behavior.</td>
-          </tr>
-          <tr>
-            <td>T6 Retrieval/fusion</td>
-            <td>Medium</td>
-            <td>Exact phrase + bm25s lexical + optional dense + RRF exists.</td>
-            <td>Compare <code>no_dense</code>, <code>no_rerank</code>, <code>full</code>; dense is meaningful only after Model2Vec is vendored.</td>
-          </tr>
-          <tr>
-            <td>T7 Optional reranker</td>
-            <td>Lower</td>
-            <td>LightGBM feature schema/training/inference scaffold exists; no <code>models/ltr.txt</code> yet.</td>
-            <td>Use only if LTR beats heuristic on score and latency. No paid LLM reranker.</td>
-          </tr>
-          <tr>
-            <td>T8 Deliverables</td>
-            <td>Always-on</td>
-            <td>Devpost draft, demo script, checklist, verification script, and README sections exist.</td>
-            <td>Fill measured results, team contributions, and video link before submission.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>How To Get Data Locally Without Committing It</h2>
-      <p>The repo already protects local data in <code>.gitignore</code>: <code>data/*</code> is ignored except <code>data/README.md</code>, plus <code>*.jsonl.gz</code>, <code>techjam-participant-kit.zip</code>, <code>results.json</code>, and <code>eval_output/</code>. Use the official participant kit release, not the full upstream Amazon Reviews 2023 dataset.</p>
-      <h3>Team setup commands</h3>
-      <p>PowerShell:</p>
-      <pre><code>python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-
 .\scripts\setup_local_data.ps1 -DownloadOfficial
-
-git status --short</code></pre>
-      <p>macOS/Linux:</p>
-      <pre><code>python3 -m venv .venv
-. .venv/bin/activate
+.\scripts\verify_submission.ps1 -WithData
+.\scripts\demo.ps1 -Fixture</code></pre>
+        </div>
+        <div>
+          <h3>macOS / Linux</h3>
+          <pre><code>git pull origin main
 python -m pip install -r requirements.txt
-
 sh scripts/setup_local_data.sh --download-official
-
-git status --short</code></pre>
-      <p>The script downloads <code>catalog.jsonl.gz</code>, <code>techjam-participant-kit.zip</code>, and <code>SHA256SUMS</code> from the participant-kit GitHub Release, verifies checksums when available, decompresses <code>data/catalog.jsonl</code>, and extracts <code>data/public_set.jsonl</code>.</p>
-      <p>Expected result: <code>data/catalog.jsonl</code> and <code>data/public_set.jsonl</code> should not appear as staged files. If someone sees them under <code>git status --short</code>, stop and fix ignore rules before committing.</p>
-      <h3>Verification commands</h3>
-      <pre><code>python scripts/measure_catalog.py --catalog data/catalog.jsonl
-python scripts/build_index.py --catalog data/catalog.jsonl
-python -m evaluator.local_evaluator --catalog data/catalog.jsonl --dataset data/public_set.jsonl --output results.json
-python scripts/check_determinism.py</code></pre>
-      <p><code>results.json</code> is also ignored. Share metrics in chat/report, not the raw result file unless needed.</p>
-    </section>
-
-    <section>
-      <h2>How To Train and Adopt the Ranker</h2>
-      <ol>
-        <li><strong>Create a deterministic train/holdout split:</strong> split the 200 public sessions into 160 train and 40 holdout by stable sample id hash. Keep the split script deterministic.</li>
-        <li><strong>Generate candidate pools:</strong> for each turn, run the current retrieval stack and keep top <code>N_fuse</code> candidates, including route scores, ranks, active constraints, category signals, title overlap, popularity, sparsity, and whether the candidate is the target.</li>
-        <li><strong>Train LightGBM LambdaRank:</strong> group candidates by query-turn/session. Label target as relevant, non-target as zero. Use NDCG/MRR-oriented validation.</li>
-        <li><strong>Save small artifact:</strong> write the booster to <code>models/ltr.txt</code>. This should be committed if it remains small, typically under 1 MiB.</li>
-        <li><strong>Wire inference:</strong> add an <code>ltr</code> path in <code>agent/rerank.py</code> that loads <code>models/ltr.txt</code> once, computes the same feature vector, and falls back to heuristic if the model is missing or malformed.</li>
-        <li><strong>Benchmark before enabling by default:</strong> measure p95 per-turn latency on all 200 sessions. Only set <code>rerank_mode="ltr"</code> or <code>"cascade"</code> if score improves without threatening the 500 ms turn budget.</li>
-      </ol>
-      <div class="callout">
-        The ranker target is narrow: promote rank-2 and rank-3 hits to rank 1 often enough to reach roughly 79% rank-1 share and about +0.039 TechnicalScore. Do not chase a heavy model unless LightGBM cannot move the public-set metric.
+sh scripts/verify_submission.sh --with-data
+sh scripts/demo.sh --fixture</code></pre>
+        </div>
       </div>
     </section>
 
     <section>
-      <h2>Implementation Roadmap</h2>
-      <div class="phase">
-        <div class="phase-title"><span>Phase 1: Local Repro Pack</span><span>Owner: everyone, first priority</span></div>
-        <ul>
-          <li>Add <code>scripts/setup_local_data.ps1</code> to verify local files, decompress catalog, and print row counts without staging data.</li>
-          <li>Add <code>.env.example</code> only if needed for path overrides; keep real <code>.env</code> ignored.</li>
-          <li>Add a README section with exact teammate commands and expected outputs.</li>
-        </ul>
-      </div>
-      <div class="phase">
-        <div class="phase-title"><span>Phase 2: Production Dense Route</span><span>Owner: retrieval</span></div>
-        <ul>
-          <li>Download/vendor complete Model2Vec files into <code>models/encoder/</code>.</li>
-          <li>Run <code>scripts/build_index.py --catalog data/catalog.jsonl</code> and confirm cold-start, cache write, and no network access.</li>
-          <li>Measure dense-route Recall@50 against the public set. Escalate to ONNX-int8 MiniLM only if Model2Vec trails by more than 3 points.</li>
-        </ul>
-      </div>
-      <div class="phase">
-        <div class="phase-title"><span>Phase 3: Ablations and Gates</span><span>Owner: evaluation</span></div>
-        <ul>
-          <li>Create <code>scripts/run_ablations.py</code> for full, no exact phrase, no dense, no rerank, and lexical-only variants.</li>
-          <li>Record overall and per-scenario metrics: Buying, Browsing, Intent Override, Boundary.</li>
-          <li>Require two consecutive deterministic runs with byte-identical recommendations before declaring a score.</li>
-        </ul>
-      </div>
-      <div class="phase">
-        <div class="phase-title"><span>Phase 4: LightGBM Reranker</span><span>Owner: ranking</span></div>
-        <ul>
-          <li>Build candidate feature extraction once and share it between training and inference.</li>
-          <li>Train <code>models/ltr.txt</code>, benchmark p95, and compare against heuristic rerank.</li>
-          <li>Enable only if it improves TechnicalScore and keeps per-turn p95 below budget.</li>
-        </ul>
-      </div>
-      <div class="phase">
-        <div class="phase-title"><span>Phase 5: Demo and Team Handoff</span><span>Owner: product/demo</span></div>
-        <ul>
-          <li><span class="ok">Done:</span> one-command launch via <code>scripts/demo.ps1</code> and <code>scripts/demo.sh</code>.</li>
-          <li><span class="ok">Done:</span> instant UI walkthrough mode via <code>python -m ui --fixture</code>, <code>.\scripts\demo.ps1 -Fixture</code>, or <code>FIXTURE=1 sh scripts/demo.sh</code>.</li>
-          <li><span class="ok">Done:</span> demo script includes curated prompts for search, override, and no-preference behavior.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section>
-      <h2>Demo Showcase Plan</h2>
+      <h2>8. Useful vs Not Useful Right Now</h2>
       <table>
-        <thead>
-          <tr>
-            <th>Need</th>
-            <th>Action</th>
-            <th>Result</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Fast teammate launch</td>
-            <td>Use <code>scripts/demo.ps1</code>, <code>scripts/demo.sh</code>, <code>scripts/evaluate.ps1</code>, and <code>scripts/evaluate.sh</code>.</td>
-            <td>Team members can start UI and evaluator without memorizing commands.</td>
-          </tr>
-          <tr>
-            <td>Public share for video</td>
-            <td>Run <code>python -m ui</code>, then optionally <code>ngrok http 8765</code>.</td>
-            <td>Temporary demo URL while keeping scoring local.</td>
-          </tr>
-          <tr>
-            <td>Clear visual proof</td>
-            <td>UI shows chat, preset demo buttons, turn behavior through the API, selected ask attribute, and a Top 10 product panel with metadata.</td>
-            <td>Judges and teammates can see agent behavior rather than just chat text.</td>
-          </tr>
-          <tr>
-            <td>Reproducible numbers</td>
-            <td>Pin one command that outputs TechnicalScore, Hit@10, MRR, MTTC, p95 latency, and token count.</td>
-            <td>Report and demo use measured values, not guesses.</td>
-          </tr>
-          <tr>
-            <td>Metric narrative</td>
-            <td>Explain HitRate@K as retrieval coverage, MRR/top-rank share as ranking precision, and MTTC as dialog efficiency.</td>
-            <td>The showcase matches the webinar rubric and the evaluator math.</td>
-          </tr>
-        </tbody>
+        <tr><th>Useful</th><th>Why</th></tr>
+        <tr><td>Keep no-paid-API default.</td><td>Simple, cheap, reproducible, no private credentials.</td></tr>
+        <tr><td>Show comparison table in Devpost/video.</td><td>Proves we tested options and chose the best measured method.</td></tr>
+        <tr><td>Use UI for video only.</td><td>Looks good in demo while keeping backend scoring clean.</td></tr>
+        <tr><td>Use `.ps1` and `.sh` script pairs.</td><td>Teammates can run the project on Windows, macOS, or Linux.</td></tr>
+      </table>
+      <table>
+        <tr><th>Not useful</th><th>Why</th></tr>
+        <tr><td>Paid LLM APIs.</td><td>Cost, credential, and network risk; not needed for current score.</td></tr>
+        <tr><td>Unmeasured model changes.</td><td>Could reduce score or break deadline safety.</td></tr>
+        <tr><td>Overbuilding UI.</td><td>The challenge is evaluated through backend APIs.</td></tr>
       </table>
     </section>
 
     <section>
-      <h2>Submission Deliverables</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Deliverable</th>
-            <th>What We Added</th>
-            <th>Still Needed</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Devpost written description</td>
-            <td><code>docs/devpost_draft.md</code> with project description, tools, APIs, libraries, datasets, limitations, and contribution placeholders.</td>
-            <td>Paste measured scores, latency, individual contributions, and final YouTube link.</td>
-          </tr>
-          <tr>
-            <td>Public GitHub repository</td>
-            <td>README setup/reproduction flow, local-data guardrails, model plan, and verification commands.</td>
-            <td>Confirm no local catalog, public set, cache, result file, secret, or oversized model blob is staged.</td>
-          </tr>
-          <tr>
-            <td>Demo video</td>
-            <td><code>docs/demo_video_script.md</code> for evaluator/API walkthrough and optional local UI demo.</td>
-            <td>Record after measured evaluator output is available; upload to public YouTube; link in Devpost.</td>
-          </tr>
-          <tr>
-            <td>Final verification</td>
-            <td><code>scripts/verify_submission.ps1</code> and <code>scripts/verify_submission.sh</code> run tests, compile, repository hygiene, fixture smoke, synthetic customer gate, and optional full data evaluation.</td>
-            <td>Run <code>.\scripts\verify_submission.ps1 -WithData</code> on a data-bearing machine before submission.</td>
-          </tr>
-          <tr>
-            <td>Submission package</td>
-            <td><code>scripts/package_submission.ps1</code> and <code>scripts/package_submission.sh</code> build a tracked-file-only zip from clean <code>HEAD</code>.</td>
-            <td>Use the filename printed by the package script after the final pull.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>Definition of Done</h2>
-      <ul>
-        <li><span class="ok">Done now:</span> official <code>Agent</code> interface, local UI, fixture unit tests, defensive degradation path, ignored local data paths.</li>
-        <li><span class="ok">Measured:</span> full public-set acceptance score is 0.852704 with zero paid API calls.</li>
-        <li><span class="ok">Done now:</span> GitHub Actions fixture CI, repository hygiene, synthetic customer gate, package scripts, PowerShell helpers, and macOS/Linux shell companions.</li>
-        <li><span class="p0">Must finish:</span> final Devpost paste, public YouTube demo link, and last clean <code>-WithData</code> verification before submission.</li>
-        <li><span class="p1">Should finish:</span> concise live demo recording using the preset UI buttons and measured 0.852704 score.</li>
-        <li><span class="p2">Could finish:</span> optional dense/LTR comparison appendix only if it beats the current default.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Immediate Next Actions</h2>
+      <h2>9. Demo Video Script</h2>
       <ol>
-        <li>Run <code>.\scripts\verify_submission.ps1 -WithData</code> once more on the data-bearing machine before submission.</li>
-        <li>Record the demo using <code>.\scripts\demo.ps1 -Fixture</code> and the preset buttons for instant UI flow plus <code>.\scripts\evaluate.ps1</code> for real metrics.</li>
-        <li>Paste <code>docs/devpost_draft.md</code> into Devpost, add individual names/contributions, and link the public YouTube video. Team name: <strong>kpopy demon hunter</strong>.</li>
-        <li>Confirm GitHub Actions remains green on <code>main</code>, run <code>python scripts/check_repo_hygiene.py</code>, and check <code>git status --short</code> shows no staged data or secrets.</li>
-        <li>Only spend extra time on Model2Vec/LightGBM if it can be measured quickly and beats the current 0.852704 default.</li>
+        <li>Say: "We are team kpopy demon hunter."</li>
+        <li>Explain the challenge: find a hidden product in 10 turns.</li>
+        <li>Show the method comparison table.</li>
+        <li>Show the architecture diagram.</li>
+        <li>Run evaluator or show the score table.</li>
+        <li>Open the local UI and show a quick conversation.</li>
+        <li>End with: no paid APIs, zero token usage, reproducible teammate setup.</li>
       </ol>
+    </section>
+
+    <section>
+      <h2>10. Remaining Tasks</h2>
+      <table>
+        <tr><th>Task</th><th>Owner</th><th>Status</th></tr>
+        <tr><td>Fill individual member names and contribution split.</td><td>Team</td><td class="warn">Still needed</td></tr>
+        <tr><td>Record and upload public YouTube video.</td><td>Demo owner</td><td class="warn">Still needed</td></tr>
+        <tr><td>Paste Devpost draft and links.</td><td>Submitter</td><td class="warn">Still needed</td></tr>
+        <tr><td>Keep score above 0.80 and avoid paid APIs.</td><td>Engineering</td><td class="ok">Currently satisfied</td></tr>
+      </table>
+      <div class="callout">Deadline: submit on Devpost before 2026-09-01 12:00 Singapore time.</div>
     </section>
   </main>
 </body>

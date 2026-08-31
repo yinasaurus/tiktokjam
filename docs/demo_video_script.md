@@ -4,100 +4,55 @@ Target length: 2 to 4 minutes.
 
 Use `docs/youtube_description.md` for the upload title and description.
 
-## 1. Opening
+## Slide Order
 
-Show the repo and explain the task:
+| Time | What to show | What to say |
+|---|---|---|
+| 0:00 | README title | "We are team kpopy demon hunter. This is our Shopping Copilot for TikTok TechJam Track 4." |
+| 0:15 | Simple idea table | "The backend agent must find a hidden product from a 50,000-item catalog within 10 turns." |
+| 0:35 | Why normal search fails table | "Customers can be vague, high-intent, or change their mind. The agent needs memory and good questions." |
+| 0:55 | Method comparison table | "We compared approaches and chose the best measured offline method, not a paid API." |
+| 1:20 | Architecture diagram | "The evaluator calls starter.agent.Agent. Our FastAgent parses messages, updates state, asks a question, ranks products, and returns 10 IDs." |
+| 1:55 | Metrics table | "The current expected TechnicalScore is 0.852704, above our 0.80 gate, with zero token usage." |
+| 2:20 | Terminal or CI | "Tests, compile checks, repository hygiene, and CI are green." |
+| 2:40 | Local UI | "The UI is just for demonstration. The backend API is what the challenge scores." |
+| 3:10 | Closing | "The solution is reproducible, offline, no paid API calls, with Windows and macOS/Linux setup scripts." |
 
-> We are team kpopy demon hunter.
->
-> This is a backend conversational shopping copilot for TikTok TechJam 2026
-> Track 4. The goal is to find a hidden purchased Amazon product from a frozen
-> 50,000-item clothing catalog within 10 turns.
+## Commands To Show
 
-Mention that UI is not part of scoring. The official evaluator imports
-`starter.agent.Agent` and scores only returned `parent_asin` IDs.
-
-## 2. Architecture Walkthrough
-
-Show `README.md` and `agent/`.
-
-Cover the four challenge pillars:
-
-- Intent Routing & Hybrid Pipeline: exact phrase, BM25 lexical, dense retrieval,
-  fusion, reranking.
-- Multi-Turn Scenario Evolution: accumulated slots, declined attributes,
-  intent override.
-- Dynamic Context Programming: active constraints are rebuilt each turn and the
-  workflow adapts between retrieval, clarification, reranking, and fallback.
-- Product & Efficiency Metrics: HitRate@10, MRR, MTTC, Efficiency, and
-  TechnicalScore.
-
-## 3. Local Setup Proof
-
-Run:
+Windows:
 
 ```powershell
-.\scripts\setup_local_data.ps1 -DownloadOfficial
 python -m pytest tests -q
-```
-
-Explain that `data/catalog.jsonl`, `data/public_set.jsonl`, caches, and
-`results.json` are local-only and gitignored.
-
-## 4. End-to-End Evaluator
-
-Run:
-
-```powershell
 .\scripts\evaluate.ps1
-```
-
-Show the printed metrics:
-
-- HitRate@10 as retrieval coverage.
-- MRR and top-rank movement as precision.
-- MTTC and Efficiency as reduced conversational load.
-- Token usage as zero for the offline path.
-
-## 5. Demo Interaction
-
-Run:
-
-```powershell
-.\scripts\demo.ps1
-```
-
-For a quick UI-only recording pass, use:
-
-```powershell
 .\scripts\demo.ps1 -Fixture
 ```
 
-The fixture mode is not scored; it exists so the visual walkthrough starts
-instantly. Use `.\scripts\evaluate.ps1` for the real 50k-catalog score.
+macOS / Linux equivalent:
 
-Use short prompts or the preset buttons:
+```bash
+python -m pytest tests -q
+sh scripts/verify_submission.sh --with-data
+sh scripts/demo.sh --fixture
+```
 
-- `navy cotton t-shirts`
-- `black leather boots`
-- `I'm looking for running shorts. A key requirement is: cotton.`
-- Intent override: start with one product type, then say
-  `Actually, ignore my earlier preference. What I need is: leather boots.`
-- Boundary: answer a clarification with
-  `I don't have a preference for color; please use your judgment.`
+## One-Minute Architecture Explanation
 
-Show that the right panel returns ranked product IDs and metadata.
-For fixture-mode recording, click `Reset`, then use `Override 1` followed by
-`Override 2` to show an intent change inside the same category.
+```text
+customer message
+  -> starter.agent.Agent
+  -> FastAgent
+  -> parse message and update memory
+  -> ask one useful attribute
+  -> rank using category, exact constraints, lexical overlap, and fallback
+  -> return 10 product IDs
+```
 
-## 6. Close
+## Important Lines To Mention
 
-Summarize:
-
-> The submission is offline, deterministic, and evaluator-compatible. The core
-> design prioritizes candidate coverage first, then uses reranking and adaptive
-> questions to improve precision and reduce mean turns to conversion.
-
-Avoid showing third-party trademarks beyond what is necessary in the competition
-catalog output. For a backend/NLP track, an API/evaluator walkthrough is
-acceptable.
+- No paid APIs.
+- No hosted LLM dependency.
+- Zero token usage during scoring.
+- Official data stays local and gitignored.
+- UI is only for video; evaluator scores backend product IDs.
+- We only submit methods that beat `TechnicalScore >= 0.80`.

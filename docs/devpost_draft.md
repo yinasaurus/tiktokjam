@@ -2,184 +2,149 @@
 
 Team: **kpopy demon hunter**
 
-## Project Description
-
-This project is an offline conversational shopping agent for TikTok TechJam 2026
-Track 4: Shopping Copilot. The agent receives a short user message and an
-anonymized aggregate preference profile, then returns a ranked list of catalog
-`parent_asin` values and, when useful, one structured clarification request.
-
-The system is optimized for the official backend evaluator, not for a consumer
-checkout UI. Each session has a hard 10-turn limit. The objective is to recover
-the hidden purchased product as early and as highly ranked as possible.
-
 Repository: https://github.com/yinasaurus/tiktokjam
 
-Planning artifact: https://mj4gkxs69b24.postplan.dev
+Main PostPlan: https://mj4gkxs69b24.postplan.dev
 
-## How It Addresses the Problem
+Status PostPlan: https://pbexoc8bktvw.postplan.dev
 
-Traditional keyword search is brittle when a shopper starts vague, changes
-their mind, or gives constraints incrementally. This solution uses an offline
-evaluator-aligned retrieval pipeline, with a hybrid research path kept available
-for measured experiments:
+## 1. Project Summary
 
-- Intent-sensitive handling for Buying, Browsing, Intent Override, and Boundary
-  scenarios.
-- Category routing, exact phrase matching, cross-turn lexical overlap, and
-  popularity backfill in the submitted default agent.
-- Optional multi-route research path across BM25 lexical search, dense
-  retrieval, fusion, and reranking.
-- Dialog state tracking for accumulated slots, declined attributes, superseded
-  preferences, and the latest user utterance.
-- Reciprocal-rank fusion and reranking to convert broad candidate coverage into
-  precise top-ranked recommendations.
-- A deadline guard and degraded fallback so the agent returns valid catalog IDs
-  instead of timing out.
+| Question | Answer |
+|---|---|
+| What did we build? | An offline conversational shopping agent. |
+| What problem does it solve? | It helps a shopper find the right product even when the shopper is vague, changes their mind, or gives constraints over multiple turns. |
+| What does it output? | A ranked Top 10 list of valid Amazon `parent_asin` product IDs and one optional clarification question. |
+| Does it require paid APIs? | No. The submitted path is offline, CPU-only, and uses zero token calls. |
 
-## Technical Architecture
+## 2. Problem
 
-The official evaluator imports `from starter.agent import Agent`. The adapter in
-`starter/agent.py` exports the offline fast submission agent by default and
-keeps the heavier hybrid agent available as `HybridAgent` for experiments.
+Normal e-commerce search depends heavily on keywords. That breaks when the
+customer says something vague like "I need something comfortable for work", or
+when they change their mind halfway through the conversation.
 
-Main components:
+The challenge asks us to build a backend shopping copilot that can:
 
-- `agent/fast_agent.py`: submitted default path; offline category routing,
-  exact intent-card signal, repeated clarification, override handling, and
-  valid Top 10 fallback.
-- `agent/catalog.py`: defensive parsing, normalization, product indexing, and
-  popularity backfill for the hybrid research path.
-- `agent/extract.py`: constraint extraction from the current utterance and
-  session context.
-- `agent/state.py`: per-session memory and slot lifecycle.
-- `agent/routes/`: exact phrase, lexical BM25, and dense retrieval routes.
-- `agent/fusion.py`: weighted reciprocal-rank fusion and popularity recovery.
-- `agent/rerank.py`: heuristic reranking plus optional LightGBM model loading.
-- `evaluator/local_evaluator.py`: official-style scoring for public sessions.
+| Challenge behavior | What it means | Our approach |
+|---|---|---|
+| Buying | Customer has hard requirements. | Use category and exact constraints early. |
+| Browsing | Customer is still exploring. | Ask useful clarification questions while still ranking products. |
+| Intent override | Customer says to ignore earlier preference. | Replace old intent instead of mixing old and new constraints. |
+| Boundary | Customer has no preference for an attribute. | Move on to another attribute and keep recommending. |
 
-## Models and APIs Used
+## 3. Architecture
 
-Default path:
+```text
+official evaluator or local demo UI
+    |
+    v
+starter.agent.Agent
+    |
+    v
+FastAgent
+    |
+    +--> parse customer message
+    +--> update per-session state
+    +--> choose next ask_attribute
+    |
+    v
+category + exact + lexical + popularity routes
+    |
+    v
+rank candidates
+    |
+    v
+return 10 valid parent_asin IDs + one question
+```
 
-- No hosted LLM API.
-- No API key.
-- No paid API calls.
-- Zero token usage during scoring.
-- CPU-only local Python stack.
+## 4. Method Comparison
 
-Planned production model artifacts:
+| Method | Paid API? | What it does | Expected score | Decision |
+|---|---:|---|---:|---|
+| Starter BM25 | No | Basic keyword search. | 0.1067 | Baseline only. |
+| Category + memory | No | Remembers earlier turns and category. | about 0.25 | Useful foundation. |
+| Ask every turn | No | Always asks a valid attribute question while recommending. | about 0.69 | Core idea. |
+| Fast exact + lexical agent | No | Uses category, exact constraints, lexical ranking, and fallback. | **0.852704** | **Submitted default.** |
+| Dense embeddings | No | Optional semantic search. | Must beat default first. | Research only. |
+| LightGBM reranker | No | Optional learned ranking model. | Must beat default first. | Research only. |
+| Hosted LLM API | Usually yes | External model calls for rewriting/ranking. | Not needed. | Avoided. |
 
-- Default submission path: no model artifact required; deterministic offline
-  catalog indexing, clarification, and exact intent-card signal.
-- Optional dense encoder: a vendored Model2Vec static encoder under
-  `models/encoder/`, only if measured ablations improve the default.
-- Optional reranker: LightGBM LambdaRank saved as `models/ltr.txt`, only if it
-  beats the default on score and latency.
+## 5. Current Measured Result
 
-External hosted services are not part of the submission path. If the team later
-tests an external model for learning only, credentials must be supplied locally
-via environment variables and never committed, and the offline local path remains
-the default submitted method.
+| Metric | Value | Meaning |
+|---|---:|---|
+| HitRate@10 | 0.960000 | The correct product usually appears in the Top 10. |
+| MRR | 0.681347 | The correct product is usually ranked high. |
+| MTTC | 2.585000 | The agent usually converts in about 2 to 3 turns. |
+| TechnicalScore | **0.852704** | Above our internal 0.80 acceptance gate. |
+| Token usage | 0 | No paid API calls in the submitted path. |
 
-## Libraries and Frameworks
+## 6. Tools, Libraries, APIs
 
-- Python 3.11+
-- `numpy`
-- `scipy`
-- `bm25s`
-- `model2vec`
-- `lightgbm`
-- `pytest`
-- Standard-library HTTP server for the optional local demo UI
+| Category | Used |
+|---|---|
+| Language | Python 3.11+ |
+| Libraries | `numpy`, `scipy`, `bm25s`, `model2vec`, `lightgbm`, `pytest` |
+| APIs | No hosted API required for submitted path |
+| UI | Standard-library local HTTP server and static HTML |
+| Development | VSCode / terminal-friendly scripts |
 
-## Dataset and Assets
+## 7. Dataset and Assets
 
-The competition uses a frozen 50,000-product slice from the Amazon Reviews 2023
-`Clothing_Shoes_and_Jewelry` category. The participant kit also includes 200
-labeled public development sessions and a deterministic local evaluator. The
-organizer keeps 800 additional private sessions for final scoring.
+| Asset | How we use it |
+|---|---|
+| Frozen 50,000-product catalog | Local scoring catalog. |
+| 200 public sessions | Local evaluation and ablation testing. |
+| 800 private sessions | Held by organizer for final evaluation. |
+| Amazon Reviews 2023 lineage | Source of the organizer-provided catalog slice. |
 
-The project does not download or reconstruct the full upstream Amazon Reviews
-2023 dataset. It uses the official participant kit release assets only:
+We do not reconstruct the full upstream Amazon Reviews 2023 dataset. We use the
+official participant kit assets only. Local data files are gitignored and are
+not committed.
 
-- `catalog.jsonl.gz`
-- `techjam-participant-kit.zip`
-- `SHA256SUMS`
+## 8. Reproducibility
 
-Local data files are gitignored and should not be committed.
-
-## Evaluation Framing
-
-- Coverage / HitRate@K: shows whether retrieval keeps the hidden purchased item
-  inside the returned candidate set.
-- Precision / MRR / top-rank share: shows whether reranking moves the exact
-  purchased item toward rank 1.
-- Efficiency / MTTC: shows whether the dialog policy converges in fewer turns
-  and avoids unnecessary cognitive load.
-- Cost / latency: shows commercial practicality. The default path is offline
-  and reports zero token usage.
-
-Internal submission gate: the team should only treat a method as submission-ready
-when the official local evaluator or acceptance wrapper reports
-`recommended_technical_score >= 0.80` without paid API calls, with valid Top 10
-recommendations and acceptable latency.
-
-Current measured public-set result for the default offline path:
-
-- HitRate@10: 0.960000
-- MRR: 0.681347
-- MTTC: 2.585000
-- TechnicalScore: 0.852704
-- Token usage: 0
-
-## How To Reproduce
+Windows:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-
 .\scripts\setup_local_data.ps1 -DownloadOfficial
 .\scripts\verify_submission.ps1 -WithData
-.\scripts\package_submission.ps1
+.\scripts\demo.ps1 -Fixture
 ```
 
-Optional model training:
+macOS / Linux:
 
-```powershell
-python scripts/train_ltr.py
-python scripts/bench_reranker.py --mode ltr
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+sh scripts/setup_local_data.sh --download-official
+sh scripts/verify_submission.sh --with-data
+sh scripts/demo.sh --fixture
 ```
 
-## Limitations
+## 9. Limitations
 
-- The catalog is frozen; the system does not handle cold-start products.
-- Text only; no image or multimodal retrieval.
-- English-only assumptions.
-- The demo UI is not scored and is intended only for walkthroughs.
-- Hybrid research ranker falls back to a heuristic unless `models/ltr.txt` has
-  been trained and benchmarked.
-- The current submission candidate avoids paid APIs and hosted model
-  dependencies entirely.
+| Limitation | What we would improve |
+|---|---|
+| Text-only catalog | Add multimodal image/product understanding in a real system. |
+| Frozen catalog | Add catalog update handling for production. |
+| Evaluator-specific templates | Keep semantic fallback and avoid relying only on exact strings. |
+| Demo UI is simple | Build a richer product-facing UI after the backend competition. |
+| Optional dense/LTR paths are research-only | Submit them only if measured score and latency improve. |
 
-## Future Improvements
-
-- Complete Model2Vec vendoring and network-disabled verification.
-- Train and benchmark the LightGBM LambdaRank reranker.
-- Add a measured ablation appendix only if a new method beats the current
-  offline default.
-- Improve demo explanations for matched constraints and intent routing without
-  changing the scored backend API.
-- Calibrate question policy thresholds against per-scenario evaluator results.
-
-## Team Contributions
+## 10. Team Contributions
 
 Team name: **kpopy demon hunter**
 
-Fill individual names and contribution split before submission:
+Fill individual names and contribution split before final Devpost submission:
 
-- Team member 1:
-- Team member 2:
-- Team member 3:
-- Team member 4:
+| Member | Contribution |
+|---|---|
+| Team member 1 | _Fill in_ |
+| Team member 2 | _Fill in_ |
+| Team member 3 | _Fill in_ |
+| Team member 4 | _Fill in_ |
