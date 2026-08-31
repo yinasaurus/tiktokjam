@@ -2,14 +2,9 @@
 
 Team: **kpopy demon hunter**
 
-Source repo inspected locally:
-
-```text
-X:\01 REPOSITORIES\healthkaki-pov
-```
-
-The user originally said `healthkaki pov`; the actual local folder is
-`healthkaki-pov`.
+Source: a separate internal evaluation/tooling repository (not this TechJam
+codebase), inspected locally for process lessons such as runbooks, test gates,
+and branch hygiene.
 
 ## 1. What Was Inspected
 

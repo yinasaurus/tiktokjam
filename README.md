@@ -90,7 +90,7 @@ Detailed research notes in this repo:
 ```text
 docs/research/marketplace_search_patterns.md
 docs/research/model_avenues.md
-docs/research/healthkaki_pov_lessons.md
+docs/research/cross_project_eval_lessons.md
 docs/evaluation_runbook.md
 ```
 

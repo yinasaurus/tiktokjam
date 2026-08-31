@@ -36,8 +36,8 @@ ALLOW_SECRET_WORD_FILES = {
     "README.md",
     "DISCLOSURE.md",
     "DATA_ATTRIBUTION.md",
-    "PRD-v2.0-conversational-shopping-agent.md",
-    "TDD-v2.0-conversational-shopping-agent.md",
+    "docs/design/PRD-v2.0-conversational-shopping-agent.md",
+    "docs/design/TDD-v2.0-conversational-shopping-agent.md",
     "plan.html",
     "scripts/check_repo_hygiene.py",
 }

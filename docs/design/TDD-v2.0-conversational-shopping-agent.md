@@ -669,6 +669,10 @@ repo/
 ├── README.md                    # overview, setup, reproduction, limitations, contributions
 ├── requirements.txt             # pinned
 ├── DISCLOSURE.md                # deliverable 5
+├── docs/
+│   └── design/
+│       ├── PRD-v2.0-conversational-shopping-agent.md
+│       └── TDD-v2.0-conversational-shopping-agent.md
 ├── report/
 │   ├── technical_report.md      # deliverable 4
 │   └── figures/
