@@ -66,8 +66,9 @@ database, no committed private credential, and zero token usage.
 | Starter BM25 | Keyword search only | 0.1067 | Too weak because it does not ask well. |
 | Category + memory | Remember turns and category | about 0.25 | Memory matters. |
 | Valid question each turn | Ask while recommending | about 0.69 | Clarification is the biggest win. |
-| Fast exact + lexical | Add exact constraints and fallback | **0.852704** | Best current submission path. |
-| Dense/LTR research | Add semantic/model ranking | Must beat 0.852704 | Only ship if measured better. |
+| Fast exact + lexical | Add exact constraints and fallback | 0.852704 | Previous best. |
+| Fast + rank tie-breaks | Semicolon-safe constraints, position matching, popularity tie-breaks | **0.902564** | Best current PR candidate. |
+| Dense/LTR research | Add semantic/model ranking | Must beat 0.902564 | Only ship if measured better. |
 
 ## 6. Current Public-Set Result
 
@@ -75,11 +76,11 @@ Measured with the official-style local evaluator on 200 public sessions.
 
 | Scope | HitRate@10 | MRR | MTTC | TechnicalScore |
 |---|---:|---:|---:|---:|
-| Overall | 0.960000 | 0.681347 | 2.585000 | 0.852704 |
-| Buying | 0.975000 | 0.664301 | 1.925000 | 0.868290 |
-| Browsing | 0.937500 | 0.672505 | 2.637500 | 0.837751 |
-| Intent Override | 0.966667 | 0.755556 | 3.933333 | 0.851334 |
-| Boundary | 1.000000 | 0.665833 | 3.400000 | 0.851750 |
+| Overall | 1.000000 | 0.711546 | 1.545000 | 0.902564 |
+| Buying | 1.000000 | 0.731300 | 1.100000 | 0.917390 |
+| Browsing | 1.000000 | 0.637654 | 1.237500 | 0.886546 |
+| Intent Override | 1.000000 | 0.925000 | 3.600000 | 0.925500 |
+| Boundary | 1.000000 | 0.504286 | 1.400000 | 0.843286 |
 
 ## 7. Cost, Latency, Tokens
 
@@ -114,4 +115,4 @@ Measured with the official-style local evaluator on 200 public sessions.
 ## 10. Final Submission Position
 
 Submit the fast offline agent unless a fresh full public-set ablation beats
-`TechnicalScore 0.852704` with acceptable latency and no paid API calls.
+`TechnicalScore 0.902564` with acceptable latency and no paid API calls.

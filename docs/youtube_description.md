@@ -22,10 +22,10 @@ Default submission path:
 - CPU-only local Python agent
 
 Measured public-set result:
-- HitRate@10: 0.960000
-- MRR: 0.681347
-- MTTC: 2.585000
-- TechnicalScore: 0.852704
+- HitRate@10: 1.000000
+- MRR: 0.711546
+- MTTC: 1.545000
+- TechnicalScore: 0.902564
 
 Repository:
 https://github.com/yinasaurus/tiktokjam

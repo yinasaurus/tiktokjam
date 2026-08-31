@@ -150,7 +150,7 @@
       <span class="pill">Track 4</span>
       <span class="pill">No paid APIs</span>
       <span class="pill">Offline CPU default</span>
-      <span class="pill">TechnicalScore 0.852704</span>
+      <span class="pill">TechnicalScore 0.902564</span>
     </div>
   </header>
 
@@ -194,7 +194,8 @@
         <tr><td>Starter BM25 keyword baseline</td><td>No</td><td>0.1067</td><td>Reject. Too weak.</td></tr>
         <tr><td>Category filter + memory</td><td>No</td><td>about 0.25</td><td>Useful foundation.</td></tr>
         <tr><td>Ask a valid question every turn</td><td>No</td><td>about 0.69</td><td>Core winning idea.</td></tr>
-        <tr><td>Fast exact + lexical agent</td><td>No</td><td><strong>0.852704</strong></td><td><strong>Use for submission.</strong></td></tr>
+        <tr><td>Fast exact + lexical agent</td><td>No</td><td>0.852704</td><td>Previous default.</td></tr>
+        <tr><td>Fast + rank tie-breaks</td><td>No</td><td><strong>0.902564</strong></td><td><strong>Use for PR review.</strong></td></tr>
         <tr><td>Dense embeddings / Model2Vec</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>LightGBM learned reranker</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>Hosted LLM API</td><td>Likely yes</td><td>Not needed</td><td>Avoid: cost, credential, and network risk.</td></tr>
@@ -206,7 +207,8 @@
       <table>
         <tr><th>Question</th><th>Answer</th></tr>
         <tr><td>Are we using an LLM?</td><td>No hosted LLM is used in the submitted default. No paid API call is required.</td></tr>
-        <tr><td>Are we using BM25?</td><td>BM25-style/hybrid search exists in the research path, but the current default fast agent uses offline ranked retrieval.</td></tr>
+        <tr><td>Are we using BM25?</td><td>BM25 means keyword search. We tested BM25-style/hybrid code, but the default is not plain BM25.</td></tr>
+        <tr><td>What is ranked retrieval?</td><td>Give each candidate product a score, sort by that score, and return the best 10 IDs.</td></tr>
         <tr><td>What is the main search method?</td><td>Category filtering, exact disclosed constraints, lexical/token overlap, and popularity fallback.</td></tr>
         <tr><td>Are we training a model?</td><td>Not for the submitted default. LightGBM training is a research branch only.</td></tr>
         <tr><td>Why this method?</td><td>It is faster, cheaper, reproducible, and currently beats the heavier research path.</td></tr>
@@ -228,16 +230,17 @@
       <h2>Slide 7: 95% TechnicalScore Reality Check</h2>
       <table>
         <tr><th>Metric</th><th>Current clean result</th><th>Rough target for 95% TechnicalScore</th></tr>
-        <tr><td>HitRate@10</td><td>0.960</td><td>about 1.000</td></tr>
-        <tr><td>MRR</td><td>0.681</td><td>about 0.900</td></tr>
-        <tr><td>MTTC</td><td>2.585</td><td>about 2.000 or lower</td></tr>
+        <tr><td>HitRate@10</td><td>1.000</td><td>about 1.000</td></tr>
+        <tr><td>MRR</td><td>0.712</td><td>about 0.900</td></tr>
+        <tr><td>MTTC</td><td>1.545</td><td>about 2.000 or lower</td></tr>
       </table>
       <table>
         <tr><th>30-session research variant</th><th>HitRate@10</th><th>MRR</th><th>MTTC</th><th>TechnicalScore</th><th>Decision</th></tr>
         <tr><td>Hybrid <code>full</code></td><td>0.800</td><td>0.689815</td><td>3.933333</td><td>0.748278</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
-        <tr><td>Fast default reference</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Still best</td></tr>
+        <tr><td>Fast default before tie-breaks</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Previous best</td></tr>
+        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.711546</td><td>1.545000</td><td>0.902564</td><td>Current best PR candidate</td></tr>
       </table>
     </section>
 
@@ -303,10 +306,10 @@ submit only the best method</code></pre>
       <h2>Slide 10: Current Result</h2>
       <table>
         <tr><th>Metric</th><th>Value</th><th>Meaning</th></tr>
-        <tr><td>HitRate@10</td><td>0.960000</td><td>We find the target in Top 10 for most public sessions.</td></tr>
-        <tr><td>MRR</td><td>0.681347</td><td>When we hit, the target is usually ranked high.</td></tr>
-        <tr><td>MTTC</td><td>2.585000</td><td>Average conversion happens in about 2.6 turns.</td></tr>
-        <tr><td>TechnicalScore</td><td><strong>0.852704</strong></td><td>Above our 0.80 acceptance gate.</td></tr>
+        <tr><td>HitRate@10</td><td>1.000000</td><td>We find the target in Top 10 for every public session.</td></tr>
+        <tr><td>MRR</td><td>0.711546</td><td>Rank 1 placement is improved but still the main remaining gap.</td></tr>
+        <tr><td>MTTC</td><td>1.545000</td><td>Average conversion happens in about 1.5 turns.</td></tr>
+        <tr><td>TechnicalScore</td><td><strong>0.902564</strong></td><td>Above 0.90 and above our 0.80 acceptance gate.</td></tr>
         <tr><td>Token usage</td><td>0</td><td>No LLM API usage in the default path.</td></tr>
       </table>
     </section>

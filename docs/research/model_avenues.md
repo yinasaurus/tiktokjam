@@ -7,19 +7,26 @@ Branch: `research/dense-ltr-marketplaces`
 Reason for this branch: keep `main` stable while we investigate the two Slide 4
 research methods that are not the submitted default.
 
+Bottom line today: submit the offline `FastAgent` rank tie-break PR unless
+dense retrieval or LightGBM reranking beats `0.902564` on the full
+official-style evaluator with zero paid API calls.
+
 ## 1. Current Truth
 
 | Item | Value |
 |---|---:|
-| Current official clean TechnicalScore | 0.852704 |
-| Current clean HitRate@10 | 0.960000 |
+| Current official clean TechnicalScore | 0.902564 |
+| Current clean HitRate@10 | 1.000000 |
+| Current clean MRR | 0.711546 |
+| Current clean MTTC | 1.545000 |
 | Current paraphrased robustness TechnicalScore | 0.844094 |
 | Current paraphrased HitRate@10 | 0.955000 |
 | Paid API calls | 0 |
 | Current submitted default | `starter.agent.Agent` -> `agent.fast_agent.Agent` |
 
-Important: the latest pulled code does **not** show a 90%+ official
-TechnicalScore. It shows 95-96% HitRate@10. TechnicalScore is still about 85%.
+Important: the latest rank tie-break research now shows 90%+ official
+TechnicalScore on the public evaluator. It is still not 95%; the remaining
+gap is mostly MRR.
 
 ## 2. What We Are Using Today
 
@@ -38,9 +45,9 @@ To reach `TechnicalScore = 0.95`, we likely need all three:
 
 | Metric | Current | Rough target for 0.95 |
 |---|---:|---:|
-| HitRate@10 | 0.960 | about 1.000 |
-| MRR | 0.681 | about 0.900 |
-| MTTC | 2.585 | about 2.000 or lower |
+| HitRate@10 | 1.000 | about 1.000 |
+| MRR | 0.712 | about 0.900 |
+| MTTC | 1.545 | about 2.000 or lower |
 
 This is a large jump. The biggest remaining gap is ranking precision: the target
 product must appear closer to rank 1, not just somewhere in Top 10.
@@ -54,7 +61,7 @@ product must appear closer to rank 1, not just somewhere in Top 10.
 | Paid API? | No. Must be downloaded locally and committed only if size/licence are acceptable. |
 | Current implementation | `agent/routes/dense.py` supports `Model2VecEncoder`; tiny fixtures use `HashEncoder`. |
 | Risk | Embedding 50k products at startup may be slow unless cached/precomputed. |
-| Submission rule | Only use if full public-set TechnicalScore beats `0.852704`. |
+| Submission rule | Only use if full public-set TechnicalScore beats `0.902564`. |
 
 Commands:
 
@@ -87,7 +94,7 @@ Decision rule:
 | Paid API? | No. Training is local. |
 | Current implementation | `scripts/train_ltr.py`, `agent/rerank.py`, `agent/rank_features.py`. |
 | Risk | Only 200 public sessions; high overfit risk. |
-| Submission rule | Only use if full public-set TechnicalScore beats `0.852704` and latency is acceptable. |
+| Submission rule | Only use if full public-set TechnicalScore beats `0.902564` and latency is acceptable. |
 
 Commands:
 
@@ -128,7 +135,7 @@ Accept only if:
 
 | Gate | Required |
 |---|---|
-| Official clean TechnicalScore | Greater than `0.852704` |
+| Official clean TechnicalScore | Greater than `0.902564` |
 | Internal minimum | At least `0.80` |
 | Paid API calls | 0 |
 | Token usage | 0 |
@@ -158,7 +165,8 @@ Result:
 | `full` hybrid path | 0.800000 | 0.689815 | 3.933333 | 0.748278 | Below default. |
 | `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Dense helped this small slice, but not enough. |
 | `lexical_only` | 0.100000 | 0.041429 | 10.000000 | 0.082429 | Not viable. |
-| fast default reference | 0.960000 | 0.681347 | 2.585000 | 0.852704 | Current submission default. |
+| fast default before tie-breaks | 0.960000 | 0.681347 | 2.585000 | 0.852704 | Previous default. |
+| fast rank tie-break PR candidate | 1.000000 | 0.711546 | 1.545000 | 0.902564 | Current best measured path. |
 
 Interpretation:
 
@@ -167,7 +175,7 @@ Interpretation:
 | Hybrid `full` underperforms fast default on the quick 30-session run. | Do not switch default agent. |
 | Dense appears useful inside hybrid because `full` beats `no_dense` on this slice. | Continue dense research only if local encoder/cache can keep latency sane. |
 | Lexical-only hybrid path collapses. | Ranking needs exact/state/fallback signals. |
-| Current fast default is still the strongest measured submission path. | `main` should remain stable unless a full public-set run beats it. |
+| Current fast rank tie-break path is now the strongest measured submission path. | Open a PR for review; do not merge without teammate approval. |
 
 An earlier local heuristic reranker benchmark artifact also showed
 `TechnicalScore 0.555500` on a 20-session slice with p95 latency above 2s, so

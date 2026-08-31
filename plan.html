@@ -151,7 +151,7 @@
       <span class="pill">Offline default</span>
       <span class="pill">Local UI for demo</span>
       <span class="pill">Windows + macOS/Linux scripts</span>
-      <span class="pill">TechnicalScore 0.852704</span>
+      <span class="pill">TechnicalScore 0.902564</span>
     </div>
   </header>
 
@@ -184,7 +184,8 @@
         <tr><td>Starter BM25</td><td>Simple keyword search.</td><td>No</td><td>0.1067</td><td class="bad">No</td></tr>
         <tr><td>Category + memory</td><td>Remember previous turns and use category clues.</td><td>No</td><td>about 0.25</td><td>Foundation only</td></tr>
         <tr><td>Ask every turn</td><td>Always ask a valid attribute question while recommending.</td><td>No</td><td>about 0.69</td><td>Yes, core behavior</td></tr>
-        <tr><td>Fast exact + lexical</td><td>Use category, exact constraints, words, and fallback ranking.</td><td>No</td><td><strong>0.852704</strong></td><td class="ok"><strong>Submit</strong></td></tr>
+        <tr><td>Fast exact + lexical</td><td>Use category, exact constraints, words, and fallback ranking.</td><td>No</td><td>0.852704</td><td>Previous default</td></tr>
+        <tr><td>Fast + rank tie-breaks</td><td>Add semicolon-safe constraints, position matching, and popularity tie-breaks.</td><td>No</td><td><strong>0.902564</strong></td><td class="ok"><strong>Submit</strong></td></tr>
         <tr><td>Dense embeddings</td><td>Optional semantic search model.</td><td>No</td><td>Must beat default first</td><td>Research only</td></tr>
         <tr><td>LightGBM reranker</td><td>Optional trained ranking model.</td><td>No</td><td>Must beat default first</td><td>Research only</td></tr>
         <tr><td>Hosted LLM</td><td>External model call for ranking or rewriting.</td><td>Likely yes</td><td>Not needed</td><td class="bad">Avoid</td></tr>
@@ -196,7 +197,8 @@
       <table>
         <tr><th>Question</th><th>Answer</th></tr>
         <tr><td>Are we using an LLM?</td><td>No hosted LLM is used in the submitted default. No paid API call is required.</td></tr>
-        <tr><td>Are we using BM25?</td><td>BM25-style/hybrid search exists in the research path, but the current default fast agent uses offline ranked retrieval.</td></tr>
+        <tr><td>Are we using BM25?</td><td>BM25 means keyword search. We tested BM25-style/hybrid code, but the default is not plain BM25.</td></tr>
+        <tr><td>What is ranked retrieval?</td><td>Give each candidate product a score, sort by that score, and return the best 10 IDs.</td></tr>
         <tr><td>What is the main search method?</td><td>Category filtering, exact disclosed constraints, lexical/token overlap, and popularity fallback.</td></tr>
         <tr><td>Are we training a model?</td><td>Not for the submitted default. LightGBM training is a research branch only.</td></tr>
         <tr><td>Why this method?</td><td>It is faster, cheaper, reproducible, and currently beats the heavier research path.</td></tr>
@@ -219,18 +221,19 @@
       <h2>6. 95% TechnicalScore Reality Check</h2>
       <table>
         <tr><th>Metric</th><th>Current clean result</th><th>Rough target for 95% TechnicalScore</th></tr>
-        <tr><td>HitRate@10</td><td>0.960</td><td>about 1.000</td></tr>
-        <tr><td>MRR</td><td>0.681</td><td>about 0.900</td></tr>
-        <tr><td>MTTC</td><td>2.585</td><td>about 2.000 or lower</td></tr>
+        <tr><td>HitRate@10</td><td>1.000</td><td>about 1.000</td></tr>
+        <tr><td>MRR</td><td>0.712</td><td>about 0.900</td></tr>
+        <tr><td>MTTC</td><td>1.545</td><td>about 2.000 or lower</td></tr>
       </table>
       <table>
         <tr><th>30-session research variant</th><th>HitRate@10</th><th>MRR</th><th>MTTC</th><th>TechnicalScore</th><th>Decision</th></tr>
         <tr><td>Hybrid <code>full</code></td><td>0.800</td><td>0.689815</td><td>3.933333</td><td>0.748278</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
-        <tr><td>Fast default reference</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Still best</td></tr>
+        <tr><td>Fast default before tie-breaks</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Previous best</td></tr>
+        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.711546</td><td>1.545000</td><td>0.902564</td><td>Current best PR candidate</td></tr>
       </table>
-      <div class="callout">Verified: the "more than 90%" claim matches HitRate@10, not official TechnicalScore.</div>
+      <div class="callout">Latest branch result is now above 90% TechnicalScore, but 95% still needs a much higher MRR.</div>
     </section>
 
     <section>
@@ -272,9 +275,9 @@ run tests + evaluator
   v
 compare score table
   |
-  +-- score > 0.852704 and stable -> consider submit
+  +-- score > 0.902564 and stable -> consider submit
   |
-  +-- score <= 0.852704 or slower -> keep as research
+  +-- score <= 0.902564 or slower -> keep as research
   |
   v
 never use paid API by default</code></pre>
@@ -286,10 +289,10 @@ never use paid API by default</code></pre>
       <h2>8. Current Result Table</h2>
       <table>
         <tr><th>Metric</th><th>Value</th><th>Easy reading</th></tr>
-        <tr><td>HitRate@10</td><td>0.960000</td><td>The agent usually includes the hidden product in its Top 10.</td></tr>
-        <tr><td>MRR</td><td>0.681347</td><td>The hidden product is usually ranked fairly high.</td></tr>
-        <tr><td>MTTC</td><td>2.585000</td><td>The agent usually converges in about 2 to 3 turns.</td></tr>
-        <tr><td>TechnicalScore</td><td><strong>0.852704</strong></td><td>Above our 0.80 acceptance target.</td></tr>
+        <tr><td>HitRate@10</td><td>1.000000</td><td>The agent includes the hidden product in Top 10 for every public session.</td></tr>
+        <tr><td>MRR</td><td>0.711546</td><td>The hidden product is usually high, but rank 1 is still the main gap.</td></tr>
+        <tr><td>MTTC</td><td>1.545000</td><td>The agent usually converges in about 1 to 2 turns.</td></tr>
+        <tr><td>TechnicalScore</td><td><strong>0.902564</strong></td><td>Above 0.90 and above our 0.80 acceptance target.</td></tr>
         <tr><td>Token usage</td><td>0</td><td>No LLM API calls are used in the submitted path.</td></tr>
       </table>
     </section>
@@ -319,6 +322,7 @@ python -m pip install -r requirements.txt
 .\scripts\setup_local_data.ps1 -DownloadOfficial
 .\scripts\verify_submission.ps1 -WithData
 .\scripts\demo.ps1 -Fixture</code></pre>
+          <p><strong>Fixture note:</strong> if the UI says <code>Demo fixture catalog: 13 products ready</code>, that is expected. The fixture is only for fast video recording.</p>
         </div>
         <div>
           <h3>macOS / Linux</h3>
@@ -327,6 +331,7 @@ python -m pip install -r requirements.txt
 sh scripts/setup_local_data.sh --download-official
 sh scripts/verify_submission.sh --with-data
 sh scripts/demo.sh --fixture</code></pre>
+          <p><strong>Official scoring:</strong> use <code>scripts/evaluate.*</code> with the downloaded 50,000-product catalog. The 13-product UI is not the scored backend run.</p>
         </div>
       </div>
     </section>
@@ -350,15 +355,15 @@ sh scripts/demo.sh --fixture</code></pre>
 
     <section>
       <h2>12. Demo Video Script</h2>
-      <ol>
-        <li>Say: "We are team kpopy demon hunter."</li>
-        <li>Explain the challenge: find a hidden product in 10 turns.</li>
-        <li>Show the method comparison table.</li>
-        <li>Show the architecture diagram.</li>
-        <li>Run evaluator or show the score table.</li>
-        <li>Open the local UI and show a quick conversation.</li>
-        <li>End with: no paid APIs, zero token usage, reproducible teammate setup.</li>
-      </ol>
+      <table>
+        <tr><th>Shot</th><th>Show</th><th>Say</th></tr>
+        <tr><td>1</td><td>README top</td><td>We are team kpopy demon hunter, building a backend shopping copilot.</td></tr>
+        <tr><td>2</td><td>Method table</td><td>We tested the starter, memory, questioning, dense research, and LTR research.</td></tr>
+        <tr><td>3</td><td>Architecture diagram</td><td>The submitted path is offline ranked retrieval, not a paid LLM API.</td></tr>
+        <tr><td>4</td><td>Evaluator table</td><td>This is the official-style 50,000-product score.</td></tr>
+        <tr><td>5</td><td>Local UI</td><td>The UI fixture has 13 products for recording; the evaluator uses the real catalog.</td></tr>
+        <tr><td>6</td><td>No API section</td><td>Zero token usage, no hosted model, and teammates can run it with ps1 or sh scripts.</td></tr>
+      </table>
     </section>
 
     <section>

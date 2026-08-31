@@ -9,6 +9,7 @@ external services.
 from __future__ import annotations
 
 import json
+import math
 import os
 import pickle
 import re
@@ -27,7 +28,7 @@ MATERIAL_RE = re.compile(r"\b(cotton|polyester|nylon|leather|wool|spandex|silk|r
 COLOR_RE = re.compile(r"\b(black|white|blue|red|pink|green|brown|gray|grey|purple|yellow|orange)\b", re.I)
 WORD_RE = re.compile(r"[a-z0-9]+", re.I)
 ASK_PLAN = ("other", "other", "material", "color", "budget", "style", "feature", "use_case", "size")
-FAST_CACHE_VERSION = "fast-agent-v1"
+FAST_CACHE_VERSION = "fast-agent-v2"
 
 
 def _flatten_values(value: object) -> list[str]:
@@ -102,6 +103,8 @@ class Agent:
         self.tokens: dict[str, set[str]] = {}
         self.by_category: dict[str, list[str]] = defaultdict(list)
         self.by_constraint: dict[str, set[str]] = defaultdict(set)
+        self.constraint_position: dict[tuple[str, str], int] = {}
+        self.popularity_boost: dict[str, float] = {}
         self.popularity: list[str] = []
         if not self.cache_enabled or not self._load_cache():
             self._load_catalog()
@@ -133,6 +136,8 @@ class Agent:
             self.tokens = payload["tokens"]
             self.by_category = defaultdict(list, payload["by_category"])
             self.by_constraint = defaultdict(set, payload["by_constraint"])
+            self.constraint_position = payload["constraint_position"]
+            self.popularity_boost = payload["popularity_boost"]
             self.popularity = payload["popularity"]
             return True
         except Exception:
@@ -151,6 +156,8 @@ class Agent:
                 "tokens": self.tokens,
                 "by_category": dict(self.by_category),
                 "by_constraint": dict(self.by_constraint),
+                "constraint_position": self.constraint_position,
+                "popularity_boost": self.popularity_boost,
                 "popularity": self.popularity,
             }
             with tmp.open("wb") as handle:
@@ -173,9 +180,17 @@ class Agent:
                 bucket = coarse_category([str(v) for v in product.get("categories") or []])
                 self.by_category[bucket].append(pid)
                 card = intent_card(product, corpus=text)
+                seen_phrases: set[str] = set()
+                ordered_phrases: list[str] = []
                 for phrase in [*card["hard_constraints"], *card["soft_preferences"]]:
                     if phrase:
-                        self.by_constraint[str(phrase)].add(pid)
+                        text_phrase = str(phrase)
+                        self.by_constraint[text_phrase].add(pid)
+                        if text_phrase not in seen_phrases:
+                            seen_phrases.add(text_phrase)
+                            ordered_phrases.append(text_phrase)
+                for position, phrase in enumerate(ordered_phrases):
+                    self.constraint_position[(pid, phrase)] = position
                 try:
                     count = int(float(product.get("rating_number") or 0))
                 except (TypeError, ValueError):
@@ -185,6 +200,7 @@ class Agent:
                 except (TypeError, ValueError):
                     rating = 0.0
                 popularity_rows.append((count, rating, pid))
+                self.popularity_boost[pid] = 0.05 * math.log1p(max(count, 0))
         popularity_rows.sort(key=lambda row: (-row[0], -row[1], row[2]))
         self.popularity = [pid for _, _, pid in popularity_rows]
         for bucket in self.by_category.values():
@@ -218,18 +234,19 @@ class Agent:
         state = self.sessions[session_id]
         state["vocab"].update(WORD_RE.findall(user_message.lower()))
         event = parse_event(user_message)
+        constraints = self._repair_constraints(event.constraints)
         if event.kind == "opening" and event.category and state["pool"] is None:
             state["pool"] = list(self.by_category.get(event.category, ()))
             if event.scenario_hint == "intent_override":
-                state["opening_constraints"] = list(event.constraints)
+                state["opening_constraints"] = list(constraints)
         if event.kind == "override":
             opening = set(state.get("opening_constraints") or [])
             state["constraints"] = [c for c in state["constraints"] if c not in opening]
             state["opening_constraints"] = []
             state["vocab"] = set(WORD_RE.findall(user_message.lower()))
             state["asked"] = 0
-        if event.constraints:
-            for constraint in event.constraints:
+        if constraints:
+            for constraint in constraints:
                 if constraint not in state["constraints"]:
                     state["constraints"].append(constraint)
 
@@ -244,18 +261,57 @@ class Agent:
             "usage": {"prompt_tokens": 0, "completion_tokens": 0},
         }
 
+    def _repair_constraints(self, constraints: tuple[str, ...]) -> list[str]:
+        values = [str(value).strip(" ,") for value in constraints if str(value).strip(" ,")]
+        if len(values) <= 2:
+            return values
+
+        candidates: list[tuple[float, list[str]]] = []
+        partitions = [["; ".join(values)]]
+        partitions.extend(
+            [["; ".join(values[:split]), "; ".join(values[split:])]
+            for split in range(1, len(values))]
+        )
+        for groups in partitions:
+            score = 0.0
+            for group in groups:
+                matches = self.by_constraint.get(group, ())
+                if matches:
+                    score += 1000.0 + math.log((len(self.products) + 1.0) / (len(matches) + 1.0))
+                else:
+                    score -= 1.0
+            candidates.append((score, groups))
+        best_score, best_groups = max(candidates, key=lambda item: (item[0], -len(item[1])))
+        if best_score <= 0.0:
+            return values
+        return [group for group in best_groups if group]
+
     def _rank(self, state: dict[str, Any], pool: list[str], top_k: int) -> list[str]:
         scored: list[tuple[float, str]] = []
         constraints = list(state["constraints"])
         vocab = set(state["vocab"])
         for pid in pool:
             exact = 0.0
-            for constraint in constraints:
+            position_bonus = 0.0
+            position_distance = 0.0
+            for observed_position, constraint in enumerate(constraints):
                 matches = self.by_constraint.get(constraint, ())
                 if pid in matches:
                     exact += 20.0 / max(len(matches), 1)
+                    catalog_position = self.constraint_position.get((pid, constraint))
+                    if catalog_position is not None:
+                        if catalog_position == observed_position:
+                            position_bonus += 0.5
+                        position_distance += abs(catalog_position - observed_position)
             overlap = len(self.tokens.get(pid, set()) & vocab)
-            scored.append((exact + 0.05 * overlap, pid))
+            score = (
+                exact
+                + position_bonus
+                - 0.05 * position_distance
+                + 0.05 * overlap
+                + self.popularity_boost.get(pid, 0.0)
+            )
+            scored.append((score, pid))
         scored.sort(key=lambda item: (-item[0], item[1]))
         out: list[str] = []
         seen: set[str] = set()

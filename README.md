@@ -51,7 +51,8 @@ evaluator and our current repo status.
 | Starter BM25 | No | Keyword search, weak/no useful asking | 0.1067 | Reject. Baseline only. |
 | Category + memory | No | Remembers turns and uses category narrowing | about 0.25 | Useful but not enough. |
 | Ask every turn | No | Always asks valid `ask_attribute` while ranking | about 0.69 | Strong core idea. |
-| Exact + lexical fast agent | No | Category, exact constraints, lexical ranking, fallback | **0.852704** | Submit this by default. |
+| Exact + lexical fast agent | No | Category, exact constraints, lexical ranking, fallback | 0.852704 | Previous default. |
+| Fast agent + rank tie-breaks | No | Adds semicolon-safe constraints, position match, and popularity tie-breaks | **0.902564** | Submit this by default. |
 | Dense / Model2Vec | No | Optional semantic embeddings | Not submitted unless it beats default | Research only. |
 | LightGBM LTR | No | Optional learned reranker | Not submitted unless it beats default | Research only. |
 | Hosted LLM API | Usually yes | Could rerank or rewrite queries | Not needed | Avoid for cost, credential, and network risk. |
@@ -61,8 +62,9 @@ evaluator and our current repo status.
 | Question | Answer |
 |---|---|
 | Are we using an LLM? | Not in the submitted default. No GPT/Claude/OpenAI/paid API call is required. |
-| Are we using BM25? | The repo has BM25-style/hybrid research code, but the current default fast agent uses simpler offline ranked retrieval. |
-| What is the main method? | Ranked search over category, exact disclosed constraints, lexical token overlap, and popularity fallback. |
+| Are we using BM25? | BM25 means keyword search. We tested BM25-style/hybrid code, but the default is not plain BM25. |
+| What is the main method? | Offline ranked retrieval: give every candidate product a score, sort by that score, and return the best 10 IDs. |
+| What signals are in the score? | Category, exact disclosed constraints, lexical token overlap, and popularity fallback. |
 | Is it machine learning? | The submitted path is mostly deterministic retrieval/ranking. Optional LightGBM training is research-only. |
 | Why this choice? | It is faster, cheaper, easier to reproduce, and currently scores better than the heavier research path. |
 
@@ -86,13 +88,14 @@ docs/research/model_avenues.md
 
 | Metric | Current clean result | Rough target for 95% TechnicalScore |
 |---|---:|---:|
-| HitRate@10 | 0.960 | about 1.000 |
-| MRR | 0.681 | about 0.900 |
-| MTTC | 2.585 | about 2.000 or lower |
+| HitRate@10 | 1.000 | about 1.000 |
+| MRR | 0.712 | about 0.900 |
+| MTTC | 1.545 | about 2.000 or lower |
 
-The friend update improves paraphrase robustness, but I verified the official
-clean TechnicalScore is still `0.852704`. The "more than 90%" claim appears to
-refer to HitRate@10, not TechnicalScore.
+The latest research-branch ranker raises the official clean TechnicalScore to
+`0.902564`. We are now above 90% TechnicalScore, but not yet at 95%; the
+remaining gap is mostly MRR because many correct products are still rank 2-10
+instead of rank 1.
 
 Quick research-branch ablation on 30 sessions:
 
@@ -101,7 +104,8 @@ Quick research-branch ablation on 30 sessions:
 | Hybrid `full` | 0.800 | 0.689815 | 3.933333 | 0.748278 | Below default. |
 | Hybrid `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Below default. |
 | Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
-| Fast default | 0.960 | 0.681347 | 2.585000 | 0.852704 | Still best. |
+| Fast default before rank tie-breaks | 0.960 | 0.681347 | 2.585000 | 0.852704 | Previous best. |
+| Fast rank tie-break research | 1.000 | 0.711546 | 1.545000 | 0.902564 | Current best PR candidate. |
 
 ## Slide 5: Final Architecture
 
@@ -151,10 +155,10 @@ return 10 valid parent_asin IDs + one ask_attribute
 
 | Metric | Current value |
 |---|---:|
-| HitRate@10 | 0.960000 |
-| MRR | 0.681347 |
-| MTTC | 2.585000 |
-| TechnicalScore | **0.852704** |
+| HitRate@10 | 1.000000 |
+| MRR | 0.711546 |
+| MTTC | 1.545000 |
+| TechnicalScore | **0.902564** |
 | Token usage | 0 |
 | Paid API calls | 0 |
 
@@ -166,14 +170,15 @@ Internal rule: we only accept a submission method if it reaches
 We tested FastAgent on the 200 public sessions after mechanically rewording
 the customer utterances (filler words, clause reordering, punctuation changes)
 to check whether the score depended on matching the evaluator's exact phrasing.
-On clean evaluator text, TechnicalScore was 0.852704. On the reworded set
+On the earlier clean evaluator text, TechnicalScore was 0.852704. On the reworded set
 before the parsing change it was 0.467654, a 45.16% gap. The drop came from
 order-dependent regex matching in `agent/parsing.py`: clause order and filler
 tokens stopped event extraction, even though the content words were the same.
 The fix strips a short filler list and searches the full utterance for each
 event pattern independently, while leaving the original anchored path in place
 for clean input. After the fix, the same reworded set scored 0.844094 (1.01%
-gap) and the clean score stayed 0.852704. Five additional harder paraphrase
+gap) and the clean score stayed 0.852704. The later rank tie-break PR lifts
+the clean official-style score to 0.902564. Five additional harder paraphrase
 styles — synonym substitution, run-on merging, dropping connectives, placing
 the override marker mid-utterance, and combining filler with reorder — were
 also tested against the committed FastAgent; 5/5 sessions still hit the target
@@ -200,6 +205,11 @@ python -m pip install -r requirements.txt
 .\scripts\package_submission.ps1
 ```
 
+If the UI says `Demo fixture catalog: 13 products ready`, that is expected.
+Fixture mode loads 13 tiny test products so the demo opens instantly for video
+recording. Official evaluation uses the downloaded 50,000-product catalog and
+the evaluator, not the fixture UI.
+
 ## Slide 9: How To Run On macOS / Linux
 
 Every important PowerShell script has a matching shell script for teammates.
@@ -215,6 +225,10 @@ sh scripts/demo.sh --fixture
 sh scripts/package_submission.sh
 ```
 
+The same fixture note applies on macOS/Linux: `sh scripts/demo.sh --fixture`
+starts the small 13-product recording demo, while `sh scripts/evaluate.sh`
+scores the official 50,000-product backend agent.
+
 ## Slide 10: What Not To Commit
 
 | Local-only item | Why |
@@ -229,14 +243,14 @@ sh scripts/package_submission.sh
 
 ## Slide 11: Demo Video Plan
 
-| Step | What to show | Command |
-|---|---|---|
-| 1 | Repo and team name | Open this README |
-| 2 | Architecture | Show Slide 5 diagram |
-| 3 | Tests | `python -m pytest tests -q` |
-| 4 | Real metrics | `.\scripts\evaluate.ps1` |
-| 5 | Local UI | `.\scripts\demo.ps1 -Fixture` |
-| 6 | No paid API | Show zero token / no API-key section |
+| Step | What to show | Command | What to say |
+|---|---|---|---|
+| 1 | Repo and team name | Open this README | "We are team kpopy demon hunter, and this is a backend shopping copilot." |
+| 2 | Architecture | Show Slide 5 diagram | "The UI is only for recording; the official score comes from `starter.agent.Agent` in the evaluator." |
+| 3 | Tests | `python -m pytest tests -q` | "These tests check parsing, ranking, session isolation, and the demo UI files." |
+| 4 | Real metrics | `.\scripts\evaluate.ps1` | "This is the official-style local score on the 50,000-product catalog." |
+| 5 | Local UI | `.\scripts\demo.ps1 -Fixture` | "The 13-product fixture is a tiny demo catalog, not the scored catalog." |
+| 6 | No paid API | Show zero token / no API-key section | "The submitted path is offline, no hosted LLM, no paid API, zero token usage." |
 
 ## Slide 12: Final Checklist
 

@@ -26,12 +26,12 @@ Our TechJam version is the small offline version of that pattern.
 
 ## 2. Platform Comparison
 
-| Platform | What they appear to do | What we can use |
-|---|---|---|
-| Taobao | Alibaba connected Qwen to Taobao, so users can browse, compare, order, and manage delivery through conversation. Taobao Wenwen-style assistants also suggest follow-up questions such as budget or style. | Use conversation as the interface. Ask better questions. Keep session state. |
-| Lazada | LazzieChat / AI Lazzie turns shopping questions into product suggestions and product links. Lazada also reports GenAI features for product info, smart reviews, translation, and recommendations. | Keep answers simple and product-grounded. Use product metadata and shopper preferences without needing a paid API. |
-| Shopee | Public product-search detail is thinner, but Shopee has search/recommendation teams and published/linked work around recommendation, item graphs, embeddings, and conversational discovery through ChatGPT integrations. | Graph-scale personalization is too heavy for us, but catalog-derived similarity and lightweight embeddings are reasonable research paths. |
-| Amazon | Rufus/Alexa for Shopping uses conversation, product catalog, reviews, Q&A, shopping activity, and retrieval-augmented generation. Amazon Science also describes query parsing, product-aware autocomplete, BM25/full-text search, embeddings, and retrieval/ranking funnels. | This is closest to our challenge: parse attributes, retrieve from several routes, then rank the Top 10. |
+| Platform | What they appear to do | What we can use | Status in our repo |
+|---|---|---|---|
+| Taobao | Alibaba connected Qwen to Taobao, so users can browse, compare, order, and manage delivery through conversation. Taobao Wenwen-style assistants also suggest follow-up questions such as budget or style. | Use conversation as the interface. Ask better questions. Keep session state. | Implemented through `ask_attribute` and per-session memory. |
+| Lazada | LazzieChat / AI Lazzie turns shopping questions into product suggestions and product links. Lazada also reports GenAI features for product info, smart reviews, translation, and recommendations. | Keep answers simple and product-grounded. Use product metadata and shopper preferences without needing a paid API. | Implemented through product metadata ranking and offline responses. |
+| Shopee | Public product-search detail is thinner, but Shopee has search/recommendation teams and published/linked work around recommendation, item graphs, embeddings, and conversational discovery through ChatGPT integrations. | Graph-scale personalization is too heavy for us, but catalog-derived similarity and lightweight embeddings are reasonable research paths. | Research only: dense/Model2Vec hooks exist but are not submitted by default. |
+| Amazon | Rufus/Alexa for Shopping uses conversation, product catalog, reviews, Q&A, shopping activity, and retrieval-augmented generation. Amazon Science also describes query parsing, product-aware autocomplete, BM25/full-text search, embeddings, and retrieval/ranking funnels. | This is closest to our challenge: parse attributes, retrieve from several routes, then rank the Top 10. | Implemented as category + exact + lexical + fallback ranking; BM25/LTR remain research paths. |
 
 ## 3. Lessons For Our Agent
 

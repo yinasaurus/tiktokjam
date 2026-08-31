@@ -50,10 +50,10 @@ sh scripts/package_submission.sh
 Expected official-data acceptance score:
 
 ```text
-HitRate@10: 0.960000
-MRR: 0.681347
-MTTC: 2.585000
-TechnicalScore: 0.852704
+HitRate@10: 1.000000
+MRR: 0.711546
+MTTC: 1.545000
+TechnicalScore: 0.902564
 ```
 
 The package script writes a commit-specific zip:
