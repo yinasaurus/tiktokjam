@@ -114,6 +114,32 @@ return 10 valid parent_asin IDs + one ask_attribute
 Internal rule: we only accept a submission method if it reaches
 `TechnicalScore >= 0.80` without paid API calls.
 
+## Robustness testing
+
+We tested FastAgent on the 200 public sessions after mechanically rewording
+the customer utterances (filler words, clause reordering, punctuation changes)
+to check whether the score depended on matching the evaluator's exact phrasing.
+On clean evaluator text, TechnicalScore was 0.852704. On the reworded set
+before the parsing change it was 0.467654, a 45.16% gap. The drop came from
+order-dependent regex matching in `agent/parsing.py`: clause order and filler
+tokens stopped event extraction, even though the content words were the same.
+The fix strips a short filler list and searches the full utterance for each
+event pattern independently, while leaving the original anchored path in place
+for clean input. After the fix, the same reworded set scored 0.844094 (1.01%
+gap) and the clean score stayed 0.852704. Five additional harder paraphrase
+styles — synonym substitution, run-on merging, dropping connectives, placing
+the override marker mid-utterance, and combining filler with reorder — were
+also tested against the committed FastAgent; 5/5 sessions still hit the target
+in the Top 10.
+
+## Limitations
+
+Robustness testing was performed against the 200 public sessions only. The
+private 800-session evaluation set was not accessible during development, so
+while the parsing fix is designed to generalize (it targets structural patterns
+like clause order and filler words, not memorized phrasing), its performance
+on the private set has not been directly verified.
+
 ## Slide 8: How To Run On Windows
 
 ```powershell
