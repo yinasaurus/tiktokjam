@@ -11,7 +11,7 @@ Current best code is in an open review PR, not merged to `main` yet.
 ```text
 PR: https://github.com/yinasaurus/tiktokjam/pull/1
 Branch: research/dense-ltr-marketplaces
-Latest PR HEAD: 8286a5c Clarify final PR handoff steps
+Latest PR HEAD: use the current GitHub PR head or run `python scripts\final_status.py`
 Score-changing code commit: 862e22d Improve FastAgent precision with confidence gate
 Reviewer requested: @yinasaurus
 Status: open, non-draft, CI passed
