@@ -141,6 +141,12 @@ class Handler(BaseHTTPRequestHandler):
                         "ready": _ready,
                         "error": _error,
                         "catalog_size": _catalog_size,
+                        "catalog_mode": "fixture" if _selected_catalog == FIXTURE_CATALOG else "official",
+                        "catalog_label": (
+                            "Demo fixture catalog"
+                            if _selected_catalog == FIXTURE_CATALOG
+                            else "Official 50k catalog"
+                        ),
                     },
                 )
             return

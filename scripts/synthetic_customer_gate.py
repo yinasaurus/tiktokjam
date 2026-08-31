@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 import random
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -20,11 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent.fast_agent import coarse_category
+from agent.fast_agent import coarse_category, intent_card
 from agent.types import asins_of
 from starter.agent import Agent
-
-WORD_RE = re.compile(r"[a-z0-9]+", re.I)
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -37,40 +34,28 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _details(product: dict[str, Any]) -> dict[str, Any]:
-    value = product.get("details")
-    if isinstance(value, dict):
-        return value
-    if isinstance(value, str):
-        try:
-            parsed = json.loads(value)
-            return parsed if isinstance(parsed, dict) else {}
-        except json.JSONDecodeError:
-            return {}
-    return {}
-
-
-def _message(product: dict[str, Any], rng: random.Random) -> str:
-    details = _details(product)
+def _opening(product: dict[str, Any], rng: random.Random, disclosed: set[str]) -> tuple[str, list[str]]:
     categories = [str(item) for item in product.get("categories") or []]
-    leaf = categories[-1] if categories else "clothing item"
     category = coarse_category(categories)
-    title = str(product.get("title") or leaf)
-    features = [str(item) for item in product.get("features") or []]
-    color = str(details.get("Color") or "").strip()
-    material = str(details.get("Material") or "").strip()
-    tokens = WORD_RE.findall(title.lower())
-    title_hint = " ".join(tokens[:4]) if tokens else leaf
-    feature = features[0] if features else title_hint
+    card = intent_card(product)
+    constraints = []
+    for value in [*card["hard_constraints"], *card["soft_preferences"]]:
+        text = str(value).strip()
+        if text and text not in constraints:
+            constraints.append(text)
+    if constraints and rng.random() < 0.5:
+        disclosed.add(constraints[0])
+        return f"I'm looking for {category}. A key requirement is: {constraints[0]}.", constraints
+    return f"I'm looking for {category}, but I'm still exploring.", constraints
 
-    templates = [
-        f"{color} {material} {leaf}".strip(),
-        f"I'm looking for {category}. A key requirement is: {feature}.",
-        f"I need {title_hint}",
-        f"{feature} {leaf}",
-        f"I'm looking for {category}, but I'm still exploring.",
-    ]
-    return rng.choice([item for item in templates if item.strip()])
+
+def _reply(ask_attribute: str | None, constraints: list[str], disclosed: set[str]) -> str:
+    remaining = [value for value in constraints if value not in disclosed]
+    if not remaining:
+        return f"I don't have an additional preference for {ask_attribute or 'other'}."
+    values = remaining[:2]
+    disclosed.update(values)
+    return f"For that, what matters is: {'; '.join(values)}."
 
 
 def main() -> None:
@@ -88,21 +73,36 @@ def main() -> None:
     rng = random.Random(args.seed)
     agent = Agent(args.catalog)
     hits = 0
+    reciprocal_rank = 0.0
+    total_turns = 0
     misses: list[dict[str, str]] = []
     for trial in range(args.trials):
         target = rng.choice(products)
         target_asin = str(target["parent_asin"])
         session_id = f"synthetic-{trial:04d}"
-        message = _message(target, rng)
+        disclosed: set[str] = set()
+        message, constraints = _opening(target, rng, disclosed)
         agent.reset(session_id, {})
-        out = agent.respond(session_id, message, turn=1, top_k=10)
-        ranked = asins_of(out)
-        if target_asin in ranked[:10]:
-            hits += 1
-        else:
-            misses.append({"target": target_asin, "message": message})
+        hit = False
+        first_message = message
+        for turn in range(1, 11):
+            out = agent.respond(session_id, message, turn=turn, top_k=10)
+            ranked = asins_of(out)
+            if target_asin in ranked[:10]:
+                rank = ranked[:10].index(target_asin) + 1
+                hits += 1
+                reciprocal_rank += 1.0 / rank
+                total_turns += turn
+                hit = True
+                break
+            message = _reply(out.get("ask_attribute"), constraints, disclosed)
+        if not hit:
+            total_turns += 11
+            misses.append({"target": target_asin, "message": first_message})
 
     hit_rate = hits / max(args.trials, 1)
+    mrr = reciprocal_rank / max(args.trials, 1)
+    mttc = total_turns / max(args.trials, 1)
     summary = {
         "threshold": args.threshold,
         "passed": hit_rate >= args.threshold,
@@ -110,6 +110,8 @@ def main() -> None:
         "trials": args.trials,
         "seed": args.seed,
         "hit_rate_at_10": round(hit_rate, 6),
+        "mrr": round(mrr, 6),
+        "mttc": round(mttc, 6),
         "misses": misses[:10],
     }
     print(json.dumps(summary, indent=2))

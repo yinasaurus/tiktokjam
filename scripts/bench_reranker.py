@@ -48,6 +48,12 @@ def main() -> None:
     parser.add_argument("--catalog", type=Path, default=Path("data/catalog.jsonl"))
     parser.add_argument("--dataset", type=Path, default=Path("data/public_set.jsonl"))
     parser.add_argument("--mode", choices=["off", "heuristic", "ltr", "cascade"], default="heuristic")
+    parser.add_argument(
+        "--ltr-model",
+        type=Path,
+        default=None,
+        help="Optional LightGBM model path for research runs; default remains models/ltr.txt.",
+    )
     parser.add_argument("--output", type=Path, default=Path("eval_output/reranker_bench.json"))
     parser.add_argument("--limit", type=int, default=None, help="Run only the first N selected sessions")
     parser.add_argument(
@@ -73,11 +79,15 @@ def main() -> None:
     print(f"loading catalog index: {args.catalog}", flush=True)
     catalog_ids, categories, products = catalog_index(args.catalog)
     print(f"benchmarking mode={args.mode}", flush=True)
-    agent = TimedAgent(Agent(args.catalog, config=replace(Config(), rerank_mode=args.mode)))
+    config = replace(Config(), rerank_mode=args.mode)
+    if args.ltr_model is not None:
+        config = replace(config, ltr_model_path=str(args.ltr_model))
+    agent = TimedAgent(Agent(args.catalog, config=config))
     result = evaluate(agent, samples, catalog_ids, categories, products)
     latencies = agent.latencies_ms
     summary = {
         "mode": args.mode,
+        "ltr_model": None if args.ltr_model is None else str(args.ltr_model),
         "turns": len(latencies),
         "latency_ms": {
             "mean": None if not latencies else round(statistics.fmean(latencies), 3),

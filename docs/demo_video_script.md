@@ -13,7 +13,7 @@ Use `docs/youtube_description.md` for the upload title and description.
 | 0:35 | Why normal search fails table | "Customers can be vague, high-intent, or change their mind. The agent needs memory and good questions." |
 | 0:55 | Method comparison table | "We compared approaches and chose the best measured offline method, not a paid API." |
 | 1:20 | Architecture diagram | "The evaluator calls starter.agent.Agent. Our FastAgent parses messages, updates state, asks a question, ranks products, and returns 10 IDs." |
-| 1:55 | Metrics table | "The current expected TechnicalScore is 0.852704, above our 0.80 gate, with zero token usage." |
+| 1:55 | Metrics table | "The current expected TechnicalScore is 0.955300, above our 0.80 gate and above 95%, with zero token usage." |
 | 2:20 | Terminal or CI | "Tests, compile checks, repository hygiene, and CI are green." |
 | 2:40 | Local UI | "The UI is just for demonstration. The backend API is what the challenge scores." |
 | 3:10 | Closing | "The solution is reproducible, offline, no paid API calls, with Windows and macOS/Linux setup scripts." |
@@ -45,7 +45,7 @@ customer message
   -> parse message and update memory
   -> ask one useful attribute
   -> rank using category, exact constraints, lexical overlap, and fallback
-  -> return 10 product IDs
+  -> return 10 product IDs after enough evidence
 ```
 
 ## Important Lines To Mention
