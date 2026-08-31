@@ -33,6 +33,8 @@ def rerank(
     if config.rerank_mode == "cascade" and margin > config.margin_tau_high:
         return ranked
     if config.rerank_mode in {"ltr", "cascade"}:
+        # Submitted FastAgent does not call this module. Hybrid LTR needs
+        # models/ltr.txt; if that file is missing, fall through to heuristic.
         ltr_ranked = ltr_rerank(ranked, catalog, state, constraints, config)
         if ltr_ranked is not None:
             return ltr_ranked

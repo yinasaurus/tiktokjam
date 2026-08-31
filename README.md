@@ -2,10 +2,18 @@
 
 TikTok TechJam 2026, Track 4: **AI Conversational Search and Recommendations**.
 
-This project is a backend shopping agent. A customer sends messages like
-`I'm looking for shoes, but I'm still exploring.` The agent must return up to
-10 Amazon product IDs and may ask one useful question. The evaluator checks
-whether the hidden target product appears in the returned Top 10 within 10 turns.
+## Project overview
+
+This is a **conversational shopping agent**. A customer sends messages like
+`I'm looking for shoes, but I'm still exploring.` Across up to 10 turns the
+agent returns a Top 10 list of Amazon `parent_asin` IDs and may ask one
+clarification question. The official evaluator scores whether a hidden target
+product appears in that list.
+
+**Headline result (public 200 sessions):** TechnicalScore **0.9553**
+(HitRate@10 1.000, MRR 0.937, MTTC 2.29). The submitted path
+(`starter.agent.Agent` → FastAgent) is offline, CPU-only, and uses **zero
+paid API calls**.
 
 ## Slide 1: The Simple Idea
 
@@ -77,7 +85,7 @@ evaluator and our current repo status.
 | Shopee | Search/recommendation teams and conversational discovery integrations. | Lightweight embeddings and recommendation signals are worth researching, but not at the cost of reliability. |
 | Amazon | Rufus/Alexa for Shopping uses query understanding, retrieval, product facts, reviews, and ranking. | Our architecture should be a funnel: parse, retrieve from multiple routes, rerank, return Top 10. |
 
-Detailed research is stored on the research branch in:
+Detailed research notes in this repo:
 
 ```text
 docs/research/marketplace_search_patterns.md
@@ -94,8 +102,8 @@ docs/evaluation_runbook.md
 | MRR | 0.937 | about 0.930+ |
 | MTTC | 2.290 | about 2-3 turns is acceptable if MRR improves |
 
-The latest research-branch ranker raises the official clean TechnicalScore to
-`0.955300`. We are now above the 95% TechnicalScore target because the agent
+The submitted FastAgent on `main` scores official clean TechnicalScore
+`0.955300`. That is above a 95% TechnicalScore target because the agent
 waits for enough evidence before submitting recommendations. HitRate was already
 maxed out at 1.0; the improvement came from moving many correct products to
 rank 1 and raising MRR.
@@ -109,7 +117,7 @@ Quick research-branch ablation on 30 sessions:
 | Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
 | Fast default before rank tie-breaks | 0.960 | 0.681347 | 2.585000 | 0.852704 | Previous best. |
 | Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% PR candidate. |
-| Fast confidence gate | 1.000 | 0.937000 | 2.290000 | 0.955300 | Current best PR candidate. |
+| Fast confidence gate | 1.000 | 0.937000 | 2.290000 | 0.955300 | Current default on `main`. |
 
 ## Slide 5: Final Architecture
 
@@ -184,7 +192,8 @@ event pattern independently, while leaving the original anchored path in place
 for clean input. After the fix, the same reworded set scored 0.844094 (1.01%
 gap) and the clean score stayed 0.852704. The later rank tie-break PR lifts
 the clean official-style score to 0.908232, and the confidence gate lifts it to
-0.955300. Five additional harder paraphrase
+0.955300. On current `main` (post PR #1), the same frozen paraphrase fixture
+scores **0.955125** (0.018% gap vs clean 0.9553). Five additional harder paraphrase
 styles — synonym substitution, run-on merging, dropping connectives, placing
 the override marker mid-utterance, and combining filler with reorder — were
 also tested against the committed FastAgent; 5/5 sessions still hit the target
@@ -198,7 +207,28 @@ while the parsing fix is designed to generalize (it targets structural patterns
 like clause order and filler words, not memorized phrasing), its performance
 on the private set has not been directly verified.
 
-## Slide 8: How To Run On Windows
+Given more time, the natural next step is the Hybrid stack already in this
+repo (`agent/agent.py`, `agent/routes/`: bm25s, dense Model2Vec, weighted RRF
+fusion). We did not submit that path: measured Hybrid ablations scored below
+FastAgent once category + exact constraints + top-50 rerank + confidence
+gating reached TechnicalScore 0.9553. Hybrid remains a research avenue, not
+the official `starter.agent.Agent`.
+
+`models/ltr.txt` is not in the repo. Hybrid `rerank_mode="ltr"` / `"cascade"`
+falls back to a linear heuristic when that file is missing. Submitted
+FastAgent does not use LightGBM. `models/encoder/` has no Model2Vec weights,
+so Hybrid dense retrieval is not production-ready on the 50k catalog.
+
+The confidence gate withholds scored recommendations until two constraints
+are known (or turn 4). That raises MRR while increasing MTTC: on the public
+200, first-hit never exceeded 4 turns.
+
+## Setup and installation
+
+Pinned dependencies are in `requirements.txt` (`numpy`, `scipy`, `bm25s`,
+`model2vec`, `lightgbm`, `pytest`). No PyTorch.
+
+### Windows
 
 ```powershell
 python -m venv .venv
@@ -216,7 +246,7 @@ Fixture mode loads 13 tiny test products so the demo opens instantly for video
 recording. Official evaluation uses the downloaded 50,000-product catalog and
 the evaluator, not the fixture UI.
 
-## Slide 9: How To Run On macOS / Linux
+### macOS / Linux
 
 Every important PowerShell script has a matching shell script for teammates.
 
@@ -234,6 +264,41 @@ sh scripts/package_submission.sh
 The same fixture note applies on macOS/Linux: `sh scripts/demo.sh --fixture`
 starts the small 13-product recording demo, while `sh scripts/evaluate.sh`
 scores the official 50,000-product backend agent.
+
+## Steps to reproduce your results
+
+This is how to see TechnicalScore **0.9553** yourself. The setup commands
+above only prepare the environment; these run the official local evaluator.
+
+**Windows**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+.\scripts\setup_local_data.ps1 -DownloadOfficial
+.\scripts\evaluate.ps1
+```
+
+**macOS / Linux**
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+sh scripts/setup_local_data.sh --download-official
+sh scripts/evaluate.sh
+```
+
+Look in the printed JSON for `"recommended_technical_score": 0.9553`.
+That command is `python -m evaluator.local_evaluator` on `data/catalog.jsonl`
+and `data/public_set.jsonl` (200 sessions). Optional robustness check:
+
+```powershell
+python tests\paraphrase_fixtures.py --reuse-fixture
+```
+
+Expected paraphrased TechnicalScore: **0.955125**.
 
 ## Slide 10: What Not To Commit
 
@@ -268,10 +333,21 @@ scores the official 50,000-product backend agent.
 | Done | Simple local UI exists for demo recording. |
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
-| Todo | Review and merge PR #1 before final packaging from `main`. |
-| Todo | Fill individual member names and contribution split. |
+| Todo | Fill individual member names and contribution split (see Team member contributions). |
 | Todo | Record and upload the public YouTube demo. |
 | Todo | Paste Devpost draft and submit before the deadline. |
+
+## Team member contributions
+
+Fill this in before Devpost submit. Do not invent names.
+
+| Member | Contributions |
+|---|---|
+| [Name] | [fill in] |
+| [Name] | [fill in] |
+| [Name] | [fill in] |
+
+Team name: `kpopy demon hunter`.
 
 ## Key Links
 

@@ -33,6 +33,8 @@ def choose_ask_attribute(
         and "other" in config.ask_attributes
         and state.asked.count("other") < config.other_ask_max
     ):
+        # Official simulator discloses extra constraints when asked "other".
+        # Hybrid uses that here; submitted FastAgent uses ASK_PLAN instead.
         return "other"
 
     filled = set(state.slots.keys())

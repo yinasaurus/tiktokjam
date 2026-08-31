@@ -92,6 +92,9 @@ def normalize_utterance(message: str) -> str:
 
 
 def parse_event(message: str) -> Event:
+    # Prefer the original anchored templates so clean evaluator phrasing
+    # is unchanged. Filler-strip + unanchored search only runs when those
+    # templates miss (clause reorder, leading "um,", dropped period).
     text = (message or "").strip()
     exact = _parse_anchored(text)
     if exact.kind != "unknown":
