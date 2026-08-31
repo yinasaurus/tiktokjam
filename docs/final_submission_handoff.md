@@ -4,12 +4,38 @@ Date: 2026-08-31 Singapore time.
 
 Team: **kpopy demon hunter**
 
-## Current Submit Commit
+## Current Review PR
 
-Use the latest pushed `main`. Verify before packaging:
+Current best code is in an open review PR, not merged to `main` yet.
+
+```text
+PR: https://github.com/yinasaurus/tiktokjam/pull/1
+Branch: research/dense-ltr-marketplaces
+Commit: 862e22d Improve FastAgent precision with confidence gate
+Reviewer requested: @yinasaurus
+Status: open, non-draft, CI passed
+```
+
+Do not merge this PR until the team has reviewed it. After review, merge PR #1
+to `main`, then run the final commands below from `main`.
+
+Before the PR is merged, reviewers can inspect the exact branch:
 
 ```powershell
-git pull origin main
+git fetch origin
+git switch research/dense-ltr-marketplaces
+git pull --ff-only origin research/dense-ltr-marketplaces
+python scripts\final_status.py
+```
+
+## Current Submit Commit
+
+After PR #1 is reviewed and merged, use the latest pushed `main`. Verify before
+packaging:
+
+```powershell
+git switch main
+git pull --ff-only origin main
 git status --short
 git log -1 --oneline
 python scripts\final_status.py
@@ -32,7 +58,8 @@ https://mj4gkxs69b24.postplan.dev
 On the data-bearing Windows machine:
 
 ```powershell
-git pull origin main
+git switch main
+git pull --ff-only origin main
 git status --short
 .\scripts\verify_submission.ps1 -WithData
 .\scripts\package_submission.ps1
@@ -41,7 +68,8 @@ git status --short
 On macOS/Linux:
 
 ```bash
-git pull origin main
+git switch main
+git pull --ff-only origin main
 git status --short
 sh scripts/verify_submission.sh --with-data
 sh scripts/package_submission.sh
@@ -93,6 +121,9 @@ Use `docs/demo_video_script.md` as the voiceover outline.
 Use `docs/youtube_description.md` as the upload title/description template.
 
 ## Devpost Paste Order
+
+Devpost requires a logged-in browser session. Paste manually from the final
+merged repo state.
 
 1. Paste `docs/devpost_draft.md`.
 2. Fill individual names and contribution split.
