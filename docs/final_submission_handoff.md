@@ -85,14 +85,16 @@ MTTC: 2.290000
 TechnicalScore: 0.955300
 ```
 
-The package script writes a commit-specific zip:
+The package script writes a commit-specific zip and a matching SHA256 file:
 
 ```text
 dist\techjam-track4-submission-<commit>.zip
+dist\techjam-track4-submission-<commit>.zip.sha256
 ```
 
 Use the filename printed by `scripts/package_submission.ps1` or
-`scripts/package_submission.sh` after the final `git pull`.
+`scripts/package_submission.sh` after the final `git pull`. Keep the checksum
+beside the zip so the submitted artifact can be verified later.
 
 ## Demo Recording
 
