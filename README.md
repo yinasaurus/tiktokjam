@@ -82,6 +82,8 @@ Detailed research is stored on the research branch in:
 ```text
 docs/research/marketplace_search_patterns.md
 docs/research/model_avenues.md
+docs/research/healthkaki_pov_lessons.md
+docs/evaluation_runbook.md
 ```
 
 ## Slide 4C: 95% TechnicalScore Reality Check

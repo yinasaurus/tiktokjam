@@ -86,6 +86,11 @@ We copied the safe offline parts of this pattern: state tracking, clarification,
 hybrid-style retrieval signals, ranked Top 10 output, and fallback behavior. We
 did not copy cloud-only or paid-API dependencies.
 
+We also reviewed our earlier HealthKaki POV project for process lessons. The
+useful parts were teammate setup scripts, evaluation runbooks, PR review
+discipline, usage tracking, and fallback tests. We did not copy its healthcare
+domain logic or cloud/LLM workflow code into this shopping agent.
+
 ## 6. Current Measured Result
 
 | Metric | Value | Meaning |
