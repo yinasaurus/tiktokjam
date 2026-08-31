@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>kpopy demon hunter - TechJam Track 4 Status</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101214;
+      --panel: #171b20;
+      --panel2: #1f252c;
+      --text: #eef2f4;
+      --muted: #aab5bd;
+      --line: #2e3740;
+      --green: #53d6a2;
+      --blue: #72a7ff;
+      --yellow: #ffd166;
+      --red: #ff7a90;
+      --code: #0c0f12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      background: #0c0f12;
+      border-bottom: 1px solid var(--line);
+      padding: 32px 22px 26px;
+    }
+    main, .hero {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    main { padding: 24px 18px 44px; }
+    h1, h2, h3 { margin: 0; letter-spacing: 0; }
+    h1 { font-size: 34px; line-height: 1.12; }
+    h2 { font-size: 22px; margin-bottom: 12px; }
+    h3 { font-size: 16px; margin-bottom: 8px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    section, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    section { padding: 18px; margin: 16px 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { padding: 14px; min-height: 108px; }
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .value {
+      display: block;
+      margin-top: 7px;
+      font-weight: 750;
+      font-size: 22px;
+      color: var(--text);
+    }
+    .ok { color: var(--green); }
+    .warn { color: var(--yellow); }
+    .info { color: var(--blue); }
+    .bad { color: var(--red); }
+    code {
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: #d8e7ff;
+      padding: 2px 5px;
+      font-size: .92em;
+    }
+    pre {
+      overflow-x: auto;
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      color: #d8e7ff;
+      margin: 10px 0 0;
+    }
+    pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+    }
+    th { color: var(--text); background: var(--panel2); }
+    td { color: var(--muted); }
+    ul, ol { margin: 8px 0 0 20px; padding: 0; color: var(--muted); }
+    li { margin: 6px 0; }
+    .pill {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin: 8px 6px 0 0;
+      color: var(--muted);
+      background: var(--panel2);
+      font-size: 12px;
+    }
+    .callout {
+      border-left: 4px solid var(--green);
+      background: #12201b;
+      border-radius: 6px;
+      padding: 12px 14px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    @media (max-width: 860px) {
+      .grid, .two { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <h1>kpopy demon hunter - Track 4 Status Update</h1>
+      <p>A digestible handoff of what changed, what is already ready, and what remains before Devpost submission.</p>
+      <span class="pill">TikTok TechJam 2026</span>
+      <span class="pill">Shopping Copilot</span>
+      <span class="pill">Offline CPU submission</span>
+      <span class="pill">No paid APIs</span>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>Current Snapshot</h2>
+      <div class="grid">
+        <div class="card">
+          <span class="label">Team</span>
+          <span class="value">kpopy demon hunter</span>
+          <p>Added to README, Devpost draft, report, handoff, demo script, YouTube template, and plan.</p>
+        </div>
+        <div class="card">
+          <span class="label">Best score</span>
+          <span class="value ok">0.852704</span>
+          <p>Official public-set TechnicalScore expected by the final status script.</p>
+        </div>
+        <div class="card">
+          <span class="label">Default path</span>
+          <span class="value">Offline fast agent</span>
+          <p><code>starter.agent.Agent</code> uses no hosted LLM, no API key, and zero token usage.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What I Just Did</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Area</th>
+            <th>Change</th>
+            <th>Why it matters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Team identity</td>
+            <td>Set the team name to <strong>kpopy demon hunter</strong> across submission docs.</td>
+            <td>Devpost and demo materials no longer have a missing team-name field.</td>
+          </tr>
+          <tr>
+            <td>Architecture diagram</td>
+            <td>Added clear PostPlan diagrams for submitted runtime, research pipeline, evaluation loop, and team setup.</td>
+            <td>Judges and teammates can understand the system without reading all source files first.</td>
+          </tr>
+          <tr>
+            <td>Handoff wording</td>
+            <td>Changed remaining task language from "fill team names" to "fill individual names and contribution split".</td>
+            <td>The actual remaining human work is now precise.</td>
+          </tr>
+          <tr>
+            <td>Packaging</td>
+            <td>Rebuilt the commit-specific archive and checked it excludes forbidden data/cache/result paths.</td>
+            <td>The package is reproducible and does not accidentally include local competition data.</td>
+          </tr>
+          <tr>
+            <td>Main branch</td>
+            <td>Pushed commit <code>652aaa3</code> to <code>main</code>.</td>
+            <td>Your team members can pull the latest docs and setup instructions directly.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Architecture Diagram</h2>
+      <div class="grid two">
+        <div>
+          <h3>Submitted Offline Runtime</h3>
+          <pre><code>official evaluator / local demo UI
+  |
+  v
+starter.agent.Agent
+  |
+  v
+FastAgent
+  |
+  +-- template parser
+  +-- per-session state
+  +-- question policy
+  |
+  v
+category + exact + lexical + popularity routes
+  |
+  v
+score candidates
+  |
+  v
+10 valid parent_asin + ask_attribute</code></pre>
+        </div>
+        <div>
+          <h3>Research Path, Only If Better</h3>
+          <pre><code>catalog + public sessions
+  |
+  v
+ablation runner
+  |
+  +-- BM25 / lexical
+  +-- dense route
+  +-- fusion
+  +-- heuristic or LTR rerank
+  |
+  v
+compare TechnicalScore + latency
+  |
+  v
+submit only if it beats 0.852704</code></pre>
+        </div>
+      </div>
+      <div class="callout">
+        Submission posture: use the proven offline fast agent by default. Optional dense/LTR work remains research-only unless it wins on the official evaluator and stays practical for teammates.
+      </div>
+    </section>
+
+    <section>
+      <h2>Verification State</h2>
+      <div class="grid">
+        <div class="card">
+          <span class="label">Tests</span>
+          <span class="value ok">Passed</span>
+          <p><code>python -m pytest tests -q</code></p>
+        </div>
+        <div class="card">
+          <span class="label">Compile</span>
+          <span class="value ok">Passed</span>
+          <p><code>python -m compileall agent scripts tools starter tests evaluator ui -q</code></p>
+        </div>
+        <div class="card">
+          <span class="label">Hygiene</span>
+          <span class="value ok">Passed</span>
+          <p><code>python scripts\check_repo_hygiene.py</code></p>
+        </div>
+        <div class="card">
+          <span class="label">CI</span>
+          <span class="value ok">Green</span>
+          <p>GitHub Actions succeeded for commit <code>652aaa3</code>.</p>
+        </div>
+        <div class="card">
+          <span class="label">Package</span>
+          <span class="value ok">Built</span>
+          <p><code>dist\techjam-track4-submission-652aaa3.zip</code></p>
+        </div>
+        <div class="card">
+          <span class="label">Archive safety</span>
+          <span class="value ok">Clean</span>
+          <p>No catalog, public sessions, cache, runs, results, dist folder, or credentials inside the zip.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Useful vs Not Useful</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Useful for submission</th>
+            <th>Not useful right now</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>No paid API path, measured score, clean package, PostPlan diagram, README setup, Windows and shell scripts.</td>
+            <td>Adding hosted LLM calls this late; it adds cost, latency, secrets, and network risk.</td>
+          </tr>
+          <tr>
+            <td>Showing ablations and explaining why the fast offline method is the default.</td>
+            <td>Submitting an unmeasured dense/LTR model just because it sounds more advanced.</td>
+          </tr>
+          <tr>
+            <td>Using the local UI for the video and the evaluator output for proof.</td>
+            <td>Overbuilding UI/UX, because the track is scored through backend APIs/headless pipeline.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>What Remains</h2>
+      <ol>
+        <li>Fill individual member names and contribution split in <code>docs/devpost_draft.md</code> before pasting into Devpost.</li>
+        <li>Record the demo video using <code>.\scripts\demo.ps1 -Fixture</code> for the UI and <code>.\scripts\evaluate.ps1</code> for real score proof.</li>
+        <li>Upload the video publicly to YouTube and paste the URL into Devpost.</li>
+        <li>Run final verification on the data-bearing machine: <code>.\scripts\verify_submission.ps1 -WithData</code>.</li>
+        <li>Submit before <strong>2026-09-01 12:00 Singapore time</strong>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>About Kant</h2>
+      <p><code>Kant</code> is a subagent label exposed by the environment metadata, alongside <code>Hooke</code>. I did not create the name, and no actionable report from that subagent was available in this thread. Treat it as an inactive/unknown helper until it produces an actual task report.</p>
+    </section>
+  </main>
+</body>
+</html>
