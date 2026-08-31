@@ -46,3 +46,43 @@ def test_parse_refusals_and_rebuke():
         parse_event("Those options are not quite right yet. Ask me about one specific attribute.").kind
         == "rebuke"
     )
+
+
+def test_parse_reordered_buying_opening():
+    event = parse_event(
+        "A key requirement is: Material:alloy. I'm looking for Jewelry Necklaces if that makes sense"
+    )
+    assert event.kind == "opening"
+    assert event.category == "Jewelry Necklaces"
+    assert event.constraints == ("Material:alloy",)
+    assert event.scenario_hint == "buying"
+
+
+def test_parse_reordered_override_opening():
+    event = parse_event("Buckle closure. I'm looking for Accessories Belts if that makes sense")
+    assert event.kind == "opening"
+    assert event.category == "Accessories Belts"
+    assert event.constraints == ("Buckle closure",)
+    assert event.scenario_hint == "intent_override"
+
+
+def test_parse_reordered_disclosure():
+    event = parse_event("um, What matters is: leather; 100% Leather, for that")
+    assert event.kind == "disclosure"
+    assert event.constraints == ("leather", "100% Leather")
+
+
+def test_parse_reordered_override():
+    event = parse_event(
+        "What I need is: leather. Actually, ignore my earlier preference if that makes sense"
+    )
+    assert event.kind == "override"
+    assert event.constraints == ("leather",)
+
+
+def test_parse_reordered_browsing_opening():
+    event = parse_event("um, I'm still exploring, but I'm looking for Basketball Men")
+    assert event.kind == "opening"
+    assert event.category == "Basketball Men"
+    assert event.constraints == ()
+    assert event.scenario_hint == "browsing"
