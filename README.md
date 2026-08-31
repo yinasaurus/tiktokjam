@@ -15,7 +15,7 @@ product appears in that list.
 (`starter.agent.Agent` → FastAgent) is offline, CPU-only, and uses **zero
 paid API calls**.
 
-## Slide 1: The Simple Idea
+## The idea
 
 | Question | Plain answer |
 |---|---|
@@ -25,7 +25,7 @@ paid API calls**.
 | Are we using paid APIs? | No. The submitted path is offline, CPU-only, and uses zero tokens. |
 | Team name | `kpopy demon hunter` |
 
-## Slide 2: Why Normal Search Fails
+## Why keyword search fails
 
 | Customer situation | Why keyword search struggles | What our agent does |
 |---|---|---|
@@ -34,7 +34,7 @@ paid API calls**.
 | "Actually, ignore that. I need white sneakers." | Old keywords conflict with new intent. | Replace outdated slots instead of appending contradictions. |
 | "No preference, use your judgment." | Search cannot learn more from that question. | Move to another attribute and keep ranking. |
 
-## Slide 3: How We Are Scored
+## How we are scored
 
 | Metric | Easy meaning | Why it matters |
 |---|---|---|
@@ -49,7 +49,7 @@ Formula:
 TechnicalScore = 0.50 * HitRate@10 + 0.30 * MRR + 0.20 * Efficiency
 ```
 
-## Slide 4: What We Tried
+## What we tried
 
 These are the important method comparisons from the official-style local
 evaluator and our current repo status.
@@ -65,7 +65,7 @@ evaluator and our current repo status.
 | LightGBM LTR | No | Optional learned reranker | Not submitted unless it beats default | Research only. |
 | Hosted LLM API | Usually yes | Could rerank or rewrite queries | Not needed | Avoid for cost, credential, and network risk. |
 
-## Slide 4A: What Are We Actually Using?
+## Submitted method
 
 | Question | Answer |
 |---|---|
@@ -76,7 +76,7 @@ evaluator and our current repo status.
 | Is it machine learning? | The submitted path is mostly deterministic retrieval/ranking. Optional LightGBM training is research-only. |
 | Why this choice? | It is faster, cheaper, easier to reproduce, and currently scores better than the heavier research path. |
 
-## Slide 4B: What We Learned From Big Marketplaces
+## Marketplace research
 
 | Platform | What they do | Lesson for us |
 |---|---|---|
@@ -94,7 +94,7 @@ docs/research/healthkaki_pov_lessons.md
 docs/evaluation_runbook.md
 ```
 
-## Slide 4C: 95% TechnicalScore Reality Check
+## Score breakdown
 
 | Metric | Current clean result | Rough target for 95% TechnicalScore |
 |---|---:|---:|
@@ -119,7 +119,7 @@ Quick research-branch ablation on 30 sessions:
 | Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% PR candidate. |
 | Fast confidence gate | 1.000 | 0.937000 | 2.290000 | 0.955300 | Current default on `main`. |
 
-## Slide 5: Final Architecture
+## Architecture
 
 ```text
 official evaluator or local demo UI
@@ -150,7 +150,7 @@ if enough evidence: return 10 valid parent_asin IDs + one ask_attribute
 else: ask one more question before scoring a slate
 ```
 
-## Slide 6: What Each Component Means
+## Repo map
 
 | Component | File | Student-friendly explanation |
 |---|---|---|
@@ -164,7 +164,7 @@ else: ask one more question before scoring a slate
 | Demo UI | `ui/server.py`, `ui/static/index.html` | Local browser demo for video recording, not scored. |
 | Evaluation | `tools/eval.py`, `scripts/evaluate.*` | Runs official scoring and reports metrics. |
 
-## Slide 7: Current Measured Result
+## Headline metrics
 
 | Metric | Current value |
 |---|---:|
@@ -300,7 +300,7 @@ python tests\paraphrase_fixtures.py --reuse-fixture
 
 Expected paraphrased TechnicalScore: **0.955125**.
 
-## Slide 10: What Not To Commit
+## What not to commit
 
 | Local-only item | Why |
 |---|---|
@@ -312,18 +312,18 @@ Expected paraphrased TechnicalScore: **0.955125**.
 | `cache/` | Local index/cache files. |
 | `.env`, API keys | Secrets must never be committed. |
 
-## Slide 11: Demo Video Plan
+## Demo video plan
 
 | Step | What to show | Command | What to say |
 |---|---|---|---|
 | 1 | Repo and team name | Open this README | "We are team kpopy demon hunter, and this is a backend shopping copilot." |
-| 2 | Architecture | Show Slide 5 diagram | "The UI is only for recording; the official score comes from `starter.agent.Agent` in the evaluator." |
+| 2 | Architecture | Show the architecture diagram | "The UI is only for recording; the official score comes from `starter.agent.Agent` in the evaluator." |
 | 3 | Tests | `python -m pytest tests -q` | "These tests check parsing, ranking, session isolation, and the demo UI files." |
 | 4 | Real metrics | `.\scripts\evaluate.ps1` | "This is the official-style local score on the 50,000-product catalog." |
 | 5 | Local UI | `.\scripts\demo.ps1 -Fixture` | "The 13-product fixture is a tiny demo catalog, not the scored catalog." |
 | 6 | No paid API | Show zero token / no API-key section | "The submitted path is offline, no hosted LLM, no paid API, zero token usage." |
 
-## Slide 12: Final Checklist
+## Final checklist
 
 | Status | Item |
 |---|---|
