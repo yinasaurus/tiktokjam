@@ -2,7 +2,7 @@
 
 ## Public Repository
 
-- [ ] PR #1 is reviewed by the team and merged to `main`.
+- [ ] Any open final PR is reviewed by the team and merged to `main`.
 - [ ] Final packaging is run from merged `main`, not only from the review
   branch.
 - [ ] `README.md` includes overview, setup, reproduction, limitations, and team
@@ -23,6 +23,8 @@
   improvement.
 - [ ] Submission archive, if used, is built from tracked files only with
   `scripts/package_submission.ps1` or `scripts/package_submission.sh`.
+- [ ] Submission archive checksum `.zip.sha256` is generated and kept beside
+  the final zip.
 - [ ] `docs/final_submission_handoff.md` has the current commit and final
   command sequence.
 

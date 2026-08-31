@@ -4,28 +4,27 @@ Date: 2026-08-31 Singapore time.
 
 Team: **kpopy demon hunter**
 
-## Current Review PR
+## Current Review State
 
-Current best code is in an open review PR, not merged to `main` yet.
+The score-changing PR has been merged to `main`. If any follow-up PR is open
+for final packaging, checksum, or documentation polish, review and merge it
+before the final package is built from `main`.
 
 ```text
-PR: https://github.com/yinasaurus/tiktokjam/pull/1
-Branch: research/dense-ltr-marketplaces
-Latest PR HEAD: use the current GitHub PR head or run `python scripts\final_status.py`
-Score-changing code commit: 862e22d Improve FastAgent precision with confidence gate
-Reviewer requested: @yinasaurus
-Status: open, non-draft, CI passed
+Pull requests: https://github.com/yinasaurus/tiktokjam/pulls
+Score-changing merged PR: https://github.com/yinasaurus/tiktokjam/pull/1
+Expected TechnicalScore after merge: 0.955300
 ```
 
-Do not merge this PR until the team has reviewed it. After review, merge PR #1
-to `main`, then run the final commands below from `main`.
+Do not merge any new PR until the team has reviewed it. After review, merge the
+final PR to `main`, then run the final commands below from `main`.
 
-Before the PR is merged, reviewers can inspect the exact branch:
+Before any follow-up PR is merged, reviewers can inspect the exact branch:
 
 ```powershell
 git fetch origin
-git switch research/dense-ltr-marketplaces
-git pull --ff-only origin research/dense-ltr-marketplaces
+git switch <review-branch-name>
+git pull --ff-only
 python scripts\final_status.py
 ```
 
@@ -85,14 +84,16 @@ MTTC: 2.290000
 TechnicalScore: 0.955300
 ```
 
-The package script writes a commit-specific zip:
+The package script writes a commit-specific zip and a matching SHA256 file:
 
 ```text
 dist\techjam-track4-submission-<commit>.zip
+dist\techjam-track4-submission-<commit>.zip.sha256
 ```
 
 Use the filename printed by `scripts/package_submission.ps1` or
-`scripts/package_submission.sh` after the final `git pull`.
+`scripts/package_submission.sh` after the final `git pull`. Keep the checksum
+beside the zip so the submitted artifact can be verified later.
 
 ## Demo Recording
 

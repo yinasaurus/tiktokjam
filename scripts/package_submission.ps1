@@ -24,7 +24,13 @@ if (Test-Path $zip) {
 }
 
 git archive --format=zip --output=$zip HEAD
+$hash = Get-FileHash -Algorithm SHA256 -LiteralPath $zip
+$checksum = "$zip.sha256"
+"{0}  {1}" -f $hash.Hash.ToLowerInvariant(), (Split-Path -Leaf $zip) |
+    Set-Content -Path $checksum -Encoding ascii
 
 Write-Host "Wrote $zip"
+Write-Host "Wrote $checksum"
+Write-Host "SHA256 $($hash.Hash.ToLowerInvariant())"
 Write-Host "Built from commit $sha"
 Write-Host "Archive is generated from tracked files only; ignored catalog/data/cache/results are excluded."

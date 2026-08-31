@@ -330,10 +330,12 @@ Expected paraphrased TechnicalScore: **0.955125**.
 | Done | Offline agent exported as `starter.agent.Agent`. |
 | Done | No paid API calls required. |
 | Done | Windows `.ps1` and macOS/Linux `.sh` scripts exist. |
+| Done | Package scripts write both the submission zip and a `.zip.sha256` checksum. |
 | Done | Simple local UI exists for demo recording. |
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
 | Todo | Fill individual member names and contribution split (see Team member contributions). |
+| Todo | Review and merge any open final PR before final packaging from `main`. |
 | Todo | Record and upload the public YouTube demo. |
 | Todo | Paste Devpost draft and submit before the deadline. |
 
