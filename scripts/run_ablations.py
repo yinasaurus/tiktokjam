@@ -56,6 +56,12 @@ def main() -> None:
     parser.add_argument("--catalog", type=Path, default=Path("data/catalog.jsonl"))
     parser.add_argument("--dataset", type=Path, default=Path("data/public_set.jsonl"))
     parser.add_argument("--output-dir", type=Path, default=Path("eval_output"))
+    parser.add_argument(
+        "--ltr-model",
+        type=Path,
+        default=None,
+        help="Optional LightGBM model path for ltr/cascade research runs.",
+    )
     parser.add_argument("--limit", type=int, default=None, help="Run only the first N selected sessions")
     parser.add_argument(
         "--scenario",
@@ -89,7 +95,7 @@ def main() -> None:
     catalog_ids, categories, products = catalog_index(args.catalog)
 
     selected = args.variant or ["full", "no_exact_phrase", "no_dense", "no_rerank", "lexical_only"]
-    ltr_path = Path(Config().ltr_model_path)
+    ltr_path = args.ltr_model or Path(Config().ltr_model_path)
     if args.variant is None and ltr_path.exists():
         selected.extend(["ltr", "cascade"])
 
@@ -98,6 +104,8 @@ def main() -> None:
         if args.progress_every > 0 and (i == 1 or i % args.progress_every == 0):
             print(f"running variant {i}/{len(selected)}: {name}", flush=True)
         config = replace(Config(), **VARIANTS[name])
+        if args.ltr_model is not None:
+            config = replace(config, ltr_model_path=str(args.ltr_model))
         agent = Agent(args.catalog, config=config)
         result = evaluate(agent, samples, catalog_ids, categories, products)
         summaries[name] = compact(result)
