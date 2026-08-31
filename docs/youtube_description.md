@@ -23,9 +23,9 @@ Default submission path:
 
 Measured public-set result:
 - HitRate@10: 1.000000
-- MRR: 0.711546
-- MTTC: 1.545000
-- TechnicalScore: 0.902564
+- MRR: 0.729107
+- MTTC: 1.525000
+- TechnicalScore: 0.908232
 
 Repository:
 https://github.com/yinasaurus/tiktokjam

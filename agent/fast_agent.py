@@ -29,6 +29,8 @@ COLOR_RE = re.compile(r"\b(black|white|blue|red|pink|green|brown|gray|grey|purpl
 WORD_RE = re.compile(r"[a-z0-9]+", re.I)
 ASK_PLAN = ("other", "other", "material", "color", "budget", "style", "feature", "use_case", "size")
 FAST_CACHE_VERSION = "fast-agent-v2"
+RERANK_K = 50
+PRICE_RE = re.compile(r"\$\s*(\d+(?:\.\d+)?)")
 
 
 def _flatten_values(value: object) -> list[str]:
@@ -313,9 +315,11 @@ class Agent:
             )
             scored.append((score, pid))
         scored.sort(key=lambda item: (-item[0], item[1]))
+        shortlist = scored[: max(RERANK_K, top_k)]
+        reranked = self._rerank(state, shortlist)
         out: list[str] = []
         seen: set[str] = set()
-        for _, pid in scored:
+        for _, pid in reranked:
             if pid not in seen:
                 seen.add(pid)
                 out.append(pid)
@@ -328,3 +332,40 @@ class Agent:
             if len(out) >= top_k:
                 break
         return out
+
+    def _rerank(
+        self, state: dict[str, Any], shortlist: list[tuple[float, str]]
+    ) -> list[tuple[float, str]]:
+        """Hand-built rerank over the current top-K. No trained model."""
+        if len(shortlist) <= 1:
+            return shortlist
+        constraints = list(state["constraints"])
+        budget = None
+        for constraint in constraints:
+            match = PRICE_RE.search(constraint)
+            if match:
+                budget = float(match.group(1))
+                break
+        rescored: list[tuple[float, str]] = []
+        for base, pid in shortlist:
+            n_match = 0
+            for constraint in constraints:
+                if pid in self.by_constraint.get(constraint, ()):
+                    n_match += 1
+            product = self.products.get(pid) or {}
+            try:
+                count = int(float(product.get("rating_number") or 0))
+            except (TypeError, ValueError):
+                count = 0
+            price_term = 0.0
+            if budget is not None:
+                try:
+                    price = float(product.get("price"))
+                    rel = abs(price - budget) / max(budget, 1.0)
+                    price_term = max(0.0, 1.0 - rel)
+                except (TypeError, ValueError):
+                    price_term = 0.0
+            score = base + 2.5 * n_match + 0.05 * math.log1p(max(count, 0)) + 0.3 * price_term
+            rescored.append((score, pid))
+        rescored.sort(key=lambda item: (-item[0], item[1]))
+        return rescored

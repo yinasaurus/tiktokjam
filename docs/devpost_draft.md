@@ -65,7 +65,7 @@ return 10 valid parent_asin IDs + one question
 | Category + memory | No | Remembers earlier turns and category. | about 0.25 | Useful foundation. |
 | Ask every turn | No | Always asks a valid attribute question while recommending. | about 0.69 | Core idea. |
 | Fast exact + lexical agent | No | Uses category, exact constraints, lexical ranking, and fallback. | 0.852704 | Previous default. |
-| Fast + rank tie-breaks | No | Adds semicolon-safe constraints, position matching, and popularity tie-breaks. | **0.902564** | **PR candidate.** |
+| Fast + rank tie-breaks | No | Adds semicolon-safe constraints, top-50 reranking, position matching, and popularity tie-breaks. | **0.908232** | **PR candidate.** |
 | Dense embeddings | No | Optional semantic search. | Must beat default first. | Research only. |
 | LightGBM reranker | No | Optional learned ranking model. | Must beat default first. | Research only. |
 | Hosted LLM API | Usually yes | External model calls for rewriting/ranking. | Not needed. | Avoided. |
@@ -91,9 +91,9 @@ did not copy cloud-only or paid-API dependencies.
 | Metric | Value | Meaning |
 |---|---:|---|
 | HitRate@10 | 1.000000 | The correct product appears in the Top 10 for every public session. |
-| MRR | 0.711546 | The correct product is usually ranked high, but rank 1 is still the main gap. |
-| MTTC | 1.545000 | The agent usually converts in about 1 to 2 turns. |
-| TechnicalScore | **0.902564** | Above our internal 0.80 acceptance gate. |
+| MRR | 0.729107 | The correct product is usually ranked high, but rank 1 is still the main gap. |
+| MTTC | 1.525000 | The agent usually converts in about 1 to 2 turns. |
+| TechnicalScore | **0.908232** | Above our internal 0.80 acceptance gate. |
 | Token usage | 0 | No paid API calls in the submitted path. |
 
 ## 7. Tools, Libraries, APIs

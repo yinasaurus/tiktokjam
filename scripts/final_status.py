@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_SCORE = "0.902564"
+EXPECTED_SCORE = "0.908232"
 
 
 def run(args: list[str]) -> tuple[int, str]:

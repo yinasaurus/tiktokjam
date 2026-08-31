@@ -52,7 +52,7 @@ evaluator and our current repo status.
 | Category + memory | No | Remembers turns and uses category narrowing | about 0.25 | Useful but not enough. |
 | Ask every turn | No | Always asks valid `ask_attribute` while ranking | about 0.69 | Strong core idea. |
 | Exact + lexical fast agent | No | Category, exact constraints, lexical ranking, fallback | 0.852704 | Previous default. |
-| Fast agent + rank tie-breaks | No | Adds semicolon-safe constraints, position match, and popularity tie-breaks | **0.902564** | Submit this by default. |
+| Fast agent + rank tie-breaks | No | Adds semicolon-safe constraints, top-50 reranking, position match, and popularity tie-breaks | **0.908232** | Submit this by default. |
 | Dense / Model2Vec | No | Optional semantic embeddings | Not submitted unless it beats default | Research only. |
 | LightGBM LTR | No | Optional learned reranker | Not submitted unless it beats default | Research only. |
 | Hosted LLM API | Usually yes | Could rerank or rewrite queries | Not needed | Avoid for cost, credential, and network risk. |
@@ -89,11 +89,11 @@ docs/research/model_avenues.md
 | Metric | Current clean result | Rough target for 95% TechnicalScore |
 |---|---:|---:|
 | HitRate@10 | 1.000 | about 1.000 |
-| MRR | 0.712 | about 0.900 |
-| MTTC | 1.545 | about 2.000 or lower |
+| MRR | 0.729 | about 0.900 |
+| MTTC | 1.525 | about 2.000 or lower |
 
 The latest research-branch ranker raises the official clean TechnicalScore to
-`0.902564`. We are now above 90% TechnicalScore, but not yet at 95%; the
+`0.908232`. We are now above 90% TechnicalScore, but not yet at 95%; the
 remaining gap is mostly MRR because many correct products are still rank 2-10
 instead of rank 1.
 
@@ -105,7 +105,7 @@ Quick research-branch ablation on 30 sessions:
 | Hybrid `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Below default. |
 | Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
 | Fast default before rank tie-breaks | 0.960 | 0.681347 | 2.585000 | 0.852704 | Previous best. |
-| Fast rank tie-break research | 1.000 | 0.711546 | 1.545000 | 0.902564 | Current best PR candidate. |
+| Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Current best PR candidate. |
 
 ## Slide 5: Final Architecture
 
@@ -156,9 +156,9 @@ return 10 valid parent_asin IDs + one ask_attribute
 | Metric | Current value |
 |---|---:|
 | HitRate@10 | 1.000000 |
-| MRR | 0.711546 |
-| MTTC | 1.545000 |
-| TechnicalScore | **0.902564** |
+| MRR | 0.729107 |
+| MTTC | 1.525000 |
+| TechnicalScore | **0.908232** |
 | Token usage | 0 |
 | Paid API calls | 0 |
 
@@ -178,7 +178,7 @@ The fix strips a short filler list and searches the full utterance for each
 event pattern independently, while leaving the original anchored path in place
 for clean input. After the fix, the same reworded set scored 0.844094 (1.01%
 gap) and the clean score stayed 0.852704. The later rank tie-break PR lifts
-the clean official-style score to 0.902564. Five additional harder paraphrase
+the clean official-style score to 0.908232. Five additional harder paraphrase
 styles — synonym substitution, run-on merging, dropping connectives, placing
 the override marker mid-utterance, and combining filler with reorder — were
 also tested against the committed FastAgent; 5/5 sessions still hit the target
