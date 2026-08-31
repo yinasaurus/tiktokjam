@@ -1,0 +1,45 @@
+{
+  "description": "Supplementary harder paraphrases. Separate from paraphrased_public_200.json, which must stay frozen.",
+  "cases": [
+    {
+      "id": 1,
+      "style": "synonym_swap",
+      "sample_id": "public_0005",
+      "replace_turn": 1,
+      "original": "I'm looking for Outdoor & Work Snow & Cold Weather. A key requirement is: leather.",
+      "utterance": "I'm looking for Outdoor & Work Snow & Cold Weather. A key requirement is: genuine leather material."
+    },
+    {
+      "id": 2,
+      "style": "run_on_merge",
+      "sample_id": "public_0001",
+      "replace_turn": 1,
+      "original": "I'm looking for Jewelry Necklaces. A key requirement is: Material:alloy.",
+      "utterance": "I'm looking for Jewelry Necklaces and a key requirement is Material:alloy."
+    },
+    {
+      "id": 3,
+      "style": "terse_drop_connectives",
+      "sample_id": "public_0001",
+      "replace_turn": 1,
+      "original": "I'm looking for Jewelry Necklaces. A key requirement is: Material:alloy.",
+      "utterance": "Jewelry Necklaces, material alloy"
+    },
+    {
+      "id": 4,
+      "style": "mid_utterance_override",
+      "sample_id": "public_0002",
+      "replace_turn": 3,
+      "original": "Actually, ignore my earlier preference. What I need is: leather.",
+      "utterance": "What I need is leather, actually scratch my last preference, so leather"
+    },
+    {
+      "id": 5,
+      "style": "filler_plus_reorder",
+      "sample_id": "public_0006",
+      "replace_turn": 1,
+      "original": "I'm looking for Basketball Men, but I'm still exploring.",
+      "utterance": "um, I'm still exploring, looking for Basketball Men I guess"
+    }
+  ]
+}

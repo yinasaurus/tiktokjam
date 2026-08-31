@@ -46,6 +46,68 @@ _FOR_CLAUSE = re.compile(
 )
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "paraphrased_public_200.json"
+HARDER_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "harder_paraphrases.json"
+
+# Supplementary set only. Do not feed these through write_fixture() / the
+# public-200 file — that fixture must stay frozen for the 45.16% → 1.01% result.
+HARDER_CASES = [
+    {
+        "id": 1,
+        "style": "synonym_swap",
+        "sample_id": "public_0005",
+        "replace_turn": 1,
+        "original": (
+            "I'm looking for Outdoor & Work Snow & Cold Weather. "
+            "A key requirement is: leather."
+        ),
+        "utterance": (
+            "I'm looking for Outdoor & Work Snow & Cold Weather. "
+            "A key requirement is: genuine leather material."
+        ),
+    },
+    {
+        "id": 2,
+        "style": "run_on_merge",
+        "sample_id": "public_0001",
+        "replace_turn": 1,
+        "original": (
+            "I'm looking for Jewelry Necklaces. "
+            "A key requirement is: Material:alloy."
+        ),
+        "utterance": (
+            "I'm looking for Jewelry Necklaces and a key requirement is Material:alloy."
+        ),
+    },
+    {
+        "id": 3,
+        "style": "terse_drop_connectives",
+        "sample_id": "public_0001",
+        "replace_turn": 1,
+        "original": (
+            "I'm looking for Jewelry Necklaces. "
+            "A key requirement is: Material:alloy."
+        ),
+        "utterance": "Jewelry Necklaces, material alloy",
+    },
+    {
+        "id": 4,
+        "style": "mid_utterance_override",
+        "sample_id": "public_0002",
+        "replace_turn": 3,
+        "original": "Actually, ignore my earlier preference. What I need is: leather.",
+        "utterance": (
+            "What I need is leather, actually scratch my last preference, so leather"
+        ),
+    },
+    {
+        "id": 5,
+        "style": "filler_plus_reorder",
+        "sample_id": "public_0006",
+        "replace_turn": 1,
+        "original": "I'm looking for Basketball Men, but I'm still exploring.",
+        "utterance": "um, I'm still exploring, looking for Basketball Men I guess",
+    },
+]
 
 
 def _seed(text: str) -> int:
@@ -220,9 +282,133 @@ def metrics(result: dict) -> dict[str, float]:
     }
 
 
+def write_harder_fixture(path: Path = HARDER_FIXTURE_PATH) -> None:
+    payload = {
+        "description": (
+            "Supplementary harder paraphrases. Separate from "
+            "paraphrased_public_200.json, which must stay frozen."
+        ),
+        "cases": HARDER_CASES,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def evaluate_with_turn_swap(
+    agent,
+    sample: dict,
+    catalog_ids: set,
+    categories: dict,
+    products: dict,
+    replace_turn: int,
+    harder_text: str,
+) -> dict:
+    """Official evaluate() loop for one sample, with one customer turn swapped."""
+    from evaluator.local_evaluator import (
+        MAX_TURNS,
+        TOP_K,
+        coarse_category,
+        customer_reply,
+        initial_message,
+        materialize_hidden_fields,
+        normalize_recommendations,
+    )
+
+    session_id = f"harder_{sample['sample_id']}_{replace_turn}"
+    agent.reset(session_id, sample["user_profile"])
+    target = str(sample["ground_truth"]["parent_asin"])
+    card, behavior = materialize_hidden_fields(sample, products)
+    effective = {**sample, "intent_card": card, "behavior": behavior}
+    disclosed: set[str] = set()
+    boundary_used = False
+    override_applied = sample["scenario_type"] != "intent_override"
+    user_message = initial_message(
+        effective, coarse_category(categories.get(target, [])), disclosed
+    )
+    hit_turn: int | None = None
+    best_rank: int | None = None
+    used: list[str] = []
+    for turn in range(1, MAX_TURNS + 1):
+        if turn == replace_turn:
+            user_message = harder_text
+        used.append(user_message)
+        try:
+            response = agent.respond(session_id, user_message, turn, TOP_K)
+        except Exception:
+            response = {"message": "", "ask_attribute": None, "recommendations": []}
+        if not isinstance(response, dict) or not isinstance(response.get("message"), str):
+            response = {"message": "", "ask_attribute": None, "recommendations": []}
+        ranked = normalize_recommendations(response.get("recommendations"), catalog_ids)
+        if override_applied and target in ranked:
+            best_rank = ranked.index(target) + 1
+            hit_turn = turn
+            break
+        if turn == MAX_TURNS:
+            break
+        override = effective.get("behavior", {}).get("override") or {}
+        if not override_applied and turn + 1 == int(override.get("turn", 3)):
+            override_applied = True
+            new_value = str(override.get("new_value", ""))
+            if new_value:
+                disclosed.add(new_value)
+            user_message = str(
+                override.get("message", "Actually, please ignore my earlier preference.")
+            )
+        else:
+            user_message, boundary_used = customer_reply(
+                effective, response.get("ask_attribute"), disclosed, boundary_used
+            )
+    return {
+        "sample_id": sample["sample_id"],
+        "hit": hit_turn is not None,
+        "first_hit_turn": hit_turn,
+        "best_rank": best_rank,
+        "utterances": used,
+    }
+
+
+def run_harder_cases() -> list[dict]:
+    from evaluator.local_evaluator import catalog_index, load_jsonl
+    from starter.agent import Agent
+
+    write_harder_fixture()
+    samples = {row["sample_id"]: row for row in load_jsonl(ROOT / "data" / "public_set.jsonl")}
+    catalog_ids, categories, products = catalog_index(ROOT / "data" / "catalog.jsonl")
+    agent = Agent(ROOT / "data" / "catalog.jsonl")
+    results = []
+    for case in HARDER_CASES:
+        sample = samples[case["sample_id"]]
+        outcome = evaluate_with_turn_swap(
+            agent,
+            sample,
+            catalog_ids,
+            categories,
+            products,
+            case["replace_turn"],
+            case["utterance"],
+        )
+        row = {
+            "id": case["id"],
+            "style": case["style"],
+            "utterance": case["utterance"],
+            "hit": outcome["hit"],
+            "first_hit_turn": outcome["first_hit_turn"],
+            "best_rank": outcome["best_rank"],
+        }
+        results.append(row)
+        print(json.dumps(row), flush=True)
+    hits = sum(1 for row in results if row["hit"])
+    print(json.dumps({"summary": f"{hits}/{len(results)} hit"}), flush=True)
+    return results
+
+
 def main() -> None:
     from evaluator.local_evaluator import catalog_index, evaluate, load_jsonl
     from starter.agent import Agent
+
+    if "--harder" in sys.argv:
+        run_harder_cases()
+        return
 
     reuse = "--reuse-fixture" in sys.argv
     catalog = ROOT / "data" / "catalog.jsonl"
