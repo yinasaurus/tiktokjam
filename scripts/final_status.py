@@ -148,8 +148,8 @@ def main() -> None:
     print()
     print("## External Items")
     print()
-    print(f"- Ask the team to review and merge any open final PR before final packaging: {PULLS_URL}")
-    print("- Team name is `kpopy demon hunter`; fill individual names and contribution split in Devpost.")
+    print(f"- Confirm there are no unmerged final PRs before final packaging: {PULLS_URL}")
+    print("- Team name and member contributions are already filled in `README.md` and `docs/devpost_draft.md`.")
     print("- Record/upload the public YouTube demo.")
     print("- Paste `docs/devpost_draft.md` into Devpost and submit before 2026-09-01 12:00 Singapore time.")
 

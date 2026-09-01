@@ -349,7 +349,7 @@ Expected paraphrased TechnicalScore: **0.955125**.
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
 | Done | Team member names and contribution split documented below. |
-| Todo | Review and merge any open final PR before final packaging from `main`. |
+| Done | No open final PRs at last status check; verify again before final packaging from `main`. |
 | Todo | Record and upload the public YouTube demo. |
 | Todo | Paste Devpost draft and submit before the deadline. |
 

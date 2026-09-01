@@ -1,23 +1,24 @@
 # Final Submission Handoff
 
-Date: 2026-08-31 Singapore time.
+Date: 2026-09-01 Singapore time.
 
 Team: **kpopy demon hunter**
 
 ## Current Review State
 
-The score-changing PR has been merged to `main`. If any follow-up PR is open
-for final packaging, checksum, or documentation polish, review and merge it
+The score-changing PR and follow-up status/docs PR have been merged to `main`.
+At final packaging time, confirm there are no unmerged final PRs. If a new PR
+is open for packaging, checksum, or documentation polish, review and merge it
 before the final package is built from `main`.
 
 ```text
 Pull requests: https://github.com/yinasaurus/tiktokjam/pulls
 Score-changing merged PR: https://github.com/yinasaurus/tiktokjam/pull/1
+Status-script merged PR: https://github.com/yinasaurus/tiktokjam/pull/3
 Expected TechnicalScore after merge: 0.955300
 ```
 
-Do not merge any new PR until the team has reviewed it. After review, merge the
-final PR to `main`, then run the final commands below from `main`.
+After any review PR is merged, run the final commands below from `main`.
 
 Before any follow-up PR is merged, reviewers can inspect the exact branch:
 
@@ -30,8 +31,7 @@ python scripts\final_status.py
 
 ## Current Submit Commit
 
-After PR #1 is reviewed and merged, use the latest pushed `main`. Verify before
-packaging:
+Use the latest pushed `main`. Verify before packaging:
 
 ```powershell
 git switch main
@@ -128,7 +128,7 @@ Devpost requires a logged-in browser session. Paste manually from the final
 merged repo state.
 
 1. Paste `docs/devpost_draft.md`.
-2. Fill individual names and contribution split.
+2. Confirm the team contribution table has the correct member details.
 3. Add the public GitHub URL.
 4. Add the public YouTube demo URL.
 5. Include the measured score block above.
