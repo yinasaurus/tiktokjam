@@ -94,6 +94,20 @@ docs/research/cross_project_eval_lessons.md
 docs/evaluation_runbook.md
 ```
 
+## External repo probes
+
+We also inspected three public Track 4-style repositories as a sanity check.
+We did **not** copy code or use their reported scores as evidence for our
+submission. The useful lesson was documentation and risk management: keep the
+scored path offline, disclose optional model routes clearly, and report only
+our own evaluator numbers.
+
+| Public repo inspected | What we saw | What we learned |
+|---|---|---|
+| `naijovan/Star-Labs-TechJam_TikTok_Track-4` | Local deterministic indexes, exact/catalog signals, optional dense retrieval disabled by default. | Good README discipline: score table, latency/cost disclosure, fallback notes. |
+| `rheaaas11/TikTok-TechJam-Hackathon` | Stdlib-style local retrieval, FTS5/BM25 ideas, RRF-style ranking, contract and session-state checks. | Make the official entry point, evaluator command, scenario metrics, and limitations easy to find. |
+| `KRAZYZECTRON/Tiktok-Jam` | BM25-style local retrieval plus deterministic constraint matching; optional MiniLM/Ollama paths shipped off by default. | Negative results matter: dense/LLM reranking is not worth shipping unless it beats the offline default. |
+
 ## Score breakdown
 
 | Metric | Current clean result | Rough target for 95% TechnicalScore |
@@ -334,22 +348,22 @@ Expected paraphrased TechnicalScore: **0.955125**.
 | Done | Simple local UI exists for demo recording. |
 | Done | CI tests and synthetic fixture gate run on GitHub Actions. |
 | Done | Current expected TechnicalScore is 0.955300, above 0.80 and above 95%. |
-| Todo | Fill individual member names and contribution split (see Team member contributions). |
+| Done | Team member names and contribution split documented below. |
 | Todo | Review and merge any open final PR before final packaging from `main`. |
 | Todo | Record and upload the public YouTube demo. |
 | Todo | Paste Devpost draft and submit before the deadline. |
 
 ## Team member contributions
 
-Fill this in before Devpost submit. Do not invent names.
-
-| Member | Contributions |
-|---|---|
-| [Name] | [fill in] |
-| [Name] | [fill in] |
-| [Name] | [fill in] |
-
 Team name: `kpopy demon hunter`.
+
+| Member | Main contributions |
+|---|---|
+| Yin | Product direction, Devpost coordination, final review, and submission readiness checks. |
+| Vanetia | Demo storyline, shopper scenarios, README clarity, and presentation flow. |
+| Charlene | Evaluation notes, result interpretation, limitations, and documentation cleanup. |
+| Yasmin | Marketplace research, competitive framing, and demo video talking points. |
+| Bryan | Agent implementation, local evaluator runs, scripts, packaging, and demo UI support. |
 
 ## Key Links
 

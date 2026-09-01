@@ -163,11 +163,10 @@ sh scripts/demo.sh --fixture
 
 Team name: **kpopy demon hunter**
 
-Fill individual names and contribution split before final Devpost submission:
-
 | Member | Contribution |
 |---|---|
-| Team member 1 | _Fill in_ |
-| Team member 2 | _Fill in_ |
-| Team member 3 | _Fill in_ |
-| Team member 4 | _Fill in_ |
+| Yin | Product direction, Devpost coordination, final review, and submission readiness checks. |
+| Vanetia | Demo storyline, shopper scenarios, README clarity, and presentation flow. |
+| Charlene | Evaluation notes, result interpretation, limitations, and documentation cleanup. |
+| Yasmin | Marketplace research, competitive framing, and demo video talking points. |
+| Bryan | Agent implementation, local evaluator runs, scripts, packaging, and demo UI support. |
