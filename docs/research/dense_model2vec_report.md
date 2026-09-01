@@ -19,7 +19,7 @@ embeddings are not active in the measured default.
 | Check | Result | Meaning |
 |---|---:|---|
 | Current clean TechnicalScore to beat | `0.955300` | Any dense change must beat this on the full official public set. |
-| Current clean HitRate@10 | `1.000000` | The latest branch now reaches every public target in Top 10. |
+| Current clean HitRate@10 | `1.000000` | The submitted default on `main` reaches every public target in Top 10. |
 | `requirements.txt` declares `model2vec==0.6.0` | Yes | Dependency is planned. |
 | `models/encoder/` contains complete model files | No | Only README is present, so production dense cannot run. |
 | `agent.routes.dense.Model2VecEncoder` exists | Yes | The code path can load a local `StaticModel`. |

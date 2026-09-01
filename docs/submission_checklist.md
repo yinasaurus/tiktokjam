@@ -2,7 +2,7 @@
 
 ## Public Repository
 
-- [ ] Any open final PR is reviewed by the team and merged to `main`.
+- [ ] Confirm there are no open final PRs before packaging from `main`.
 - [ ] Final packaging is run from merged `main`, not only from the review
   branch.
 - [ ] `README.md` includes overview, setup, reproduction, limitations, and team

@@ -4,8 +4,8 @@
 | Field | Value |
 |---|---|
 | Document | Product Requirements — Track 4 submission |
-| Owner | *(fill in)* |
-| Team size | *(fill in — solo permitted, max 5)* |
+| Owner | kpopy demon hunter |
+| Team size | 5 |
 | Status | **Draft v2.0** — rebuilt against external evidence; supersedes v1.1 |
 | Date | 26 August 2026 |
 | Build window | **29 Aug 12:00 → 1 Sep 12:00 (72h)** — *verify against official Info Document* |
