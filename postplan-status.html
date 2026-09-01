@@ -195,7 +195,7 @@
         <tr><td>Category filter + memory</td><td>No</td><td>about 0.25</td><td>Useful foundation.</td></tr>
         <tr><td>Ask a valid question every turn</td><td>No</td><td>about 0.69</td><td>Core winning idea.</td></tr>
         <tr><td>Fast exact + lexical agent</td><td>No</td><td>0.852704</td><td>Previous default.</td></tr>
-        <tr><td>Fast + confidence gate</td><td>No</td><td><strong>0.955300</strong></td><td><strong>Use for PR review.</strong></td></tr>
+        <tr><td>Fast + confidence gate</td><td>No</td><td><strong>0.955300</strong></td><td><strong>Current default on <code>main</code>.</strong></td></tr>
         <tr><td>Dense embeddings / Model2Vec</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>LightGBM learned reranker</td><td>No</td><td>Only if it beats default</td><td>Research path.</td></tr>
         <tr><td>Hosted LLM API</td><td>Likely yes</td><td>Not needed</td><td>Avoid: cost, credential, and network risk.</td></tr>
@@ -240,8 +240,8 @@
         <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
         <tr><td>Fast default before tie-breaks</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Previous best</td></tr>
-        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Previous 90% PR candidate</td></tr>
-        <tr><td>Fast confidence gate</td><td>1.000</td><td>0.937000</td><td>2.290000</td><td>0.955300</td><td>Current best PR candidate</td></tr>
+        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Previous 90% research result</td></tr>
+        <tr><td>Fast confidence gate</td><td>1.000</td><td>0.937000</td><td>2.290000</td><td>0.955300</td><td>Current default on <code>main</code></td></tr>
       </table>
     </section>
 
@@ -365,20 +365,31 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>Slide 14: Remaining Work</h2>
+      <h2>Slide 14: External Repo Probe Summary</h2>
+      <p>Subagents inspected three public Track 4-style repositories in temporary clones. We used them only as a sanity check for documentation and risk posture; we did not copy code or use their scores as evidence.</p>
+      <table>
+        <tr><th>Repo</th><th>Useful lesson</th><th>Decision for us</th></tr>
+        <tr><td><code>naijovan/Star-Labs-TechJam_TikTok_Track-4</code></td><td>Strong no-paid-API disclosure, score table, fallback notes.</td><td>Keep our own measured 0.955300 result and document optional model paths as research only.</td></tr>
+        <tr><td><code>rheaaas11/TikTok-TechJam-Hackathon</code></td><td>Clear local retrieval, contract checks, and scenario metric reporting.</td><td>Keep README/evaluator commands obvious for teammates and judges.</td></tr>
+        <tr><td><code>KRAZYZECTRON/Tiktok-Jam</code></td><td>Optional dense/local-LLM experiments were disabled by default.</td><td>Do not ship dense or LLM routes unless they beat the offline FastAgent.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Slide 15: Remaining Work</h2>
       <table>
         <tr><th>Owner</th><th>Task</th><th>Status</th></tr>
-        <tr><td>Team / @yinasaurus</td><td>Review and merge any open final PR before final packaging from <code>main</code>.</td><td class="warn">Needed if a PR is open.</td></tr>
-        <tr><td>Team</td><td>Fill individual names and contribution split.</td><td class="warn">Needed before Devpost.</td></tr>
+        <tr><td>Team / @yinasaurus</td><td>Confirm no open final PR exists before final packaging from <code>main</code>.</td><td class="ok">No open PRs at last check.</td></tr>
+        <tr><td>Team</td><td>Confirm individual names and contribution split.</td><td class="ok">Filled in README and Devpost draft.</td></tr>
         <tr><td>Demo owner</td><td>Record and upload public YouTube video.</td><td class="warn">Needed before Devpost.</td></tr>
         <tr><td>Submitter</td><td>Paste Devpost draft and final links.</td><td class="warn">Deadline: 2026-09-01 12:00 Singapore time.</td></tr>
-        <tr><td>Engineering</td><td>Build final zip plus <code>.zip.sha256</code> checksum.</td><td class="ok">Scripted.</td></tr>
+        <tr><td>Engineering</td><td>Build final zip plus <code>.zip.sha256</code> checksum.</td><td class="ok">Run package script from latest <code>main</code>.</td></tr>
         <tr><td>Engineering</td><td>Keep final score above 0.80 and avoid paid APIs.</td><td class="ok">Currently satisfied at 0.955300.</td></tr>
       </table>
     </section>
 
     <section>
-      <h2>Slide 15: Kant Explanation</h2>
+      <h2>Slide 16: Kant Explanation</h2>
       <p><code>Kant</code> is just a subagent label exposed by the environment metadata. I did not create that name, and I do not have an actionable report from it. Until it reports real findings, treat it as inactive/unknown.</p>
     </section>
   </main>

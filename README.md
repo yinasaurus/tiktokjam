@@ -130,7 +130,7 @@ Quick research-branch ablation on 30 sessions:
 | Hybrid `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Below default. |
 | Hybrid `lexical_only` | 0.100 | 0.041429 | 10.000000 | 0.082429 | Reject. |
 | Fast default before rank tie-breaks | 0.960 | 0.681347 | 2.585000 | 0.852704 | Previous best. |
-| Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% PR candidate. |
+| Fast rank tie-break research | 1.000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% research result. |
 | Fast confidence gate | 1.000 | 0.937000 | 2.290000 | 0.955300 | Current default on `main`. |
 
 ## Architecture

@@ -231,10 +231,10 @@
         <tr><td>Hybrid <code>no_dense</code></td><td>0.766667</td><td>0.681481</td><td>4.466667</td><td>0.718444</td><td>Below default</td></tr>
         <tr><td>Hybrid <code>lexical_only</code></td><td>0.100</td><td>0.041429</td><td>10.000000</td><td>0.082429</td><td>Reject</td></tr>
         <tr><td>Fast default before tie-breaks</td><td>0.960</td><td>0.681347</td><td>2.585000</td><td>0.852704</td><td>Previous best</td></tr>
-        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Previous 90% PR candidate</td></tr>
-        <tr><td>Fast confidence gate</td><td>1.000</td><td>0.937000</td><td>2.290000</td><td>0.955300</td><td>Current best PR candidate</td></tr>
+        <tr><td>Fast rank tie-break research</td><td>1.000</td><td>0.729107</td><td>1.525000</td><td>0.908232</td><td>Previous 90% research result</td></tr>
+        <tr><td>Fast confidence gate</td><td>1.000</td><td>0.937000</td><td>2.290000</td><td>0.955300</td><td>Current default on <code>main</code></td></tr>
       </table>
-      <div class="callout">Latest branch result is now 0.955300 TechnicalScore. HitRate stayed at 1.0; MRR jumped because the agent waits for more evidence before submitting recommendations.</div>
+      <div class="callout">Latest <code>main</code> result is now 0.955300 TechnicalScore. HitRate stayed at 1.0; MRR jumped because the agent waits for more evidence before submitting recommendations.</div>
     </section>
 
     <section>
@@ -356,7 +356,18 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>12. Demo Video Script</h2>
+      <h2>12. External Repo Probe Summary</h2>
+      <p>Subagents inspected three public Track 4-style repositories in temporary clones. We used them only as a sanity check for documentation and risk posture; we did not copy code or use their scores as evidence.</p>
+      <table>
+        <tr><th>Repo</th><th>Useful lesson</th><th>Decision for us</th></tr>
+        <tr><td><code>naijovan/Star-Labs-TechJam_TikTok_Track-4</code></td><td>Strong no-paid-API disclosure, score table, fallback notes.</td><td>Keep our own measured 0.955300 result and document optional model paths as research only.</td></tr>
+        <tr><td><code>rheaaas11/TikTok-TechJam-Hackathon</code></td><td>Clear local retrieval, contract checks, and scenario metric reporting.</td><td>Keep README/evaluator commands obvious for teammates and judges.</td></tr>
+        <tr><td><code>KRAZYZECTRON/Tiktok-Jam</code></td><td>Optional dense/local-LLM experiments were disabled by default.</td><td>Do not ship dense or LLM routes unless they beat the offline FastAgent.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>13. Demo Video Script</h2>
       <table>
         <tr><th>Shot</th><th>Show</th><th>Say</th></tr>
         <tr><td>1</td><td>README top</td><td>We are team kpopy demon hunter, building a backend shopping copilot.</td></tr>
@@ -369,14 +380,14 @@ sh scripts/demo.sh --fixture</code></pre>
     </section>
 
     <section>
-      <h2>13. Remaining Tasks</h2>
+      <h2>14. Remaining Tasks</h2>
       <table>
         <tr><th>Task</th><th>Owner</th><th>Status</th></tr>
-        <tr><td>Review and merge any open final PR before final packaging from <code>main</code>.</td><td>Team / @yinasaurus</td><td class="warn">Still needed if a PR is open</td></tr>
-        <tr><td>Fill individual member names and contribution split.</td><td>Team</td><td class="warn">Still needed</td></tr>
+        <tr><td>Confirm no open final PR exists before final packaging from <code>main</code>.</td><td>Team / @yinasaurus</td><td class="ok">No open PRs at last check</td></tr>
+        <tr><td>Confirm individual member names and contribution split.</td><td>Team</td><td class="ok">Filled in README and Devpost draft</td></tr>
         <tr><td>Record and upload public YouTube video.</td><td>Demo owner</td><td class="warn">Still needed</td></tr>
         <tr><td>Paste Devpost draft and links.</td><td>Submitter</td><td class="warn">Still needed</td></tr>
-        <tr><td>Build final zip plus <code>.zip.sha256</code> checksum.</td><td>Engineering</td><td class="ok">Scripted</td></tr>
+        <tr><td>Build final zip plus <code>.zip.sha256</code> checksum.</td><td>Engineering</td><td class="ok">Run package script from latest <code>main</code></td></tr>
         <tr><td>Keep score above 0.80 and avoid paid APIs.</td><td>Engineering</td><td class="ok">Currently satisfied at 0.955300</td></tr>
       </table>
       <div class="callout">Deadline: submit on Devpost before 2026-09-01 12:00 Singapore time.</div>

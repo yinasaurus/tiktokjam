@@ -66,7 +66,7 @@ else: ask one more question before scoring a slate
 | Category + memory | No | Remembers earlier turns and category. | about 0.25 | Useful foundation. |
 | Ask every turn | No | Always asks a valid attribute question while recommending. | about 0.69 | Core idea. |
 | Fast exact + lexical agent | No | Uses category, exact constraints, lexical ranking, and fallback. | 0.852704 | Previous default. |
-| Fast + confidence gate | No | Adds semicolon-safe constraints, top-50 reranking, position matching, and waits for enough evidence before submitting a scored slate. | **0.955300** | **PR candidate.** |
+| Fast + confidence gate | No | Adds semicolon-safe constraints, top-50 reranking, position matching, and waits for enough evidence before submitting a scored slate. | **0.955300** | **Submitted default.** |
 | Dense embeddings | No | Optional semantic search. | Must beat default first. | Research only. |
 | LightGBM reranker | No | Optional learned ranking model. | Must beat default first. | Research only. |
 | Hosted LLM API | Usually yes | External model calls for rewriting/ranking. | Not needed. | Avoided. |

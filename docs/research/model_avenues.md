@@ -166,7 +166,7 @@ Result:
 | `no_dense` | 0.766667 | 0.681481 | 4.466667 | 0.718444 | Dense helped this small slice, but not enough. |
 | `lexical_only` | 0.100000 | 0.041429 | 10.000000 | 0.082429 | Not viable. |
 | fast default before tie-breaks | 0.960000 | 0.681347 | 2.585000 | 0.852704 | Previous default. |
-| fast rank tie-break PR candidate | 1.000000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% candidate. |
+| fast rank tie-break research result | 1.000000 | 0.729107 | 1.525000 | 0.908232 | Previous 90% result. |
 | fast confidence gate | 1.000000 | 0.937000 | 2.290000 | 0.955300 | Current best measured path. |
 
 Interpretation:
